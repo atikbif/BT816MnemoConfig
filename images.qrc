@@ -1,0 +1,44 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/ellipse.png</file>
+        <file>images/image.png</file>
+        <file>images/rectangle.png</file>
+        <file>images/background.png</file>
+        <file>images/filled_ellipse.png</file>
+        <file>images/rounded_rectangle.png</file>
+        <file>images/align_bottom.png</file>
+        <file>images/align_left.png</file>
+        <file>images/align_right.png</file>
+        <file>images/align_top.png</file>
+        <file>images/align_hight.png</file>
+        <file>images/align_width.png</file>
+        <file>images/text.png</file>
+        <file>images/bottom.png</file>
+        <file>images/top.png</file>
+        <file>images/lamps/lamp1.png</file>
+        <file>images/lamps/lamp2.png</file>
+        <file>images/lamps/lamp3.png</file>
+        <file>images/lamps/lamp4.png</file>
+        <file>images/lamps/lamp5.png</file>
+        <file>images/number.png</file>
+        <file>images/lamps/lamp6.png</file>
+        <file>images/lamps/lamp7.png</file>
+        <file>images/lamps/lamp8.png</file>
+        <file>images/lamps/lamp9.png</file>
+        <file>images/lamps/lamp10.png</file>
+        <file>images/pictures/picture1.png</file>
+        <file>images/pictures/picture2.png</file>
+        <file>images/pictures/picture3.png</file>
+        <file>images/pictures/picture4.png</file>
+        <file>images/pictures/picture5.png</file>
+        <file>images/pictures/picture6.png</file>
+        <file>images/pictures/background.png</file>
+        <file>images/square.png</file>
+        <file>images/align_height_min.png</file>
+        <file>images/align_width_min.png</file>
+        <file>images/hor_step.png</file>
+        <file>images/vert_step.png</file>
+        <file>images/Open.png</file>
+        <file>images/Save.png</file>
+    </qresource>
+</RCC>
