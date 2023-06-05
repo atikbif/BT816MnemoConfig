@@ -394,6 +394,7 @@ QGroupBox::title {
     </property>
     <addaction name="action_PC21"/>
     <addaction name="action_project_properties"/>
+    <addaction name="action_clear_background"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -429,6 +430,11 @@ QGroupBox::title {
   <action name="action_PC21">
    <property name="text">
     <string>Подгрузить проект РС21</string>
+   </property>
+  </action>
+  <action name="action_clear_background">
+   <property name="text">
+    <string>Очистить фон</string>
    </property>
   </action>
  </widget>

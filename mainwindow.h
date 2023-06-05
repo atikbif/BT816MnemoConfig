@@ -17,6 +17,7 @@ class MainWindow : public QMainWindow
     DisplayScene *sc = nullptr;
     PropertiesView *prView = nullptr;
     QSpinBox *distanceItem = nullptr;
+    QGraphicsPixmapItem *backgroundItem = nullptr;
 
     void setProperties(const std::vector<ElProperty> &properties);
     void updateRect(int x, int y, int w, int h, int lw);

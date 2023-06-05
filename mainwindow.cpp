@@ -170,6 +170,26 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->addAction(QIcon(":/images/Open.png"),"открыть",[this](){open();});
     ui->toolBar->addAction(QIcon(":/images/Save.png"),"сохранить",[this](){save();});
     ui->toolBar->addSeparator();
+
+    ui->toolBar->addAction("Фон",[this](){
+        QString fileName = QFileDialog::getOpenFileName(this, "Открыть файл с фоновым изображением", "", "*.png");
+        if(fileName.isEmpty()) return;
+        if(backgroundItem) {
+            sc->removeItem(backgroundItem);
+            delete backgroundItem;
+            backgroundItem = nullptr;
+        }
+
+        if(backgroundItem==nullptr) {
+            QPixmap pix(fileName);
+            pix = pix.scaled(800,480);
+            backgroundItem = sc->addPixmap(pix);
+        }
+
+    });
+
+    ui->toolBar->addSeparator();
+
     ui->toolBar->addAction(QIcon(":/images/align_left.png"),"выравнять по левому краю",[this](){sc->alignLeft();});
     ui->toolBar->addAction(QIcon(":/images/align_right.png"),"выравнять по правому краю",[this](){sc->alignRight();});
     ui->toolBar->addAction(QIcon(":/images/align_bottom.png"),"выравнять по нижнему краю",[this](){sc->alignBottom();});
@@ -216,9 +236,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     });
 
-//    QPixmap pix(":/images/background.png");
-//    pix = pix.scaled(800,480);
-//    sc->addPixmap(pix);
+    connect(ui->action_clear_background,&QAction::triggered,[this](){
+        if(backgroundItem) {
+            sc->removeItem(backgroundItem);
+            delete(backgroundItem);
+            sc->update();
+            backgroundItem = nullptr;
+        }
+    });
 
     //item2->setZValue(1);
 }
