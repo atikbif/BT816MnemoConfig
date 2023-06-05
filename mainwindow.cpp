@@ -67,7 +67,7 @@ void MainWindow::open()
         sc->deselectAllItems();
         sc->removeInsertItem();
         sc->clear();
-        auto *border = sc->addRect(0,0,800,600,QPen(Qt::gray,1));
+        auto *border = sc->addRect(0,0,800,480,QPen(Qt::gray,1));
         border->setZValue(-1000);
         QByteArray saveData = loadFile.readAll();
         QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
@@ -152,10 +152,10 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->graphicsView->resize(800+200,600+200);
+    ui->graphicsView->resize(800+200,480+200);
 
     sc = new DisplayScene();
-    sc->setSceneRect(0,0,800,600);
+    sc->setSceneRect(0,0,800,480);
 
     connect(sc,&DisplayScene::updateRect,this,&MainWindow::updateRect);
     connect(sc,&DisplayScene::clearProperties,this,&MainWindow::clearProperties);
@@ -164,7 +164,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphicsView->setMouseTracking(true);
     ui->graphicsView->setScene(sc);
 
-    auto *border = sc->addRect(0,0,800,600,QPen(Qt::gray,1));
+    auto *border = sc->addRect(0,0,800,480,QPen(Qt::gray,1));
     border->setZValue(-1000);
 
     ui->toolBar->addAction(QIcon(":/images/Open.png"),"открыть",[this](){open();});
@@ -205,7 +205,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prView,&PropertiesView::updateProperty,sc,&DisplayScene::updateProperty);
 
 //    QPixmap pix(":/images/background.png");
-//    pix = pix.scaled(800,600);
+//    pix = pix.scaled(800,480);
 //    sc->addPixmap(pix);
 
     //item2->setZValue(1);

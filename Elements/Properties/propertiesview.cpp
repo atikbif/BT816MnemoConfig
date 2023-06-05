@@ -112,7 +112,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
 
     spBox = new ViewSpinbox();
     spBox->setStyleSheet(spinHeight);
-    spBox->setRange(25,600);
+    spBox->setRange(25,480);
     connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_height);
     wName = new QLabel("высота");
     wName->setStyleSheet(textColor);
