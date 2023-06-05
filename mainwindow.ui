@@ -388,6 +388,21 @@ QGroupBox::title {
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Проект</string>
+    </property>
+    <addaction name="action_PC21"/>
+    <addaction name="action_project_properties"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+    <addaction name="action_about"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -401,6 +416,21 @@ QGroupBox::title {
     <bool>false</bool>
    </attribute>
   </widget>
+  <action name="action_project_properties">
+   <property name="text">
+    <string>Свойства</string>
+   </property>
+  </action>
+  <action name="action_about">
+   <property name="text">
+    <string>о программе</string>
+   </property>
+  </action>
+  <action name="action_PC21">
+   <property name="text">
+    <string>Подгрузить проект РС21</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="images.qrc"/>

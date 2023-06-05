@@ -204,6 +204,18 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prView,&PropertiesView::update_line_width,sc,&DisplayScene::update_line_width);
     connect(prView,&PropertiesView::updateProperty,sc,&DisplayScene::updateProperty);
 
+    connect(ui->action_project_properties,&QAction::triggered,[](){
+
+    });
+
+    connect(ui->action_PC21,&QAction::triggered,[](){
+
+    });
+
+    connect(ui->action_about,&QAction::triggered,[](){
+
+    });
+
 //    QPixmap pix(":/images/background.png");
 //    pix = pix.scaled(800,480);
 //    sc->addPixmap(pix);
