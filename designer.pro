@@ -38,8 +38,10 @@ SOURCES += \
     Elements/Widgets/scalimages.cpp \
     Elements/Widgets/textitem.cpp \
     displayscene.cpp \
+    jsonplcconfigreader.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    plcconfig.cpp
 
 HEADERS += \
     Elements/Properties/elproperty.h \
@@ -56,7 +58,10 @@ HEADERS += \
     Elements/Widgets/scalimages.h \
     Elements/Widgets/textitem.h \
     displayscene.h \
-    mainwindow.h
+    jsonplcconfigreader.h \
+    mainwindow.h \
+    plcconfig.h \
+    plcconfigreader.h
 
 FORMS += \
     mainwindow.ui
