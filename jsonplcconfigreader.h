@@ -10,7 +10,7 @@ public:
 
     // PLCConfigReader interface
 public:
-    PLCConfig readFromFile(const QString &fName);
+    std::optional<PLCConfig> readFromFile(const QString &fName);
 };
 
 #endif // JSONPLCCONFIGREADER_H

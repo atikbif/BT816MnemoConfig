@@ -11,10 +11,10 @@ enum class SysVarType {CLUSTER_BIT,CLUSTER_REG,NET_BIT,NET_REG};
 
 struct Sensor {
     SensType sensType;
-    QString high_limit;
-    QString low_limit;
+    QString highLimit;
+    QString lowLimit;
     QString name;
-    QString measure_unit;
+    QString measureUnit;
 };
 
 struct Var {
@@ -34,35 +34,38 @@ struct Input: public Var {
 
 struct DiscreteOutput: public Var {
     int num;
-    QString faultUserName;
 };
 
 struct DiscreteInp : public Input {
-    QString shortCircUserName;
-    QString breakUserName;
-    QString faultUserName;
+
 };
 
 struct AnalogueInp : public Input {
     InpType inpType;
     Sensor sensor;
-    QString overUserName;
-    QString underUserName;
-    QString alarmUserName;
 };
 
 class PLCConfig
 {
-    int app_cn;
-    int app_checksum;
-    QString app_name;
-    QString app_time;
-    QString app_version;
+    friend class JSONPLCConfigReader;
+
+    int appCN;
+    int appCheckSum;
+    QString appName;
+    QString appTime;
+    QString appVersion;
     QString plcName;
-    std::vector<std::shared_ptr<Input>> input;
-    std::vector<DiscreteOutput> out;
+    std::vector<DiscreteInp> dInput;
+    std::vector<AnalogueInp> anInput;
+    std::vector<DiscreteOutput> dOut;
     std::vector<SysVar> sysVar;
 public:
+    int getAppCN() const {return appCN;}
+    int getAppCheckSum() const {return appCheckSum;}
+    QString getAppName() const {return appName;}
+    QString getAppTime() const {return appTime;}
+    QString getAppVersion() const {return appVersion;}
+    QString getPLCName() const {return plcName;}
     std::vector<SysVar> getSysVarByType(SysVarType vType) const;
     std::vector<DiscreteInp> getDiscreteInputs() const;
     std::vector<AnalogueInp> getAnalogueInputs() const;
