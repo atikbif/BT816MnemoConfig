@@ -5,6 +5,7 @@
 #include "displayscene.h"
 #include "Elements/Properties/propertiesview.h"
 #include <QSpinBox>
+#include "plcconfig.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,6 +19,8 @@ class MainWindow : public QMainWindow
     PropertiesView *prView = nullptr;
     QSpinBox *distanceItem = nullptr;
     QGraphicsPixmapItem *backgroundItem = nullptr;
+
+    PLCConfig plc;
 
     void setProperties(const std::vector<ElProperty> &properties);
     void updateRect(int x, int y, int w, int h, int lw);

@@ -16,6 +16,7 @@
 #include <QFile>
 #include <QDebug>
 #include <QFileDialog>
+#include "jsonplcconfigreader.h"
 
 void MainWindow::setProperties(const std::vector<ElProperty> &properties)
 {
@@ -228,8 +229,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     });
 
-    connect(ui->action_PC21,&QAction::triggered,[](){
-
+    connect(ui->action_PC21,&QAction::triggered,[this](){
+        QString fileName = QFileDialog::getOpenFileName(this, "Открыть проект", "", "Проект контроллера *.ldp");
+        if(!fileName.isEmpty()) {
+            JSONPLCConfigReader reader;
+            auto res = reader.readFromFile(fileName);
+            if(res) {
+                plc = res.value();
+            }
+        }
     });
 
     connect(ui->action_about,&QAction::triggered,[](){

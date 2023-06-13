@@ -39,7 +39,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                 for(auto element: sensArray) {
                     QJsonObject sensOb = element.toObject();
                     Sensor sens;
-                    sens.sensType = static_cast<SensType>(sensOb["Code"].toInt(0));
+                    sens.sensType = static_cast<SensType>(sensOb["Code"].toInt(0)+1);
                     sens.highLimit = sensOb["High Limit"].toString("0");
                     sens.lowLimit = sensOb["Low Limit"].toString("0");
                     sens.name = sensOb["Name"].toString("");
@@ -94,7 +94,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                 anInp.usedFlag = false;
 
                                 bool discrInpFlag  = false;
-                                if(QString::compare(inpType.toString(),"I")) {
+                                if(QString::compare(inpType.toString(),"I")==0) {
                                     if(sensConnection.size()>inpNum) {
                                         if(sensConnection.at(inpNum)==0) discrInpFlag = true;
                                     }
@@ -103,14 +103,14 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                     for(auto el:sysVarParGroupsArray) {
                                         QJsonObject elOb = el.toObject();
                                         if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                            if(QString::compare(elOb["Name"].toString(),"Дискретные входы")) {
+                                            if(QString::compare(elOb["Name"].toString(),"Дискретные входы")==0) {
                                                 if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
                                                     QJsonArray diVarsArray = elOb["Groups"].toArray();
                                                     for(auto gr:diVarsArray) {
                                                         QJsonObject grOb = gr.toObject();
                                                         if(grOb.contains("Name") && grOb["Name"].isString()) {
                                                             QString grName = grOb["Name"].toString("");
-                                                            if(QString::compare(grName,"состояние")) {
+                                                            if(QString::compare(grName,"состояние")==0) {
                                                                 if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
                                                                     QJsonArray varArray = grOb["Variables"].toArray();
                                                                     int varNum = 0;
@@ -135,14 +135,14 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                     for(auto el:sysVarParGroupsArray) {
                                         QJsonObject elOb = el.toObject();
                                         if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                            if(QString::compare(elOb["Name"].toString(),"Аналоговые входы")) {
+                                            if(QString::compare(elOb["Name"].toString(),"Аналоговые входы")==0) {
                                                 if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
                                                     QJsonArray aiVarsArray = elOb["Groups"].toArray();
                                                     for(auto gr:aiVarsArray) {
                                                         QJsonObject grOb = gr.toObject();
                                                         if(grOb.contains("Name") && grOb["Name"].isString()) {
                                                             QString grName = grOb["Name"].toString("");
-                                                            if(QString::compare(grName,"состояние")) {
+                                                            if(QString::compare(grName,"состояние")==0) {
                                                                 if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
                                                                     QJsonArray varArray = grOb["Variables"].toArray();
                                                                     int varNum = 0;
@@ -161,6 +161,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                                                 }
                                                                             }
                                                                         }
+                                                                        varNum++;
                                                                     }
                                                                 }
                                                             }
@@ -186,7 +187,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                if(QString::compare(elOb["Name"].toString(),"Дискретные выходы")) {
+                                if(QString::compare(elOb["Name"].toString(),"Дискретные выходы")==0) {
                                     DiscreteOutput dOut;
                                     dOut.num = outNum+1;
                                     dOut.userName = "";
@@ -197,7 +198,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                             QJsonObject grOb = gr.toObject();
                                             if(grOb.contains("Name") && grOb["Name"].isString()) {
                                                 QString grName = grOb["Name"].toString("");
-                                                if(QString::compare(grName,"состояние")) {
+                                                if(QString::compare(grName,"состояние")==0) {
                                                     if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
                                                         QJsonArray varArray = grOb["Variables"].toArray();
                                                         for(auto var:varArray) {
@@ -224,7 +225,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                if(QString::compare(elOb["Name"].toString(),"Биты кластера")) {
+                                if(QString::compare(elOb["Name"].toString(),"Биты кластера")==0) {
                                     if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
                                         QJsonArray nodeVarsArray = elOb["Groups"].toArray();
                                         for(auto gr:nodeVarsArray) {
@@ -254,7 +255,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                if(QString::compare(elOb["Name"].toString(),"Сетевые биты")) {
+                                if(QString::compare(elOb["Name"].toString(),"Сетевые биты")==0) {
                                     if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
                                         QJsonArray nodeVarsArray = elOb["Groups"].toArray();
                                         for(auto gr:nodeVarsArray) {
@@ -284,7 +285,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                if(QString::compare(elOb["Name"].toString(),"Сетевые регистры")) {
+                                if(QString::compare(elOb["Name"].toString(),"Сетевые регистры")==0) {
                                     if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
                                         QJsonArray nodeVarsArray = elOb["Groups"].toArray();
                                         for(auto gr:nodeVarsArray) {
@@ -314,23 +315,34 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                if(QString::compare(elOb["Name"].toString(),"Регистры кластера")) {
-                                    if(elOb.contains("Variables") && elOb["Variables"].isArray()) {
-                                         QJsonArray clRegArray = elOb["Variables"].toArray();
-                                         for(auto clReg:clRegArray) {
-                                             QJsonObject clRegOb = clReg.toObject();
-                                             SysVar v;
-                                             v.varType = SysVarType::CLUSTER_REG;
-                                             if(clRegOb.contains("Comment") && clRegOb["Comment"].isString()) {
-                                                 v.userName = clRegOb["Comment"].toString();
-                                             }
-                                             if(clRegOb.contains("Name") && clRegOb["Name"].isString()) {
-                                                 v.sysName = clRegOb["Name"].toString();
-                                             }
-                                             conf.sysVar.push_back(v);
-                                         }
+                                if(elOb["Name"].toString().isEmpty()) {
+                                    if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
+                                        QJsonArray grArray = elOb["Groups"].toArray();
+                                        for(auto gr:grArray) {
+                                            QJsonObject grOb = gr.toObject();
+                                            if(grOb.contains("Name") && grOb["Name"].isString()) {
+                                                if(QString::compare(grOb["Name"].toString(),"Регистры кластера")==0) {
+                                                    if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                                         QJsonArray clRegArray = grOb["Variables"].toArray();
+                                                         for(auto clReg:clRegArray) {
+                                                             QJsonObject clRegOb = clReg.toObject();
+                                                             SysVar v;
+                                                             v.varType = SysVarType::CLUSTER_REG;
+                                                             if(clRegOb.contains("Comment") && clRegOb["Comment"].isString()) {
+                                                                 v.userName = clRegOb["Comment"].toString();
+                                                             }
+                                                             if(clRegOb.contains("Name") && clRegOb["Name"].isString()) {
+                                                                 v.sysName = clRegOb["Name"].toString();
+                                                             }
+                                                             conf.sysVar.push_back(v);
+                                                         }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
+
                             }
                         }
                     }

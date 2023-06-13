@@ -72,7 +72,7 @@ public:
     std::vector<DiscreteInp> getDiscreteInputs() const;
     std::vector<AnalogueInp> getAnalogueInputs() const;
     std::vector<DiscreteOutput> getDiscreteOutputs() const;
-    PLCConfig(const QString plcName);
+    PLCConfig(const QString plcName = "PC21");
 };
 
 #endif // PLCCONFIG_H
