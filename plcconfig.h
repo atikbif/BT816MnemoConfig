@@ -24,6 +24,8 @@ struct Var {
 
 struct SysVar :public Var {
     SysVarType varType;
+    QString userName;
+    QString sysName;
     int num;
 };
 

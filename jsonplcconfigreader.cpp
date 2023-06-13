@@ -217,6 +217,122 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                 }
                             }
                         }
+
+                        conf.sysVar.clear();
+
+                        // read cluster bits
+                        for(auto el:sysVarParGroupsArray) {
+                            QJsonObject elOb = el.toObject();
+                            if(elOb.contains("Name") && elOb["Name"].isString()) {
+                                if(QString::compare(elOb["Name"].toString(),"Биты кластера")) {
+                                    if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
+                                        QJsonArray nodeVarsArray = elOb["Groups"].toArray();
+                                        for(auto gr:nodeVarsArray) {
+                                            QJsonObject grOb = gr.toObject();
+                                            if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                                 QJsonArray clBitArray = grOb["Variables"].toArray();
+                                                 for(auto clBit:clBitArray) {
+                                                     QJsonObject clBitOb = clBit.toObject();
+                                                     SysVar v;
+                                                     v.varType = SysVarType::CLUSTER_BIT;
+                                                     if(clBitOb.contains("Comment") && clBitOb["Comment"].isString()) {
+                                                         v.userName = clBitOb["Comment"].toString();
+                                                     }
+                                                     if(clBitOb.contains("Name") && clBitOb["Name"].isString()) {
+                                                         v.sysName = clBitOb["Name"].toString();
+                                                     }
+                                                     conf.sysVar.push_back(v);
+                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // net bits
+                        for(auto el:sysVarParGroupsArray) {
+                            QJsonObject elOb = el.toObject();
+                            if(elOb.contains("Name") && elOb["Name"].isString()) {
+                                if(QString::compare(elOb["Name"].toString(),"Сетевые биты")) {
+                                    if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
+                                        QJsonArray nodeVarsArray = elOb["Groups"].toArray();
+                                        for(auto gr:nodeVarsArray) {
+                                            QJsonObject grOb = gr.toObject();
+                                            if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                                 QJsonArray netBitArray = grOb["Variables"].toArray();
+                                                 for(auto netBit:netBitArray) {
+                                                     QJsonObject netBitOb = netBit.toObject();
+                                                     SysVar v;
+                                                     v.varType = SysVarType::NET_BIT;
+                                                     if(netBitOb.contains("Comment") && netBitOb["Comment"].isString()) {
+                                                         v.userName = netBitOb["Comment"].toString();
+                                                     }
+                                                     if(netBitOb.contains("Name") && netBitOb["Name"].isString()) {
+                                                         v.sysName = netBitOb["Name"].toString();
+                                                     }
+                                                     conf.sysVar.push_back(v);
+                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // net regs
+                        for(auto el:sysVarParGroupsArray) {
+                            QJsonObject elOb = el.toObject();
+                            if(elOb.contains("Name") && elOb["Name"].isString()) {
+                                if(QString::compare(elOb["Name"].toString(),"Сетевые регистры")) {
+                                    if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
+                                        QJsonArray nodeVarsArray = elOb["Groups"].toArray();
+                                        for(auto gr:nodeVarsArray) {
+                                            QJsonObject grOb = gr.toObject();
+                                            if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                                 QJsonArray netRegArray = grOb["Variables"].toArray();
+                                                 for(auto netReg:netRegArray) {
+                                                     QJsonObject netRegOb = netReg.toObject();
+                                                     SysVar v;
+                                                     v.varType = SysVarType::NET_REG;
+                                                     if(netRegOb.contains("Comment") && netRegOb["Comment"].isString()) {
+                                                         v.userName = netRegOb["Comment"].toString();
+                                                     }
+                                                     if(netRegOb.contains("Name") && netRegOb["Name"].isString()) {
+                                                         v.sysName = netRegOb["Name"].toString();
+                                                     }
+                                                     conf.sysVar.push_back(v);
+                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // clust regs
+                        for(auto el:sysVarParGroupsArray) {
+                            QJsonObject elOb = el.toObject();
+                            if(elOb.contains("Name") && elOb["Name"].isString()) {
+                                if(QString::compare(elOb["Name"].toString(),"Регистры кластера")) {
+                                    if(elOb.contains("Variables") && elOb["Variables"].isArray()) {
+                                         QJsonArray clRegArray = elOb["Variables"].toArray();
+                                         for(auto clReg:clRegArray) {
+                                             QJsonObject clRegOb = clReg.toObject();
+                                             SysVar v;
+                                             v.varType = SysVarType::CLUSTER_REG;
+                                             if(clRegOb.contains("Comment") && clRegOb["Comment"].isString()) {
+                                                 v.userName = clRegOb["Comment"].toString();
+                                             }
+                                             if(clRegOb.contains("Name") && clRegOb["Name"].isString()) {
+                                                 v.sysName = clRegOb["Name"].toString();
+                                             }
+                                             conf.sysVar.push_back(v);
+                                         }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
