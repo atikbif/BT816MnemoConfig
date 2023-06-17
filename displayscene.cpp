@@ -195,7 +195,7 @@ void DisplayScene::deselectAllItems()
     for(auto *grItem: grItems) {
         auto rectItem = dynamic_cast<RectItem*>(grItem);
         if(rectItem) {
-            rectItem->setSelection(RectItem::SelectionMode::None);
+            rectItem->setSelection(SelectionMode::None);
         }
     }
     selItems.clear();
@@ -355,7 +355,7 @@ void DisplayScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
         if(insertItem) {
             RectItem *rect = dynamic_cast<RectItem*>(insertItem);
             if(rect) {
-                rect->setSelection(RectItem::SelectionMode::Single);
+                rect->setSelection(SelectionMode::Single);
                 if(auto it=std::find(selItems.begin(),selItems.end(),rect);it==selItems.end()) {
                     selItems.push_back(rect);
                 }
@@ -379,14 +379,14 @@ void DisplayScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                             deselectAllItems();
                             selItems.push_back(rectItem);
                         }
-                        rectItem->setSelection(RectItem::SelectionMode::Single);
+                        rectItem->setSelection(SelectionMode::Single);
                     }
                     else {
                         if(auto it=std::find(selItems.begin(),selItems.end(),rectItem);it==selItems.end()) {
-                            rectItem->setSelection(RectItem::SelectionMode::Single);
+                            rectItem->setSelection(SelectionMode::Single);
                             selItems.push_back(rectItem);
                         }else {
-                            rectItem->setSelection(RectItem::SelectionMode::None);
+                            rectItem->setSelection(SelectionMode::None);
                             selItems.erase(it);
                         }
                     }
@@ -470,7 +470,7 @@ void DisplayScene::keyPressEvent(QKeyEvent *event)
                 for(RectItem *rect:bufItems) {
                     RectItem* clRect = rect->clone();
                     addItem(clRect);
-                    clRect->setSelection(RectItem::SelectionMode::Single);
+                    clRect->setSelection(SelectionMode::Single);
                     selItems.push_back(clRect);
                     clRect->setX(clRect->getX()+dx);
                     clRect->setY(clRect->getY()+dy);

@@ -47,15 +47,18 @@ HEADERS += \
     Elements/Properties/elproperty.h \
     Elements/Properties/filledrectpropertiespattern.h \
     Elements/Properties/propertiesview.h \
+    Elements/Widgets/colorvalue.h \
     Elements/Widgets/ellipseitem.h \
     Elements/Widgets/filledellipseitem.h \
     Elements/Widgets/filledrectitem.h \
     Elements/Widgets/lampimages.h \
     Elements/Widgets/lampitem.h \
+    Elements/Widgets/movepoint.h \
     Elements/Widgets/numberitem.h \
     Elements/Widgets/rectitem.h \
     Elements/Widgets/scalableimageitem.h \
     Elements/Widgets/scalimages.h \
+    Elements/Widgets/selectionmode.h \
     Elements/Widgets/textitem.h \
     displayscene.h \
     jsonplcconfigreader.h \

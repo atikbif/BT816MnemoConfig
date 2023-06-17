@@ -70,50 +70,182 @@ void RectItem::drawBorder(QPainter *painter, bool zeroWidth)
         painter->drawRect(getPointRect(MovePoint::BottomLeft));
         painter->fillRect(getPointRect(MovePoint::BottomRight),QBrush(Qt::white));
         painter->drawRect(getPointRect(MovePoint::BottomRight));
-        painter->fillRect(getPointRect(MovePoint::LeftMiddle),QBrush(Qt::white));
-        painter->drawRect(getPointRect(MovePoint::LeftMiddle));
-        painter->fillRect(getPointRect(MovePoint::RightMiddle),QBrush(Qt::white));
-        painter->drawRect(getPointRect(MovePoint::RightMiddle));
-        painter->fillRect(getPointRect(MovePoint::TopMiddle),QBrush(Qt::white));
-        painter->drawRect(getPointRect(MovePoint::TopMiddle));
-        painter->fillRect(getPointRect(MovePoint::BottomMiddle),QBrush(Qt::white));
-        painter->drawRect(getPointRect(MovePoint::BottomMiddle));
+        if(chMode==ChangeMode::WidthAndHeight) {
+            painter->fillRect(getPointRect(MovePoint::LeftMiddle),QBrush(Qt::white));
+            painter->drawRect(getPointRect(MovePoint::LeftMiddle));
+            painter->fillRect(getPointRect(MovePoint::RightMiddle),QBrush(Qt::white));
+            painter->drawRect(getPointRect(MovePoint::RightMiddle));
+            painter->fillRect(getPointRect(MovePoint::TopMiddle),QBrush(Qt::white));
+            painter->drawRect(getPointRect(MovePoint::TopMiddle));
+            painter->fillRect(getPointRect(MovePoint::BottomMiddle),QBrush(Qt::white));
+            painter->drawRect(getPointRect(MovePoint::BottomMiddle));
+        }
     }
     painter->setBrush(br);
 }
 
-qreal RectItem::leftMove(QPointF point, qreal dx)
+qreal RectItem::checkLeftDXMove(QPointF point, qreal dx)
 {
     qreal result = 0;
-    if(dx<0) {if(mapFromScene(point).x()<=0) {width+=abs(dx);result=dx;}}
-    else if(width-dx>=indent*3+dist) {if(mapFromScene(point).x()>0) {width-=abs(dx);result=dx;}}
+    if(dx<0) {if(mapFromScene(point).x()<=0) result=dx;}
+    else if(width-dx>=indent*3+dist) {if(mapFromScene(point).x()>0) result=dx;}
     return result;
 }
 
-qreal RectItem::rightMove(QPointF point, qreal dx)
-{
-    if(dx>=0) {if(mapFromScene(point).x()>=width) {width+=abs(dx);}}
-    else if(width-abs(dx)>=indent*3+dist) {if(mapFromScene(point).x()<width) {width-=abs(dx);}}
-    return 0;
-}
-
-qreal RectItem::topMove(QPointF point, qreal dy)
+qreal RectItem::checkRightDXMove(QPointF point, qreal dx)
 {
     qreal result = 0;
-    if(dy<0) {if(mapFromScene(point).y()<=0) {height+=abs(dy);result=dy;}}
-    else if(height-dy>=indent*3+dist) {if(mapFromScene(point).y()>0) {height-=abs(dy);result=dy;}}
+    if(dx>=0) {if(mapFromScene(point).x()>=width) result=dx;}
+    else if(width-abs(dx)>=indent*3+dist) {if(mapFromScene(point).x()<width) result=dx;}
     return result;
 }
 
-qreal RectItem::bottomMove(QPointF point, qreal dy)
+qreal RectItem::checkTopDYMove(QPointF point, qreal dy)
 {
-    if(dy>=0) {if(mapFromScene(point).y()>=height) {height+=abs(dy);}}
-    else if(height-abs(dy)>=indent*3+dist) {if(mapFromScene(point).y()<=height) {height-=abs(dy);}}
-    return 0;
+    qreal result = 0;
+    if(dy<0) {if(mapFromScene(point).y()<=0) result=dy;}
+    else if(height-dy>=indent*3+dist) {if(mapFromScene(point).y()>0) result=dy;}
+    return result;
+}
+
+qreal RectItem::checkBottomDYMove(QPointF point, qreal dy)
+{
+    qreal result = 0;
+    if(dy>=0) {if(mapFromScene(point).y()>=height) result=dy;}
+    else if(height-abs(dy)>=indent*3+dist) {if(mapFromScene(point).y()<=height) result=dy;}
+    return result;
+}
+
+RectGeometry RectItem::changeGeometryFromPoint(RectGeometry rect, qreal dx, qreal dy, MovePoint pointType)
+{
+    if(chMode==ChangeMode::WidthAndHeight) {
+        switch(pointType) {
+            case MovePoint::BottomLeft:
+                rect.width-=dx;
+                rect.height+=dy;
+                rect.x+=dx;
+                break;
+            case MovePoint::BottomMiddle:
+                rect.height+=dy;
+                break;
+            case MovePoint::BottomRight:
+                rect.width+=dx;
+                rect.height+=dy;
+                break;
+            case MovePoint::LeftMiddle:
+                rect.width-=dx;
+                rect.x+=dx;
+                break;
+            case MovePoint::TopLeft:
+                rect.width-=dx;
+                rect.height-=dy;
+                rect.x+=dx;
+                rect.y+=dy;
+                break;
+            case MovePoint::TopMiddle:
+                rect.height-=dy;
+                rect.y+=dy;
+                break;
+            case MovePoint::TopRight:
+                rect.width+=dx;
+                rect.height-=dy;
+                rect.y+=dy;
+                break;
+            case MovePoint::RightMiddle:
+                rect.width+=dx;
+                break;
+            case MovePoint::All:
+                rect.x+=dx;
+                rect.y+=dy;
+                break;
+        }
+    }else if(chMode==ChangeMode::Proportional) {
+        qreal coeff = 1;
+        switch(pointType) {
+            case MovePoint::BottomLeft:
+                if(abs(dx)>abs(dy)) {
+                    coeff = (rect.width-dx)/startWidth;
+                    dx = rect.width - startWidth*coeff;
+                    dy = startHeight*coeff - rect.height;
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                    rect.x+=round(dx);
+                }else {
+                    coeff = (rect.height+dy)/startHeight;
+                    dx = round(rect.width - startWidth*coeff);
+                    dy = round(startHeight*coeff - rect.height);
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                    rect.x+=round(dx);
+                }
+                break;
+            case MovePoint::BottomRight:
+                if(abs(dx)>abs(dy)) {
+                    coeff = (rect.width+dx)/startWidth;
+                    dx = startWidth*coeff - rect.width;
+                    dy = startHeight*coeff - rect.height;
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                }else {
+                    coeff = (rect.height+dy)/startHeight;
+                    dx = round(startWidth*coeff - rect.width);
+                    dy = round(startHeight*coeff - rect.height);
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                }
+                break;
+            case MovePoint::TopLeft:
+                if(abs(dx)>abs(dy)) {
+                    coeff = (rect.width-dx)/startWidth;
+                    dx = rect.width - startWidth*coeff;
+                    dy = rect.height - startHeight*coeff;
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                    rect.x+=round(dx);
+                    rect.y+=round(dy);
+                }else {
+                    coeff = (rect.height-dy)/startHeight;
+                    dx = round(rect.width - startWidth*coeff);
+                    dy = round(rect.height - startHeight*coeff);
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                    rect.x+=round(dx);
+                    rect.y+=round(dy);
+                }
+                break;
+            case MovePoint::TopRight:
+                if(abs(dx)>abs(dy)) {
+                    coeff = (rect.width+dx)/startWidth;
+                    dx = startWidth*coeff - rect.width;
+                    dy = rect.height - startHeight*coeff;
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                    rect.y+=round(dy);
+                }else {
+                    coeff = (rect.height-dy)/startHeight;
+                    dx = round(rect.width + startWidth*coeff);
+                    dy = round(rect.height - startHeight*coeff);
+                    rect.width = round(coeff*startWidth);
+                    rect.height = round(coeff*startHeight);
+                    rect.y+=round(dy);
+                }
+                break;
+            case MovePoint::All:
+                rect.x+=dx;
+                rect.y+=dy;
+                break;
+            default:
+                break;
+        }
+    }else if(chMode==ChangeMode::NoChange) {
+        rect.x+=dx;
+        rect.y+=dy;
+    }
+    return rect;
 }
 
 RectItem::RectItem(qreal width, qreal height, QObject *parent):
-    QObject(parent),width(width),height(height)
+    QObject(parent),width(width),height(height),startWidth(width), startHeight(height)
 {
     setAcceptHoverEvents(true);
     borderColor = lastBorderColor;
@@ -149,7 +281,7 @@ void RectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(widget)
 }
 
-void RectItem::setSelection(RectItem::SelectionMode value)
+void RectItem::setSelection(SelectionMode value)
 {
     if(value!=selectionMode) {
         prepareGeometryChange();
@@ -163,39 +295,47 @@ void RectItem::updateCaughtPos(QPointF point, qreal dx, qreal dy, MovePoint poin
 {
     qreal dx_offset = 0;
     qreal dy_offset = 0;
+    RectGeometry rect;
+    rect.x = static_cast<int>((pos()).x());
+    rect.y = static_cast<int>((pos()).y());
+    rect.height = height;
+    rect.width = width;
     if(pointType==MovePoint::TopLeft) {
         prepareGeometryChange();
-        dx_offset = leftMove(point,dx);
-        dy_offset = topMove(point,dy);
+        dx_offset = checkLeftDXMove(point,dx);
+        dy_offset = checkTopDYMove(point,dy);
     }else if(pointType==MovePoint::TopRight) {
         prepareGeometryChange();
-        dx_offset = rightMove(point,dx);
-        dy_offset = topMove(point,dy);
+        dx_offset = checkRightDXMove(point,dx);
+        dy_offset = checkTopDYMove(point,dy);
     }else if(pointType==MovePoint::BottomRight) {
         prepareGeometryChange();
-        dx_offset = rightMove(point,dx);
-        dy_offset = bottomMove(point,dy);
+        dx_offset = checkRightDXMove(point,dx);
+        dy_offset = checkBottomDYMove(point,dy);
     }else if(pointType==MovePoint::BottomLeft) {
         prepareGeometryChange();
-        dx_offset = leftMove(point,dx);
-        dy_offset = bottomMove(point,dy);
+        dx_offset = checkLeftDXMove(point,dx);
+        dy_offset = checkBottomDYMove(point,dy);
     }else if(pointType==MovePoint::LeftMiddle) {
         prepareGeometryChange();
-        dx_offset = leftMove(point,dx);
+        dx_offset = checkLeftDXMove(point,dx);
     }else if(pointType==MovePoint::RightMiddle) {
         prepareGeometryChange();
-        dx_offset = rightMove(point,dx);
+        dx_offset = checkRightDXMove(point,dx);
     }else if(pointType==MovePoint::TopMiddle) {
         prepareGeometryChange();
-        dy_offset = topMove(point,dy);
+        dy_offset = checkTopDYMove(point,dy);
     }else if(pointType==MovePoint::BottomMiddle) {
         prepareGeometryChange();
-        dy_offset = bottomMove(point,dy);
+        dy_offset = checkBottomDYMove(point,dy);
     }else if(pointType==MovePoint::All) {
         dx_offset = dx;
         dy_offset = dy;
     }
-    setPos(QPointF(pos().x()+dx_offset,pos().y()+dy_offset));
+    rect = changeGeometryFromPoint(rect,dx_offset,dy_offset,pointType);
+    setPos(QPointF(rect.x,rect.y));
+    width = rect.width;
+    height = rect.height;
     int x = static_cast<int>((pos()).x());
     int y = static_cast<int>((pos()).y());
     emit changeRect(x,y,static_cast<int>(width),static_cast<int>(height), lineWidth);
@@ -333,17 +473,44 @@ void RectItem::read(const QJsonObject &json)
 
 void RectItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if(selectionMode==SelectionMode::Single) {
-        if(getMousePointRect(MovePoint::TopLeft).contains(event->pos())) setCursor(QCursor(Qt::SizeFDiagCursor));
-        else if(getMousePointRect(MovePoint::BottomRight).contains(event->pos())) setCursor(QCursor(Qt::SizeFDiagCursor));
-        else if(getMousePointRect(MovePoint::TopRight).contains(event->pos())) setCursor(QCursor(Qt::SizeBDiagCursor));
-        else if(getMousePointRect(MovePoint::BottomLeft).contains(event->pos())) setCursor(QCursor(Qt::SizeBDiagCursor));
-        else if(getMousePointRect(MovePoint::TopMiddle).contains(event->pos())) setCursor(QCursor(Qt::SizeVerCursor));
-        else if(getMousePointRect(MovePoint::BottomMiddle).contains(event->pos())) setCursor(QCursor(Qt::SizeVerCursor));
-        else if(getMousePointRect(MovePoint::LeftMiddle).contains(event->pos())) setCursor(QCursor(Qt::SizeHorCursor));
-        else if(getMousePointRect(MovePoint::RightMiddle).contains(event->pos())) setCursor(QCursor(Qt::SizeHorCursor));
-        else setCursor(Qt::ArrowCursor);
-    }else setCursor(Qt::ArrowCursor);
+    bool caughtFlag = false;
+    if((selectionMode==SelectionMode::Single) && (chMode!=ChangeMode::NoChange)) {
+        if(getMousePointRect(MovePoint::TopLeft).contains(event->pos())) {
+            caughtFlag = true;
+            setCursor(QCursor(Qt::SizeFDiagCursor));
+        }
+        else if(getMousePointRect(MovePoint::BottomRight).contains(event->pos())) {
+            caughtFlag = true;
+            setCursor(QCursor(Qt::SizeFDiagCursor));
+        }
+        else if(getMousePointRect(MovePoint::TopRight).contains(event->pos())) {
+            caughtFlag = true;
+            setCursor(QCursor(Qt::SizeBDiagCursor));
+        }
+        else if(getMousePointRect(MovePoint::BottomLeft).contains(event->pos())) {
+            caughtFlag = true;
+            setCursor(QCursor(Qt::SizeBDiagCursor));
+        }
+        if(chMode==ChangeMode::WidthAndHeight) {
+            if(getMousePointRect(MovePoint::TopMiddle).contains(event->pos())) {
+                caughtFlag = true;
+                setCursor(QCursor(Qt::SizeVerCursor));
+            }
+            else if(getMousePointRect(MovePoint::BottomMiddle).contains(event->pos())) {
+                caughtFlag = true;
+                setCursor(QCursor(Qt::SizeVerCursor));
+            }
+            else if(getMousePointRect(MovePoint::LeftMiddle).contains(event->pos())) {
+                caughtFlag = true;
+                setCursor(QCursor(Qt::SizeHorCursor));
+            }
+            else if(getMousePointRect(MovePoint::RightMiddle).contains(event->pos())) {
+                caughtFlag = true;
+                setCursor(QCursor(Qt::SizeHorCursor));
+            }
+        }
+    }
+    if(!caughtFlag) setCursor(Qt::ArrowCursor);
     QGraphicsItem::hoverMoveEvent(event);
 }
 
@@ -355,18 +522,45 @@ void RectItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 
 void RectItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    bool caughtFlag = false;
     if(event->button() & Qt::LeftButton) {
         QPointF point = event->pos();
         if(selectionMode==SelectionMode::Single) {
-            if(getMousePointRect(MovePoint::TopLeft).contains(point)) emit setItemCaught(this, MovePoint::TopLeft);
-            else if(getMousePointRect(MovePoint::BottomRight).contains(point)) emit setItemCaught(this, MovePoint::BottomRight);
-            else if(getMousePointRect(MovePoint::TopRight).contains(point)) emit setItemCaught(this, MovePoint::TopRight);
-            else if(getMousePointRect(MovePoint::BottomLeft).contains(point)) emit setItemCaught(this, MovePoint::BottomLeft);
-            else if(getMousePointRect(MovePoint::TopMiddle).contains(point)) emit setItemCaught(this, MovePoint::TopMiddle);
-            else if(getMousePointRect(MovePoint::BottomMiddle).contains(point)) emit setItemCaught(this, MovePoint::BottomMiddle);
-            else if(getMousePointRect(MovePoint::LeftMiddle).contains(point)) emit setItemCaught(this, MovePoint::LeftMiddle);
-            else if(getMousePointRect(MovePoint::RightMiddle).contains(point)) emit setItemCaught(this, MovePoint::RightMiddle);
-            else if(internalRect().contains(point)) emit setItemCaught(this,MovePoint::All);
+            if(chMode!=ChangeMode::NoChange) {
+                if(getMousePointRect(MovePoint::TopLeft).contains(point)) {
+                    caughtFlag = true;
+                    emit setItemCaught(this, MovePoint::TopLeft);
+                }else if(getMousePointRect(MovePoint::BottomRight).contains(point)) {
+                    caughtFlag = true;
+                    emit setItemCaught(this, MovePoint::BottomRight);
+                }
+                else if(getMousePointRect(MovePoint::TopRight).contains(point)) {
+                    caughtFlag = true;
+                    emit setItemCaught(this, MovePoint::TopRight);
+                }
+                else if(getMousePointRect(MovePoint::BottomLeft).contains(point)) {
+                    caughtFlag = true;
+                    emit setItemCaught(this, MovePoint::BottomLeft);
+                }
+                if(chMode==ChangeMode::WidthAndHeight) {
+                    if(getMousePointRect(MovePoint::TopMiddle).contains(point)) {
+                        caughtFlag = true;
+                        emit setItemCaught(this, MovePoint::TopMiddle);
+                    }else if(getMousePointRect(MovePoint::BottomMiddle).contains(point)) {
+                        caughtFlag = true;
+                        emit setItemCaught(this, MovePoint::BottomMiddle);
+                    }
+                    else if(getMousePointRect(MovePoint::LeftMiddle).contains(point)) {
+                        caughtFlag = true;
+                        emit setItemCaught(this, MovePoint::LeftMiddle);
+                    }
+                    else if(getMousePointRect(MovePoint::RightMiddle).contains(point)) {
+                        caughtFlag = true;
+                        emit setItemCaught(this, MovePoint::RightMiddle);
+                    }
+                }
+            }
+            if((!caughtFlag)&&(internalRect().contains(point))) emit setItemCaught(this,MovePoint::All);
         }
     }
 }

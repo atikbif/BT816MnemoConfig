@@ -7,6 +7,8 @@ bool FilledEllipseItem::lastFill = true;
 
 FilledEllipseItem::FilledEllipseItem(qreal _width, qreal _height, QObject *parent): RectItem(_width,_height,parent)
 {
+    chMode = ChangeMode::Proportional;
+
     backColor = lastBackColor;
     ElProperty pr("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("filled_ellipse"));
