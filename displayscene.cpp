@@ -229,7 +229,12 @@ void DisplayScene::update_width(int value)
 {
     if(selItems.size()==1) {
         RectItem *item = dynamic_cast<RectItem*>(selItems.at(0));
-        if(value>0 && item) item->updateWidth(value);
+        if(value>0 && item && item->getChangeMode()!=ChangeMode::NoChange) {
+            item->updateWidth(value);
+            if(item->getChangeMode()==ChangeMode::Proportional) {
+                item->updateHeight(value);
+            }
+        }
     }
 }
 
@@ -237,7 +242,12 @@ void DisplayScene::update_height(int value)
 {
     if(selItems.size()==1) {
         RectItem *item = dynamic_cast<RectItem*>(selItems.at(0));
-        if(value>0 && item) item->updateHeight(value);
+        if(value>0 && item && item->getChangeMode()!=ChangeMode::NoChange) {
+            item->updateHeight(value);
+            if(item->getChangeMode()==ChangeMode::Proportional) {
+                item->updateWidth(value);
+            }
+        }
     }
 }
 

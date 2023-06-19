@@ -2,16 +2,18 @@
 #include <QPainter>
 
 ColorValue FilledCircleItem::lastBackColor = {0xAA,0xFF,0x7F};
-bool FilledCircleItem::lastFill = true;
-
 
 FilledCircleItem::FilledCircleItem(qreal _width, qreal _height, QObject *parent): RectItem(_width,_height,parent)
 {
     chMode = ChangeMode::Proportional;
 
+    ElProperty pr = ElProperty("change",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(chMode));
+    RectItem::updateProperty(pr);
+
     backColor = lastBackColor;
-    ElProperty pr("type",ElProperty::Type::STRING_T);
-    pr.setValue(QString("filled_ellipse"));
+    pr = ElProperty("type",ElProperty::Type::STRING_T);
+    pr.setValue(QString("filled_circle"));
     properties.push_back(pr);
 
     pr = ElProperty("back_color",ElProperty::Type::STRING_T);
@@ -19,11 +21,6 @@ FilledCircleItem::FilledCircleItem(qreal _width, qreal _height, QObject *parent)
     QString colStr = col.name(QColor::HexRgb);
     colStr = colStr.mid(1,6);
     pr.setValue(colStr);
-    properties.push_back(pr);
-
-    fill = lastFill;
-    pr = ElProperty("fill",ElProperty::Type::BOOL_T);
-    pr.setValue(fill);
     properties.push_back(pr);
 }
 
@@ -35,7 +32,7 @@ void FilledCircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     QPainterPath path;
     path.addEllipse(QRectF(0,0,width,height));
-    if(fill) painter->fillPath(path, QBrush(QColor(backColor.r,backColor.g,backColor.b)));
+    painter->fillPath(path, QBrush(QColor(backColor.r,backColor.g,backColor.b)));
     if(lineWidth==0) {
         painter->setPen(QPen(QBrush(Qt::white),1));
         path.addEllipse(QRectF(0,0,width,height));
@@ -78,17 +75,6 @@ void FilledCircleItem::updateProperty(ElProperty prop)
                         it->setValue(*val);
                     }
                 }
-            }
-        }
-    }else if(prop.getName()=="fill") {
-        auto fillVal = prop.getValue();
-        if(auto val = std::get_if<bool>(&fillVal)) {
-            fill = *val;
-            lastFill = fill;
-            update();
-            auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="fill";});
-            if(it!=properties.end()) {
-                it->setValue(*val);
             }
         }
     }

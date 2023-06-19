@@ -46,6 +46,7 @@ QRectF RectItem::internalRect() const
 
 void RectItem::drawBorder(QPainter *painter, bool zeroWidth)
 {
+    Q_UNUSED(zeroWidth)
     QBrush br = painter->brush();
     if(selectionMode==SelectionMode::Single) {
         painter->setOpacity(0.6);
@@ -260,6 +261,10 @@ RectItem::RectItem(qreal width, qreal height, QObject *parent):
     pr.setValue(colStr);
     properties.push_back(pr);
 
+    pr = ElProperty("change",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(chMode));
+    properties.push_back(pr);
+
 }
 
 QRectF RectItem::boundingRect() const
@@ -372,6 +377,18 @@ void RectItem::updateProperty(ElProperty prop)
                     if(it!=properties.end()) {
                         it->setValue(*val);
                     }
+                }
+            }
+        }
+    }else if(prop.getName()=="change"){
+        if(prop.getType()==ElProperty::Type::INT_T) {
+            auto chVal = prop.getValue();
+            if(auto val = std::get_if<int>(&chVal)) {
+                chMode = static_cast<ChangeMode>(*val);
+                update();
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="change";});
+                if(it!=properties.end()) {
+                    it->setValue(*val);
                 }
             }
         }

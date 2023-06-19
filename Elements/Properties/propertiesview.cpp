@@ -11,6 +11,7 @@
 #include <QCheckBox>
 #include "../Widgets/lampimages.h"
 #include "../Widgets/scalimages.h"
+#include "Elements/Widgets/rectitem.h"
 
 void PropertiesView::clearLayout(QLayout *l)
 {
@@ -99,27 +100,37 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
     fLayout->addRow(wName,spBox);
     widgets["y"] = spBox;
 
-    spBox = new ViewSpinbox();
-    spBox->setStyleSheet(spinHeight);
-    spBox->setRange(25,800);
-    connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_width);
-    wName = new QLabel("ширина");
-    wName->setStyleSheet(textColor);
-    wName->setFont(QFont("Times", textSize, QFont::Bold));
-    wName->setAlignment(Qt::AlignVCenter);
-    fLayout->addRow(wName,spBox);
-    widgets["width"] = spBox;
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="change";});
+    if(it!=properties.end()) {
+        int val = getIntFromProperty(*it);
+        ChangeMode chMode = static_cast<ChangeMode>(val);
 
-    spBox = new ViewSpinbox();
-    spBox->setStyleSheet(spinHeight);
-    spBox->setRange(25,480);
-    connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_height);
-    wName = new QLabel("высота");
-    wName->setStyleSheet(textColor);
-    wName->setFont(QFont("Times", textSize, QFont::Bold));
-    wName->setAlignment(Qt::AlignVCenter);
-    fLayout->addRow(wName,spBox);
-    widgets["height"] = spBox;
+        if(chMode!=ChangeMode::NoChange) {
+            spBox = new ViewSpinbox();
+            spBox->setStyleSheet(spinHeight);
+            spBox->setRange(25,800);
+            connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_width);
+            wName = new QLabel("ширина");
+            wName->setStyleSheet(textColor);
+            wName->setFont(QFont("Times", textSize, QFont::Bold));
+            wName->setAlignment(Qt::AlignVCenter);
+            fLayout->addRow(wName,spBox);
+            widgets["width"] = spBox;
+        }
+
+        if(chMode!=ChangeMode::Proportional) {
+            spBox = new ViewSpinbox();
+            spBox->setStyleSheet(spinHeight);
+            spBox->setRange(25,480);
+            connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_height);
+            wName = new QLabel("высота");
+            wName->setStyleSheet(textColor);
+            wName->setFont(QFont("Times", textSize, QFont::Bold));
+            wName->setAlignment(Qt::AlignVCenter);
+            fLayout->addRow(wName,spBox);
+            widgets["height"] = spBox;
+        }
+    }
 
     spBox = new ViewSpinbox();
     spBox->setStyleSheet(spinHeight);
@@ -132,7 +143,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
     fLayout->addRow(wName,spBox);
     widgets["line_width"] = spBox;
 
-    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="line_color";});
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="line_color";});
     if(it!=properties.end()) { // цвет линии
 
         fLayout->addRow(new QLabel(), new QLabel());

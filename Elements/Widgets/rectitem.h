@@ -72,6 +72,7 @@ public:
     int getX() {return static_cast<int>((pos()).x());}
     int getY() {return static_cast<int>((pos()).y());}
     int getLineWidth() const;
+    ChangeMode getChangeMode() {return chMode;}
 
     virtual void updateProperty(ElProperty prop);
     virtual void updateCaughtPos(QPointF point, qreal dx, qreal dy, MovePoint pointType);

@@ -9,8 +9,6 @@ class FilledCircleItem : public RectItem
 protected:
     ColorValue backColor;
     static ColorValue lastBackColor;
-    bool fill;
-    static bool lastFill;
 public:
     FilledCircleItem(qreal _width, qreal _height, QObject *parent=nullptr);
 

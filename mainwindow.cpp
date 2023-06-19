@@ -93,7 +93,7 @@ void MainWindow::open()
 
                     RectItem *item = nullptr;
                     if(itemName=="filled_rect") item = new FilledRectItem(width,height);
-                    else if(itemName=="filled_ellipse") item = new FilledCircleItem(width,height);
+                    else if(itemName=="filled_circle") item = new FilledCircleItem(width,height);
                     else if(itemName=="lamp") item = new LampItem(width,height);
                     else if(itemName=="text") item = new TextItem(width,height);
                     else if(itemName=="number") item = new NumberItem(width,height);

@@ -4,6 +4,10 @@
 CircleItem::CircleItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
 {
     chMode = ChangeMode::Proportional;
+
+    ElProperty pr = ElProperty("change",ElProperty::Type::INT_T);
+    pr.setValue(QString::number(static_cast<int>(chMode)));
+    RectItem::updateProperty(pr);
 }
 
 void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
