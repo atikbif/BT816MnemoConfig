@@ -16,15 +16,20 @@
 void PropertiesView::clearLayout(QLayout *l)
 {
     QLayoutItem *item;
-    while((item = l->takeAt(0))) {
-        if (item->layout()) {
-            clearLayout(item->layout());
-        }
-        if (item->widget()) {
-           delete item->widget();
-        }
-        l->removeItem(item);
-        delete item;
+    while(1) {
+        if(!l->isEmpty()) {
+            item = l->takeAt(0);
+            if(item) {
+                if (item->layout()) {
+                    clearLayout(item->layout());
+                }
+                if (item->widget()) {
+                   delete item->widget();
+                }
+                l->removeItem(item);
+                delete item;
+            }else break;
+        }else break;
     }
 }
 
@@ -110,7 +115,8 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
             spBox->setStyleSheet(spinHeight);
             spBox->setRange(25,800);
             connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_width);
-            wName = new QLabel("ширина");
+            if(chMode==ChangeMode::Proportional) wName = new QLabel("размер");
+            else wName = new QLabel("ширина");
             wName->setStyleSheet(textColor);
             wName->setFont(QFont("Times", textSize, QFont::Bold));
             wName->setAlignment(Qt::AlignVCenter);
@@ -118,7 +124,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
             widgets["width"] = spBox;
         }
 
-        if(chMode!=ChangeMode::Proportional) {
+        if(chMode==ChangeMode::WidthAndHeight) {
             spBox = new ViewSpinbox();
             spBox->setStyleSheet(spinHeight);
             spBox->setRange(25,480);

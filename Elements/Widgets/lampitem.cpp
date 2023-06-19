@@ -12,7 +12,11 @@ LampItem::LampItem(qreal _width, qreal _height, QObject *parent):RectItem(_width
 {
     chMode = ChangeMode::NoChange;
 
-    ElProperty pr("type",ElProperty::Type::STRING_T);
+    ElProperty pr = ElProperty("change",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(chMode));
+    RectItem::updateProperty(pr);
+
+    pr = ElProperty("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("lamp"));
     properties.push_back(pr);
     onIndex = lastOnIndex;

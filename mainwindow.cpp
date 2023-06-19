@@ -282,6 +282,7 @@ void MainWindow::on_pushButtonOriginalSize_clicked()
 
 void MainWindow::on_pushButtonFilledRect_clicked()
 {
+    clearProperties();
     FilledRectItem *item = new FilledRectItem(50,50);
     item->setZValue(sc->getMaxZValue());
     setProperties(item->getProperties());
@@ -292,6 +293,7 @@ void MainWindow::on_pushButtonFilledRect_clicked()
 
 void MainWindow::on_pushButtonFilledCircle_clicked()
 {
+    clearProperties();
     FilledCircleItem *item = new FilledCircleItem(50,50);
     item->setZValue(sc->getMaxZValue());
     setProperties(item->getProperties());
@@ -302,6 +304,7 @@ void MainWindow::on_pushButtonFilledCircle_clicked()
 
 void MainWindow::on_pushButtonText_clicked()
 {
+    clearProperties();
     TextItem *item = new TextItem(150,35);
     item->setZValue(sc->getMaxZValue());
     item->updateLineWidth(0);
@@ -313,6 +316,7 @@ void MainWindow::on_pushButtonText_clicked()
 
 void MainWindow::on_pushButtonLamp_clicked()
 {
+    clearProperties();
     LampItem *item = new LampItem(50,50);
     item->setZValue(sc->getMaxZValue());
     item->updateLineWidth(0);
@@ -324,6 +328,7 @@ void MainWindow::on_pushButtonLamp_clicked()
 
 void MainWindow::on_pushButtonNumber_clicked()
 {
+    clearProperties();
     NumberItem *item = new NumberItem(100,35);
     item->setZValue(sc->getMaxZValue());
     item->updateLineWidth(0);

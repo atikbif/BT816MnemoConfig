@@ -362,6 +362,8 @@ void DisplayScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if(event->button() & Qt::LeftButton) {
 
+        emit clearProperties();
+
         if(insertItem) {
             RectItem *rect = dynamic_cast<RectItem*>(insertItem);
             if(rect) {
