@@ -1,13 +1,13 @@
-#ifndef ELLIPSEITEM_H
-#define ELLIPSEITEM_H
+#ifndef CIRCLEITEM_H
+#define CIRCLEITEM_H
 
 #include "rectitem.h"
 
-class EllipseItem : public RectItem
+class CircleItem : public RectItem
 {
     Q_OBJECT
 public:
-    EllipseItem(qreal _width, qreal _height, QObject *parent=nullptr);
+    CircleItem(qreal _width, qreal _height, QObject *parent=nullptr);
 
     // QGraphicsItem interface
 public:
@@ -18,4 +18,4 @@ public:
     RectItem* clone();
 };
 
-#endif // ELLIPSEITEM_H
+#endif // CIRCLEITEM_H

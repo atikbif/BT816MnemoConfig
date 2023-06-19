@@ -66,8 +66,8 @@ QGroupBox::title {
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
-        <widget class="QPushButton" name="pushButtonFilledEllipse">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pushButtonFilledRect">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -79,7 +79,30 @@ QGroupBox::title {
          </property>
          <property name="icon">
           <iconset resource="images.qrc">
-           <normaloff>:/images/filled_ellipse.png</normaloff>:/images/filled_ellipse.png</iconset>
+           <normaloff>:/images/rounded_rectangle.png</normaloff>:/images/rounded_rectangle.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>55</width>
+           <height>55</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QPushButton" name="pushButtonFilledCircle">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="images.qrc">
+           <normaloff>:/images/circle.png</normaloff>:/images/circle.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -97,58 +120,6 @@ QGroupBox::title {
          <property name="icon">
           <iconset resource="images.qrc">
            <normaloff>:/images/lamps/lamp2.png</normaloff>:/images/lamps/lamp2.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>55</width>
-           <height>55</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0">
-        <widget class="QPushButton" name="pushButtonImage">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>64</width>
-           <height>64</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="images.qrc">
-           <normaloff>:/images/image.png</normaloff>:/images/image.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>64</width>
-           <height>64</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QPushButton" name="pushButtonFilledRect">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset resource="images.qrc">
-           <normaloff>:/images/rounded_rectangle.png</normaloff>:/images/rounded_rectangle.png</iconset>
          </property>
          <property name="iconSize">
           <size>

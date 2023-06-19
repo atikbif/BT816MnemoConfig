@@ -1,9 +1,9 @@
-#ifndef FILLEDELLIPSEITEM_H
-#define FILLEDELLIPSEITEM_H
+#ifndef FILLEDCIRCLEITEM_H
+#define FILLEDCIRCLEITEM_H
 
 #include "rectitem.h"
 
-class FilledEllipseItem : public RectItem
+class FilledCircleItem : public RectItem
 {
     Q_OBJECT
 protected:
@@ -12,7 +12,7 @@ protected:
     bool fill;
     static bool lastFill;
 public:
-    FilledEllipseItem(qreal _width, qreal _height, QObject *parent=nullptr);
+    FilledCircleItem(qreal _width, qreal _height, QObject *parent=nullptr);
 
     // QGraphicsItem interface
 public:
@@ -21,4 +21,4 @@ public:
     void updateProperty(ElProperty prop);
 };
 
-#endif // FILLEDELLIPSEITEM_H
+#endif // FILLEDCIRCLEITEM_H

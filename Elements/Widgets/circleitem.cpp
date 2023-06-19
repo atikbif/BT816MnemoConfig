@@ -1,12 +1,12 @@
-#include "ellipseitem.h"
+#include "circleitem.h"
 #include <QPainter>
 
-EllipseItem::EllipseItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
+CircleItem::CircleItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
 {
-
+    chMode = ChangeMode::Proportional;
 }
 
-void EllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void CircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if(selectionMode==SelectionMode::None) painter->setOpacity(1.0);
     else painter->setOpacity(0.3);
@@ -20,9 +20,9 @@ void EllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     Q_UNUSED(widget)
 }
 
-RectItem *EllipseItem::clone()
+RectItem *CircleItem::clone()
 {
-    EllipseItem* res = new EllipseItem(width,height);
+    CircleItem* res = new CircleItem(width,height);
     res->lineWidth = lineWidth;
     res->setX(getX());
     res->setY(getY());

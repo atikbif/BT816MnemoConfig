@@ -27,8 +27,8 @@ SOURCES += \
     Elements/Properties/elproperty.cpp \
     Elements/Properties/filledrectpropertiespattern.cpp \
     Elements/Properties/propertiesview.cpp \
-    Elements/Widgets/ellipseitem.cpp \
-    Elements/Widgets/filledellipseitem.cpp \
+    Elements/Widgets/circleitem.cpp \
+    Elements/Widgets/filledcircleitem.cpp \
     Elements/Widgets/filledrectitem.cpp \
     Elements/Widgets/lampimages.cpp \
     Elements/Widgets/lampitem.cpp \
@@ -47,9 +47,9 @@ HEADERS += \
     Elements/Properties/elproperty.h \
     Elements/Properties/filledrectpropertiespattern.h \
     Elements/Properties/propertiesview.h \
+    Elements/Widgets/circleitem.h \
     Elements/Widgets/colorvalue.h \
-    Elements/Widgets/ellipseitem.h \
-    Elements/Widgets/filledellipseitem.h \
+    Elements/Widgets/filledcircleitem.h \
     Elements/Widgets/filledrectitem.h \
     Elements/Widgets/lampimages.h \
     Elements/Widgets/lampitem.h \

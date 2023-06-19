@@ -40,5 +40,6 @@
         <file>images/vert_step.png</file>
         <file>images/Open.png</file>
         <file>images/Save.png</file>
+        <file>images/circle.png</file>
     </qresource>
 </RCC>

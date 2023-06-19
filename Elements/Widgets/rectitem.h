@@ -34,7 +34,7 @@ class RectItem : public QObject, public QGraphicsItem
 protected:
     ChangeMode chMode = ChangeMode::WidthAndHeight;
     const int indent = 5;
-    int lineWidth = 1;
+    int lineWidth = 0;
     SelectionMode selectionMode = SelectionMode::None;
     qreal width, height;
     std::vector<ElProperty> properties;

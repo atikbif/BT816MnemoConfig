@@ -2,10 +2,10 @@
 #include "ui_mainwindow.h"
 #include "displayscene.h"
 #include "Elements/Widgets/rectitem.h"
-#include "Elements/Widgets/ellipseitem.h"
+#include "Elements/Widgets/circleitem.h"
 #include "Elements/Widgets/filledrectitem.h"
 #include "Elements/Widgets/scalableimageitem.h"
-#include "Elements/Widgets/filledellipseitem.h"
+#include "Elements/Widgets/filledcircleitem.h"
 #include "Elements/Widgets/textitem.h"
 #include "Elements/Widgets/lampitem.h"
 #include "Elements/Widgets/numberitem.h"
@@ -93,11 +93,11 @@ void MainWindow::open()
 
                     RectItem *item = nullptr;
                     if(itemName=="filled_rect") item = new FilledRectItem(width,height);
-                    else if(itemName=="filled_ellipse") item = new FilledEllipseItem(width,height);
+                    else if(itemName=="filled_ellipse") item = new FilledCircleItem(width,height);
                     else if(itemName=="lamp") item = new LampItem(width,height);
                     else if(itemName=="text") item = new TextItem(width,height);
                     else if(itemName=="number") item = new NumberItem(width,height);
-                    else if(itemName=="scal_image") item = new ScalableImageItem(width,height);
+                    //else if(itemName=="scal_image") item = new ScalableImageItem(width,height);
 
 
                     if(item!=nullptr) {
@@ -172,7 +172,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->addAction(QIcon(":/images/Save.png"),"сохранить",[this](){save();});
     ui->toolBar->addSeparator();
 
-    ui->toolBar->addAction("Фон",[this](){
+    ui->toolBar->addAction(QIcon(":/images/background.png"),"Фон",[this](){
         QString fileName = QFileDialog::getOpenFileName(this, "Открыть файл с фоновым изображением", "", "*.png");
         if(fileName.isEmpty()) return;
         if(backgroundItem) {
@@ -185,6 +185,7 @@ MainWindow::MainWindow(QWidget *parent)
             QPixmap pix(fileName);
             pix = pix.scaled(800,480);
             backgroundItem = sc->addPixmap(pix);
+            backgroundItem->setZValue(-1000);
         }
 
     });
@@ -289,19 +290,9 @@ void MainWindow::on_pushButtonFilledRect_clicked()
     ui->graphicsView->setFocus();
 }
 
-void MainWindow::on_pushButtonImage_clicked()
+void MainWindow::on_pushButtonFilledCircle_clicked()
 {
-    ScalableImageItem *item = new ScalableImageItem(64,64);
-    item->setZValue(sc->getMaxZValue());
-    setProperties(item->getProperties());
-    connect(item,&RectItem::changeRect,sc,&DisplayScene::updateRect);
-    sc->setInsertElement(item);
-    ui->graphicsView->setFocus();
-}
-
-void MainWindow::on_pushButtonFilledEllipse_clicked()
-{
-    FilledEllipseItem *item = new FilledEllipseItem(50,50);
+    FilledCircleItem *item = new FilledCircleItem(50,50);
     item->setZValue(sc->getMaxZValue());
     setProperties(item->getProperties());
     connect(item,&RectItem::changeRect,sc,&DisplayScene::updateRect);

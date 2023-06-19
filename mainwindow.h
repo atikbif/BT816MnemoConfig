@@ -42,9 +42,7 @@ private slots:
 
     void on_pushButtonFilledRect_clicked();
 
-    void on_pushButtonImage_clicked();
-
-    void on_pushButtonFilledEllipse_clicked();
+    void on_pushButtonFilledCircle_clicked();
 
     void on_pushButtonText_clicked();
 

@@ -1,11 +1,11 @@
-#include "filledellipseitem.h"
+#include "filledcircleitem.h"
 #include <QPainter>
 
-ColorValue FilledEllipseItem::lastBackColor = {0xAA,0xFF,0x7F};
-bool FilledEllipseItem::lastFill = true;
+ColorValue FilledCircleItem::lastBackColor = {0xAA,0xFF,0x7F};
+bool FilledCircleItem::lastFill = true;
 
 
-FilledEllipseItem::FilledEllipseItem(qreal _width, qreal _height, QObject *parent): RectItem(_width,_height,parent)
+FilledCircleItem::FilledCircleItem(qreal _width, qreal _height, QObject *parent): RectItem(_width,_height,parent)
 {
     chMode = ChangeMode::Proportional;
 
@@ -27,7 +27,7 @@ FilledEllipseItem::FilledEllipseItem(qreal _width, qreal _height, QObject *paren
     properties.push_back(pr);
 }
 
-void FilledEllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void FilledCircleItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     if(selectionMode==SelectionMode::None) painter->setOpacity(1.0);
     else painter->setOpacity(0.8);
@@ -47,9 +47,9 @@ void FilledEllipseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     Q_UNUSED(widget)
 }
 
-RectItem *FilledEllipseItem::clone()
+RectItem *FilledCircleItem::clone()
 {
-    FilledEllipseItem* res = new FilledEllipseItem(width,height);
+    FilledCircleItem* res = new FilledCircleItem(width,height);
     res->lineWidth = lineWidth;
     res->setX(getX());
     res->setY(getY());
@@ -57,7 +57,7 @@ RectItem *FilledEllipseItem::clone()
     return res;
 }
 
-void FilledEllipseItem::updateProperty(ElProperty prop)
+void FilledCircleItem::updateProperty(ElProperty prop)
 {
     RectItem::updateProperty(prop);
     if(prop.getName()=="back_color") {
