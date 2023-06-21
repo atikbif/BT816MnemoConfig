@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "qevent.h"
 #include "ui_mainwindow.h"
 #include "displayscene.h"
 #include "Elements/Widgets/rectitem.h"
@@ -340,4 +341,20 @@ void MainWindow::on_pushButtonNumber_clicked()
     connect(item,&RectItem::changeRect,sc,&DisplayScene::updateRect);
     sc->setInsertElement(item);
     ui->graphicsView->setFocus();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key()) {
+        case Qt::Key_Plus:
+            if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
+                on_pushButtonPlus_clicked();
+            }
+            break;
+        case Qt::Key_Minus:
+            if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
+                on_pushButtonMinus_clicked();
+            }
+            break;
+    }
 }

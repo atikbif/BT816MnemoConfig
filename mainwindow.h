@@ -54,5 +54,9 @@ private:
     Ui::MainWindow *ui;
 
 
+
+    // QWidget interface
+protected:
+    void keyPressEvent(QKeyEvent *event);
 };
 #endif // MAINWINDOW_H
