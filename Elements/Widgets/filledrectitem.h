@@ -2,17 +2,20 @@
 #define FILLEDRECTITEM_H
 
 #include "rectitem.h"
+#include "plcconfig.h"
 
 class FilledRectItem : public RectItem
 {
     Q_OBJECT
 protected:
-    ColorValue backColor;
-    static ColorValue lastBackColor;
-    int radius;
-    static int lastRadius;
-    bool fill;
-    static bool lastFill;
+    ColorValue onColor;
+    ColorValue offColor;
+    static ColorValue lastOnColor;
+    static ColorValue lastOffColor;
+    static DiscreteVarType lastLinkType;
+    bool state = true;
+    DiscreteVarType linkType;
+    int linkIndex;
 public:
     FilledRectItem(qreal _width, qreal _height, QObject *parent=nullptr);
 

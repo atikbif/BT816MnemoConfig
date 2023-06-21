@@ -2,32 +2,50 @@
 #include <QPainter>
 #include <QDebug>
 
-ColorValue FilledRectItem::lastBackColor = {0xAA,0xFF,0x7F};
-int FilledRectItem::lastRadius = 0;
-bool FilledRectItem::lastFill = true;
+ColorValue FilledRectItem::lastOnColor = {0x00,0xFF,0x00};
+ColorValue FilledRectItem::lastOffColor = {0xA0,0xA0,0xA0};
+DiscreteVarType FilledRectItem::lastLinkType = DiscreteVarType::DI;
 
 FilledRectItem::FilledRectItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
 {
-    backColor = lastBackColor;
-    ElProperty pr("type",ElProperty::Type::STRING_T);
+    onColor = lastOnColor;
+    offColor = lastOffColor;
+    linkType = lastLinkType;
+
+    chMode = ChangeMode::WidthAndHeight;
+
+    ElProperty pr = ElProperty("change",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(chMode));
+    RectItem::updateProperty(pr);
+
+    pr = ElProperty("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("filled_rect"));
     properties.push_back(pr);
 
-    pr = ElProperty("back_color",ElProperty::Type::STRING_T);
-    QColor col(backColor.r,backColor.g,backColor.b);
+    pr = ElProperty("on_color",ElProperty::Type::STRING_T);
+    QColor col = QColor(onColor.r,onColor.g,onColor.b);
     QString colStr = col.name(QColor::HexRgb);
     colStr = colStr.mid(1,6);
     pr.setValue(colStr);
     properties.push_back(pr);
 
-    radius = lastRadius;
-    pr = ElProperty("rect_radius",ElProperty::Type::INT_T);
-    pr.setValue(radius);
+    pr = ElProperty("off_color",ElProperty::Type::STRING_T);
+    col = QColor(offColor.r,offColor.g,offColor.b);
+    colStr = col.name(QColor::HexRgb);
+    colStr = colStr.mid(1,6);
+    pr.setValue(colStr);
     properties.push_back(pr);
 
-    fill = lastFill;
-    pr = ElProperty("fill",ElProperty::Type::BOOL_T);
-    pr.setValue(fill);
+    pr = ElProperty("bool_state",ElProperty::Type::BOOL_T);
+    pr.setValue(state);
+    properties.push_back(pr);
+
+    pr = ElProperty("link_bool_type",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(linkType));
+    properties.push_back(pr);
+
+    pr = ElProperty("link_bool_index",ElProperty::Type::INT_T);
+    pr.setValue(linkIndex);
     properties.push_back(pr);
 }
 
@@ -38,11 +56,16 @@ void FilledRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),lineWidth));
 
     QPainterPath path;
-    path.addRoundedRect(QRectF(0,0,width,height), radius, radius);
-    if(fill) painter->fillPath(path, QBrush(QColor(backColor.r,backColor.g,backColor.b)));
+    path.addRect(QRectF(0,0,width,height));
+    if(state) {
+        painter->fillPath(path, QBrush(QColor(onColor.r,onColor.g,onColor.b)));
+    }else {
+        painter->fillPath(path, QBrush(QColor(offColor.r,offColor.g,offColor.b)));
+    }
+
     if(lineWidth==0) {
         painter->setPen(QPen(QBrush(Qt::white),1));
-        path.addRoundedRect(QRectF(0,0,width,height), radius, radius);
+        path.addRect(QRectF(0,0,width,height));
     }
     painter->drawPath(path);
 
@@ -54,7 +77,7 @@ void FilledRectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 void FilledRectItem::updateProperty(ElProperty prop)
 {
     RectItem::updateProperty(prop);
-    if(prop.getName()=="back_color") {
+    if(prop.getName()=="off_color") {
         if(prop.getType()==ElProperty::Type::STRING_T) {
             auto colVal = prop.getValue();
             if(auto val = std::get_if<QString>(&colVal)) {
@@ -64,36 +87,70 @@ void FilledRectItem::updateProperty(ElProperty prop)
                     int r = (col>>16)&0xFF;
                     int g = (col>>8)&0xFF;
                     int b = col&0xFF;
-                    backColor = {r,g,b};
-                    lastBackColor = backColor;
+                    offColor = {r,g,b};
+                    lastOffColor = offColor;
                     update();
-                    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="back_color";});
+                    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="off_color";});
                     if(it!=properties.end()) {
                         it->setValue(*val);
                     }
                 }
             }
         }
-    }else if(prop.getName()=="rect_radius") {
-        auto radVal = prop.getValue();
-        if(auto val = std::get_if<int>(&radVal)) {
-            radius = *val;
-            lastRadius = radius;
-            update();
-            auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="rect_radius";});
-            if(it!=properties.end()) {
-                it->setValue(*val);
+    }else if(prop.getName()=="on_color") {
+        if(prop.getType()==ElProperty::Type::STRING_T) {
+            auto colVal = prop.getValue();
+            if(auto val = std::get_if<QString>(&colVal)) {
+                bool res = false;
+                long col = val->toLong(&res,16);
+                if(res) {
+                    int r = (col>>16)&0xFF;
+                    int g = (col>>8)&0xFF;
+                    int b = col&0xFF;
+                    onColor = {r,g,b};
+                    lastOnColor = onColor;
+                    update();
+                    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="on_color";});
+                    if(it!=properties.end()) {
+                        it->setValue(*val);
+                    }
+                }
             }
         }
-    }else if(prop.getName()=="fill") {
-        auto fillVal = prop.getValue();
-        if(auto val = std::get_if<bool>(&fillVal)) {
-            fill = *val;
-            lastFill = fill;
-            update();
-            auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="fill";});
-            if(it!=properties.end()) {
-                it->setValue(*val);
+    }else if(prop.getName()=="bool_state") {
+        if(prop.getType()==ElProperty::Type::BOOL_T) {
+            auto lVal = prop.getValue();
+            if(auto val = std::get_if<bool>(&lVal)) {
+                state = *val;
+                update();
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="bool_state";});
+                if(it!=properties.end()) {
+                    it->setValue(*val);
+                }
+            }
+        }
+    }else if(prop.getName()=="link_bool_type") {
+        if(prop.getType()==ElProperty::Type::INT_T) {
+            auto lVal = prop.getValue();
+            if(auto val = std::get_if<int>(&lVal)) {
+                linkType = static_cast<DiscreteVarType>(*val);
+                lastLinkType = linkType;
+                update();
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
+                if(it!=properties.end()) {
+                    it->setValue(*val);
+                }
+            }
+        }
+    }else if(prop.getName()=="link_bool_index") {
+        if(prop.getType()==ElProperty::Type::INT_T) {
+            auto lVal = prop.getValue();
+            if(auto val = std::get_if<int>(&lVal)) {
+                update();
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_index";});
+                if(it!=properties.end()) {
+                    it->setValue(*val);
+                }
             }
         }
     }
