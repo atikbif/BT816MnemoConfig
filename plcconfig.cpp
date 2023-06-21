@@ -7,6 +7,30 @@ std::vector<SysVar> PLCConfig::getSysVarByType(SysVarType vType) const
     return result;
 }
 
+std::vector<Var> PLCConfig::getDiscreteVarByType(DiscreteVarType vType) const
+{
+
+    std::vector<Var> result;
+    if(vType==DiscreteVarType::DI) {
+        for(const auto&v:dInput) {
+            result.push_back(v);
+        }
+    }else if(vType==DiscreteVarType::DO) {
+        for(const auto&v:dOut) {
+            result.push_back(v);
+        }
+    }else if(vType==DiscreteVarType::CLUSTER_BIT) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::CLUSTER_BIT) result.push_back(v);
+        }
+    }else if(vType==DiscreteVarType::NET_BIT) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::NET_BIT) result.push_back(v);
+        }
+    }
+    return result;
+}
+
 std::vector<DiscreteInp> PLCConfig::getDiscreteInputs() const
 {
     std::vector<DiscreteInp> result;

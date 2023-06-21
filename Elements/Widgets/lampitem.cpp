@@ -22,7 +22,7 @@ LampItem::LampItem(qreal _width, qreal _height, QObject *parent):RectItem(_width
     onIndex = lastOnIndex;
     offIndex = lastOffIndex;
 
-    pr = ElProperty("lamp_state",ElProperty::Type::BOOL_T);
+    pr = ElProperty("bool_state",ElProperty::Type::BOOL_T);
     pr.setValue(state);
     properties.push_back(pr);
 
@@ -76,13 +76,13 @@ RectItem *LampItem::clone()
 void LampItem::updateProperty(ElProperty prop)
 {
     RectItem::updateProperty(prop);
-    if(prop.getName()=="lamp_state") {
+    if(prop.getName()=="bool_state") {
         if(prop.getType()==ElProperty::Type::BOOL_T) {
             auto lVal = prop.getValue();
             if(auto val = std::get_if<bool>(&lVal)) {
                 state = *val;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_state";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="bool_state";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }

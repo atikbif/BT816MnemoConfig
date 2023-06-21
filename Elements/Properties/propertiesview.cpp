@@ -12,6 +12,7 @@
 #include "../Widgets/lampimages.h"
 #include "../Widgets/scalimages.h"
 #include "Elements/Widgets/rectitem.h"
+#include "plcconfig.h"
 
 void PropertiesView::clearLayout(QLayout *l)
 {
@@ -153,7 +154,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
     if(it!=properties.end()) { // цвет линии
 
         fLayout->addRow(new QLabel(), new QLabel());
-        QLabel *wName = new QLabel("цвет");
+        QLabel *wName = new QLabel("цвет конт.");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
@@ -187,9 +188,9 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         fLayout->addRow(wName,colButton);
     }
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="back_color";});
-    if(it!=properties.end()) { // цвет фона
-        QLabel *wName = new QLabel("фон");
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="on_color";});
+    if(it!=properties.end()) {
+        QLabel *wName = new QLabel("цвет вкл");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
@@ -213,7 +214,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
                 pal.setColor(QPalette::Button, QColor(color));
                 colButton->setAutoFillBackground(true);
                 colButton->setPalette(pal);
-                ElProperty pr("back_color",ElProperty::Type::STRING_T);
+                ElProperty pr("on_color",ElProperty::Type::STRING_T);
                 QString colStr = color.name(QColor::HexRgb);
                 colStr = colStr.mid(1,6);
                 pr.setValue(colStr);
@@ -223,27 +224,139 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         fLayout->addRow(wName,colButton);
     }
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="rect_radius";});
-    if(it!=properties.end()) { // радиус скругления
-        QLabel *wName = new QLabel("скругление");
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="off_color";});
+    if(it!=properties.end()) {
+        QLabel *wName = new QLabel("цвет выкл");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        int rad = getIntFromProperty(*it);
-        spBox = new ViewSpinbox();
-        spBox->setStyleSheet(spinHeight);
-        spBox->setRange(0,100);
-        spBox->setValue(rad);
-        connect(spBox,&ViewSpinbox::valChanged,[this,spBox](){
-            ElProperty pr("rect_radius",ElProperty::Type::INT_T);
-            int rad = spBox->value();
-            pr.setValue(rad);
-            emit updateProperty(pr);
+        QString col = getStringFromProperty(*it);
+        bool res = false;
+        long rgb = col.toLong(&res,16);
+        int r_color = (rgb>>16) & 0xFF;
+        int g_color = (rgb>>8) & 0xFF;
+        int b_color = rgb & 0xFF;
+        QPushButton *colButton = new QPushButton("...");
+        colButton->setFlat(true);
+        QPalette pal = colButton->palette();
+        pal.setColor(QPalette::Button, QColor(r_color,g_color,b_color));
+        colButton->setAutoFillBackground(true);
+        colButton->setPalette(pal);
+        connect(colButton,&QPushButton::clicked,[this,r_color,g_color,b_color,colButton](){
+            QColor color = QColorDialog::getColor(QColor(r_color,g_color,b_color));
+            if(color.isValid()) {
+                QPalette pal = colButton->palette();
+                pal.setColor(QPalette::Button, QColor(color));
+                colButton->setAutoFillBackground(true);
+                colButton->setPalette(pal);
+                ElProperty pr("off_color",ElProperty::Type::STRING_T);
+                QString colStr = color.name(QColor::HexRgb);
+                colStr = colStr.mid(1,6);
+                pr.setValue(colStr);
+                emit updateProperty(pr);
+            }
+        });
+        fLayout->addRow(wName,colButton);
+    }
+
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
+    if(it!=properties.end()) {
+
+        QComboBox *varTypeBox = new QComboBox();
+        varTypeBox->addItem(SysVar::getDiscreteVarTypeString(DiscreteVarType::DI));
+        varTypeBox->addItem(SysVar::getDiscreteVarTypeString(DiscreteVarType::DO));
+        varTypeBox->addItem(SysVar::getDiscreteVarTypeString(DiscreteVarType::CLUSTER_BIT));
+        varTypeBox->addItem(SysVar::getDiscreteVarTypeString(DiscreteVarType::NET_BIT));
+
+        int index = getIntFromProperty(*it);
+        if(index>=0 && index<varTypeBox->count()) varTypeBox->setCurrentIndex(index);
+
+        connect(varTypeBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
+            ElProperty pr("link_bool_type",ElProperty::Type::INT_T);
+            if(index>=0) {
+                pr.setValue(index);
+                emit updateProperty(pr);
+            }
         });
 
-        fLayout->addRow(wName,spBox);
-        widgets["rect_radius"] = spBox;
+        widgets["bool_type"] = varTypeBox;
+
+        QLabel *wName = new QLabel("тип переменной");
+        wName->setStyleSheet(textColor);
+        wName->setFont(QFont("Times", textSize, QFont::Bold));
+        wName->setAlignment(Qt::AlignVCenter);
+        fLayout->addRow(wName,varTypeBox);
+    }
+
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_index";});
+    if(it!=properties.end()) {
+
+        auto widgIt = widgets.find("bool_type");
+        if(widgIt!=widgets.end()) {
+            QComboBox *comboBoxVarType = dynamic_cast<QComboBox*>(widgIt->second);
+            if(comboBoxVarType) {
+                DiscreteVarType varType = SysVar::getDiscreteVarTypeFromString(comboBoxVarType->currentText());
+                std::vector<Var> vars = plc.getDiscreteVarByType(varType);
+                QComboBox *varNameBox = new QComboBox();
+                for(const auto &v:vars) {
+                    QString varName = v.sysName;
+                    if(!v.userName.isEmpty()) {
+                        varName += " (" + v.userName + ")";
+                    }
+                    varNameBox->addItem(varName);
+                }
+
+                int index = getIntFromProperty(*it);
+                if(index>=0 && index<varNameBox->count()) varNameBox->setCurrentIndex(index);
+
+                connect(varNameBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
+                    ElProperty pr("link_bool_index",ElProperty::Type::INT_T);
+                    if(index>=0) {
+                        pr.setValue(index);
+                        emit updateProperty(pr);
+                    }
+                });
+                connect(comboBoxVarType,QOverload<int>::of(&QComboBox::currentIndexChanged),[this, properties](int index){
+                    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
+                    if(it!=properties.end()) {
+                        auto widgIt = widgets.find("bool_type");
+                        if(widgIt!=widgets.end()) {
+                            QComboBox *comboBoxVarType = dynamic_cast<QComboBox*>(widgIt->second);
+                            if(comboBoxVarType) {
+                                DiscreteVarType varType = SysVar::getDiscreteVarTypeFromString(comboBoxVarType->currentText());
+                                it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_index";});
+                                if(it!=properties.end()) {
+                                    auto widgNameIt = widgets.find("bool_index");
+                                    if(widgNameIt!=widgets.end()) {
+                                        QComboBox *comboBoxVarName = dynamic_cast<QComboBox*>(widgNameIt->second);
+                                        if(comboBoxVarName) {
+                                            std::vector<Var> vars = plc.getDiscreteVarByType(varType);
+                                            comboBoxVarName->clear();
+                                            for(const auto &v:vars) {
+                                                QString varName = v.sysName;
+                                                if(!v.userName.isEmpty()) {
+                                                    varName += " (" + v.userName + ")";
+                                                }
+                                                comboBoxVarName->addItem(varName);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                widgets["bool_index"] = varNameBox;
+
+                QLabel *wName = new QLabel("переменная");
+                wName->setStyleSheet(textColor);
+                wName->setFont(QFont("Times", textSize, QFont::Bold));
+                wName->setAlignment(Qt::AlignVCenter);
+                fLayout->addRow(wName,varNameBox);
+            }
+        }
     }
 
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="fill";});
@@ -668,4 +781,9 @@ void PropertiesView::clearProperties()
 {
     widgets.clear();
     clearLayout(layout);
+}
+
+void PropertiesView::setPLCConfig(const PLCConfig &plcConf)
+{
+    plc = plcConf;
 }

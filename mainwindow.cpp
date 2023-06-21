@@ -216,6 +216,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->addAction(QIcon(":/images/lamps/lamp2.png"),"включить все лампы",[this](){sc->turnOnAllLamps();});
     ui->toolBar->addAction(QIcon(":/images/lamps/lamp1.png"),"выключить все лампы",[this](){sc->turnOffAllLamps();});
     prView = new PropertiesView();
+    prView->setPLCConfig(plc);
     QLayout *layout = prView->getLayout();
     ui->groupBoxProperties->setLayout(layout);
 
@@ -237,6 +238,9 @@ MainWindow::MainWindow(QWidget *parent)
             auto res = reader.readFromFile(fileName);
             if(res) {
                 plc = res.value();
+                if(prView) {
+                    prView->setPLCConfig(plc);
+                }
             }
         }
     });

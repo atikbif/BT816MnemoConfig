@@ -7,6 +7,7 @@
 #include <map>
 #include "elproperty.h"
 #include <QSpinBox>
+#include "plcconfig.h"
 
 class ViewSpinbox: public QSpinBox
 {
@@ -28,6 +29,7 @@ class PropertiesView : public QObject
     Q_OBJECT
     QVBoxLayout *layout = nullptr;
     std::map<QString, QWidget*> widgets;
+    PLCConfig plc;
 
     void clearLayout(QLayout* l);
     QString getStringFromProperty(ElProperty pr);
@@ -40,6 +42,7 @@ public:
 
     void updateRect(int x, int y, int w, int h, int lw);
     void clearProperties();
+    void setPLCConfig(const PLCConfig &plcConf);
 signals:
     void update_x(int value);
     void update_y(int value);

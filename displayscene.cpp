@@ -124,11 +124,11 @@ void DisplayScene::setVerticalStep(int value)
 void DisplayScene::turnOnAllLamps()
 {
     for(auto item: items()) {
-        LampItem *lamp = dynamic_cast<LampItem*>(item);
-        if(lamp) {
-            ElProperty pr("lamp_state",ElProperty::Type::BOOL_T);
+        RectItem *rectItem = dynamic_cast<RectItem*>(item);
+        if(rectItem) {
+            ElProperty pr("bool_state",ElProperty::Type::BOOL_T);
             pr.setValue(true);
-            lamp->updateProperty(pr);
+            rectItem->updateProperty(pr);
         }
     }
     if(selItems.size()==1) {
@@ -141,11 +141,11 @@ void DisplayScene::turnOnAllLamps()
 void DisplayScene::turnOffAllLamps()
 {
     for(auto item: items()) {
-        LampItem *lamp = dynamic_cast<LampItem*>(item);
-        if(lamp) {
-            ElProperty pr("lamp_state",ElProperty::Type::BOOL_T);
+        RectItem *rectItem = dynamic_cast<RectItem*>(item);
+        if(rectItem) {
+            ElProperty pr("bool_state",ElProperty::Type::BOOL_T);
             pr.setValue(false);
-            lamp->updateProperty(pr);
+            rectItem->updateProperty(pr);
         }
     }
     if(selItems.size()==1) {
@@ -392,6 +392,12 @@ void DisplayScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                             selItems.push_back(rectItem);
                         }
                         rectItem->setSelection(SelectionMode::Single);
+
+                        if(selItems.size()==1) {
+                            RectItem *item = selItems.at(0);
+                            emit setProperties(item->getProperties());
+                            emit updateRect(item->getX(),item->getY(),item->getWidth(),item->getHeight(),item->getLineWidth());
+                        }else emit clearProperties();
                     }
                     else {
                         if(auto it=std::find(selItems.begin(),selItems.end(),rectItem);it==selItems.end()) {
@@ -401,16 +407,11 @@ void DisplayScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                             rectItem->setSelection(SelectionMode::None);
                             selItems.erase(it);
                         }
+
                     }
                 }else deselectAllItems();
             }else deselectAllItems();
         }
-
-        if(selItems.size()==1) {
-            RectItem *item = selItems.at(0);
-            emit setProperties(item->getProperties());
-            emit updateRect(item->getX(),item->getY(),item->getWidth(),item->getHeight(),item->getLineWidth());
-        }else emit clearProperties();
     }
     QGraphicsScene::mousePressEvent(event);
 }
