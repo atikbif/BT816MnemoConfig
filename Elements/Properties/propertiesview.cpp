@@ -444,59 +444,6 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         widgets["font_size"] = box;
     }
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_var_type";});
-    if(it!=properties.end()) { // тип привязки
-        auto it2 = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_var_index";});
-        if(it2!=properties.end()) {
-            fLayout->addRow(new QLabel(), new QLabel());
-            QLabel *wNameType = new QLabel("привязка");
-            wNameType->setStyleSheet(textColor);
-            wNameType->setFont(QFont("Times", textSize, QFont::Bold));
-            wNameType->setAlignment(Qt::AlignVCenter);
-
-            QLabel *wNameIndex = new QLabel("номер");
-            wNameIndex->setStyleSheet(textColor);
-            wNameIndex->setFont(QFont("Times", textSize, QFont::Bold));
-            wNameIndex->setAlignment(Qt::AlignVCenter);
-
-            QComboBox *box = new QComboBox();
-            box->setFont(QFont("Times", textSize-1, QFont::Bold));
-            box->addItems(QStringList()<<"DI"<<"DO");
-            int vType = getIntFromProperty(*it);
-            if(vType<0 || vType>=2) vType = 0;
-            box->setCurrentIndex(vType);
-
-            QSpinBox *spBox = new QSpinBox();
-            spBox->setFont(QFont("Times", textSize-2));
-            if(box->currentIndex()==0) spBox->setRange(1,98);
-            else spBox->setRange(1,42);
-            int vIndex = getIntFromProperty(*it2);
-            spBox->setValue(vIndex);
-
-            connect(box,QOverload<int>::of(&QComboBox::currentIndexChanged),[this,box,spBox](){
-                ElProperty pr("lamp_var_type",ElProperty::Type::INT_T);
-                int index = box->currentIndex();
-                pr.setValue(index);
-                emit updateProperty(pr);
-                if(index==0) spBox->setRange(1,98);
-                else spBox->setRange(1,42);
-
-            });
-
-            connect(spBox,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox](){
-                ElProperty pr("lamp_var_index",ElProperty::Type::INT_T);
-                int index = spBox->value();
-                pr.setValue(index);
-                emit updateProperty(pr);
-            });
-
-            fLayout->addRow(wNameType,box);
-            fLayout->addRow(wNameIndex,spBox);
-            widgets["lamp_var_type"] = box;
-            widgets["lamp_var_index"] = spBox;
-        }
-    }
-
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_state";});
     if(it!=properties.end()) { // состояние лампы
         fLayout->addRow(new QLabel(), new QLabel());
@@ -528,7 +475,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
 
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_on_index";});
     if(it!=properties.end()) { // иконка для вкл состояния
-        QLabel *wName = new QLabel("ON");
+        QLabel *wName = new QLabel("вкл");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
@@ -564,7 +511,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
 
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_off_index";});
     if(it!=properties.end()) { // иконка для выкл состояния
-        QLabel *wName = new QLabel("OFF");
+        QLabel *wName = new QLabel("выкл");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);

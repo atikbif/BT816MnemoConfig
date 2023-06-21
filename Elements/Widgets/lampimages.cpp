@@ -6,11 +6,6 @@ const std::vector<QString> LampImages::imageNames = {
     ":/images/lamps/lamp3.png",
     ":/images/lamps/lamp4.png",
     ":/images/lamps/lamp5.png",
-    ":/images/lamps/lamp6.png",
-    ":/images/lamps/lamp7.png",
-    ":/images/lamps/lamp8.png",
-    ":/images/lamps/lamp9.png",
-    ":/images/lamps/lamp10.png",
 };
 
 

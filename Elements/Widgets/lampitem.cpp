@@ -5,12 +5,13 @@
 
 int LampItem::lastOnIndex = 1;
 int LampItem::lastOffIndex = 0;
-int LampItem::lastVarType = 0;
-int LampItem::lastVarIndex = 1;
+DiscreteVarType LampItem::lastLinkType = DiscreteVarType::DI;
 
 LampItem::LampItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
 {
     chMode = ChangeMode::NoChange;
+
+    linkType = lastLinkType;
 
     ElProperty pr = ElProperty("change",ElProperty::Type::INT_T);
     pr.setValue(static_cast<int>(chMode));
@@ -34,15 +35,12 @@ LampItem::LampItem(qreal _width, qreal _height, QObject *parent):RectItem(_width
     pr.setValue(offIndex);
     properties.push_back(pr);
 
-    varType = lastVarType;
-    varIndex = lastVarIndex;
-
-    pr = ElProperty("lamp_var_type",ElProperty::Type::INT_T);
-    pr.setValue(varType);
+    pr = ElProperty("link_bool_type",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(linkType));
     properties.push_back(pr);
 
-    pr = ElProperty("lamp_var_index",ElProperty::Type::INT_T);
-    pr.setValue(varIndex);
+    pr = ElProperty("link_bool_index",ElProperty::Type::INT_T);
+    pr.setValue(linkIndex);
     properties.push_back(pr);
 }
 
@@ -93,6 +91,7 @@ void LampItem::updateProperty(ElProperty prop)
             auto onVal = prop.getValue();
             if(auto val = std::get_if<int>(&onVal)) {
                 onIndex = *val;
+                lastOnIndex = onIndex;
                 update();
                 auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_on_index";});
                 if(it!=properties.end()) {
@@ -105,6 +104,7 @@ void LampItem::updateProperty(ElProperty prop)
             auto onVal = prop.getValue();
             if(auto val = std::get_if<int>(&onVal)) {
                 offIndex = *val;
+                lastOffIndex = offIndex;
                 update();
                 auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_off_index";});
                 if(it!=properties.end()) {
@@ -112,25 +112,25 @@ void LampItem::updateProperty(ElProperty prop)
                 }
             }
         }
-    }else if(prop.getName()=="lamp_var_type") {
+    }else if(prop.getName()=="link_bool_type") {
         if(prop.getType()==ElProperty::Type::INT_T) {
-            auto vVal = prop.getValue();
-            if(auto val = std::get_if<int>(&vVal)) {
-                varType = *val;
+            auto lVal = prop.getValue();
+            if(auto val = std::get_if<int>(&lVal)) {
+                linkType = static_cast<DiscreteVarType>(*val);
+                lastLinkType = linkType;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_var_type";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }
             }
         }
-    }else if(prop.getName()=="lamp_var_index") {
+    }else if(prop.getName()=="link_bool_index") {
         if(prop.getType()==ElProperty::Type::INT_T) {
-            auto vVal = prop.getValue();
-            if(auto val = std::get_if<int>(&vVal)) {
-                varIndex = *val;
+            auto lVal = prop.getValue();
+            if(auto val = std::get_if<int>(&lVal)) {
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_var_index";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_index";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }

@@ -2,6 +2,7 @@
 #define LAMPITEM_H
 
 #include "rectitem.h"
+#include "plcconfig.h"
 
 class LampItem : public RectItem
 {
@@ -11,10 +12,9 @@ class LampItem : public RectItem
     static int lastOnIndex;
     static int lastOffIndex;
     bool state = true;
-    int varType;
-    int varIndex;
-    static int lastVarType;
-    static int lastVarIndex;
+    static DiscreteVarType lastLinkType;
+    DiscreteVarType linkType;
+    int linkIndex;
 public:
     LampItem(qreal _width, qreal _height, QObject *parent=nullptr);
 
