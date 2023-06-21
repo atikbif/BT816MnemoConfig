@@ -67,7 +67,15 @@ void DisplayScene::alignMinWidth()
         for(const auto& item:selItems) {
             if(item->getWidth()<w) w = item->getWidth();
         }
-        for(auto &item:selItems) item->updateGeometry(item->getX(),item->getY(),w,item->getHeight());
+        for(auto &item:selItems) {
+            if(item->getChangeMode()!=ChangeMode::NoChange) {
+                if(item->getChangeMode()==ChangeMode::WidthAndHeight) {
+                    item->updateGeometry(item->getX(),item->getY(),w,item->getHeight());
+                }else if(item->getChangeMode()==ChangeMode::Proportional) {
+                    item->updateGeometry(item->getX(),item->getY(),w,w);
+                }
+            }
+        }
     }
 }
 
@@ -78,7 +86,15 @@ void DisplayScene::alignMinHeight()
         for(const auto& item:selItems) {
             if(item->getHeight()<h) h = item->getHeight();
         }
-        for(auto &item:selItems) item->updateGeometry(item->getX(),item->getY(),item->getWidth(),h);
+        for(auto &item:selItems) {
+            if(item->getChangeMode()!=ChangeMode::NoChange) {
+                if(item->getChangeMode()==ChangeMode::WidthAndHeight) {
+                    item->updateGeometry(item->getX(),item->getY(),item->getWidth(),h);
+                }else if(item->getChangeMode()==ChangeMode::Proportional) {
+                    item->updateGeometry(item->getX(),item->getY(),h,h);
+                }
+            }
+        }
     }
 }
 
@@ -162,7 +178,15 @@ void DisplayScene::alignMaxWidth()
         for(const auto& item:selItems) {
             if(item->getWidth()>w) w = item->getWidth();
         }
-        for(auto &item:selItems) item->updateGeometry(item->getX(),item->getY(),w,item->getHeight());
+        for(auto &item:selItems) {
+            if(item->getChangeMode()!=ChangeMode::NoChange) {
+                if(item->getChangeMode()==ChangeMode::WidthAndHeight) {
+                    item->updateGeometry(item->getX(),item->getY(),w,item->getHeight());
+                }else if(item->getChangeMode()==ChangeMode::Proportional) {
+                    item->updateGeometry(item->getX(),item->getY(),w,w);
+                }
+            }
+        }
     }
 }
 
@@ -173,7 +197,15 @@ void DisplayScene::alignMaxHeight()
         for(const auto& item:selItems) {
             if(item->getHeight()>h) h = item->getHeight();
         }
-        for(auto &item:selItems) item->updateGeometry(item->getX(),item->getY(),item->getWidth(),h);
+        for(auto &item:selItems) {
+            if(item->getChangeMode()!=ChangeMode::NoChange) {
+                if(item->getChangeMode()==ChangeMode::WidthAndHeight) {
+                    item->updateGeometry(item->getX(),item->getY(),item->getWidth(),h);
+                }else if(item->getChangeMode()==ChangeMode::Proportional) {
+                    item->updateGeometry(item->getX(),item->getY(),h,h);
+                }
+            }
+        }
     }
 }
 
