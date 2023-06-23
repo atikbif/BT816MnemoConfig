@@ -9,6 +9,7 @@ enum class InpType {VType, IType};
 enum class SensType {NC,U0_4__2V,I0__20mA,I4__20mA,I2__10mA,U0__2_5V};
 enum class SysVarType {CLUSTER_BIT,CLUSTER_REG,NET_BIT,NET_REG};
 enum class DiscreteVarType{DI,DO,CLUSTER_BIT,NET_BIT};
+enum class AnalogueVarType{RAW_AI,CALCULATED_AI,CLUSTER_REG,NET_REG};
 
 struct Sensor {
     SensType sensType;

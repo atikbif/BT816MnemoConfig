@@ -55,9 +55,9 @@ void RectItem::drawBorder(QPainter *painter, bool zeroWidth)
         painter->setOpacity(0.6);
         painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),1,Qt::DashLine));
     }else if(lineWidth==0) {
-        //if(zeroWidth) painter->setOpacity(0.3);
-        //else painter->setOpacity(0);
-        //painter->setPen(QPen(QBrush(Qt::blue),1,Qt::DotLine));
+        if(zeroWidth) painter->setOpacity(0.1);
+        else painter->setOpacity(0);
+        painter->setPen(QPen(QBrush(Qt::blue),1,Qt::DotLine));
     }else return;
     painter->drawRect(QRectF(0,0,width,height));
     if(selectionMode==SelectionMode::Single) {

@@ -41,7 +41,8 @@ SOURCES += \
     jsonplcconfigreader.cpp \
     main.cpp \
     mainwindow.cpp \
-    plcconfig.cpp
+    plcconfig.cpp \
+    typical_fonts.cpp
 
 HEADERS += \
     Elements/Properties/elproperty.h \
@@ -64,7 +65,8 @@ HEADERS += \
     jsonplcconfigreader.h \
     mainwindow.h \
     plcconfig.h \
-    plcconfigreader.h
+    plcconfigreader.h \
+    typical_fonts.h
 
 FORMS += \
     mainwindow.ui

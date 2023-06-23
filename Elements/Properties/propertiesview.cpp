@@ -13,6 +13,7 @@
 #include "../Widgets/scalimages.h"
 #include "Elements/Widgets/rectitem.h"
 #include "plcconfig.h"
+#include "typical_fonts.h"
 
 void PropertiesView::clearLayout(QLayout *l)
 {
@@ -154,7 +155,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
     if(it!=properties.end()) { // цвет линии
 
         fLayout->addRow(new QLabel(), new QLabel());
-        QLabel *wName = new QLabel("цвет конт.");
+        QLabel *wName = new QLabel("цвет");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
@@ -399,6 +400,39 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         fLayout->addRow(wName,textWidget);
         widgets["text_value"] = textWidget;
     }
+
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
+    if(it!=properties.end()) { // стандартный шртфт латиница
+        QLabel *wName = new QLabel("шрифт");
+        wName->setStyleSheet(textColor);
+        wName->setFont(QFont("Times", textSize, QFont::Bold));
+        wName->setAlignment(Qt::AlignVCenter);
+
+        int f = getIntFromProperty(*it);
+
+        QComboBox *fontHeightBox = new QComboBox();
+        for(int i=0;i<static_cast<int>(EngFonts::LastEl);i++) {
+            int height = getEngFontHeight(static_cast<EngFonts>(i));
+            fontHeightBox->addItem(QString::number(height));
+        }
+
+        if(f>=0 && f<fontHeightBox->count()) {
+            fontHeightBox->setCurrentIndex(f);
+        }
+
+        connect(fontHeightBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
+            ElProperty pr("eng_font_index",ElProperty::Type::INT_T);
+            if(index>=0) {
+                pr.setValue(index);
+                emit updateProperty(pr);
+            }
+        });
+
+        fLayout->addRow(wName,fontHeightBox);
+        widgets["font_size"] = spBox;
+    }
+
+
 
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="font_size";});
     if(it!=properties.end()) { // размер шрифта

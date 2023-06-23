@@ -1,11 +1,11 @@
 #include "numberitem.h"
 #include <QPainter>
 
-int NumberItem::lastFontSize = 20;
-int NumberItem::lastDigCount = 4;
-int NumberItem::lastAfterPointDigCount = 1;
+NumberDivider NumberItem::lastDiv = NumberDivider::Div1;
+EngFonts NumberItem::lastNumFont = EngFonts::Height20;
 int NumberItem::lastVarType = 0;
 int NumberItem::lastVarIndex = 1;
+QString NumberItem::lastPattern = "000";
 
 NumberItem::NumberItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
 {
@@ -13,28 +13,29 @@ NumberItem::NumberItem(qreal _width, qreal _height, QObject *parent):RectItem(_w
     pr.setValue(QString("number"));
     properties.push_back(pr);
 
-    fontSize = lastFontSize;
-    digCount = lastDigCount;
-    afterPointDigCount = lastAfterPointDigCount;
+    engFontSize.push_back(16);
+    engFontSize.push_back(20);
+    engFontSize.push_back(25);
+    engFontSize.push_back(28);
+    engFontSize.push_back(36);
+    engFontSize.push_back(49);
 
-    pr = ElProperty("font_size",ElProperty::Type::INT_T);
-    pr.setValue(fontSize);
+    numFont = lastNumFont;
+    div = lastDiv;
+    pattern = lastPattern;
+
+
+
+    pr = ElProperty("eng_font_index",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(numFont));
     properties.push_back(pr);
 
-    pr = ElProperty("dig_count",ElProperty::Type::INT_T);
-    pr.setValue(digCount);
+    pr = ElProperty("num_div",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(div));
     properties.push_back(pr);
 
-    pr = ElProperty("after_point",ElProperty::Type::INT_T);
-    pr.setValue(afterPointDigCount);
-    properties.push_back(pr);
-
-    pr = ElProperty("text_align",ElProperty::Type::INT_T);
-    switch(align) {
-        case NumberItemAlign::Left:pr.setValue(0);break;
-        case NumberItemAlign::Right:pr.setValue(1);break;
-        case NumberItemAlign::Center:pr.setValue(2);break;
-    }
+    pr = ElProperty("num_pattern",ElProperty::Type::STRING_T);
+    pr.setValue(pattern);
     properties.push_back(pr);
 
     varType = lastVarType;
@@ -59,23 +60,10 @@ void NumberItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     }else painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),1));
     QFont font("Times");
     //font.setBold(true);
-    font.setPointSize(fontSize);
+    font.setPointSize(getEngFontHeight(numFont));
     painter->setFont(font);
-    QTextOption opt;
-    if(align==NumberItemAlign::Left) opt.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    else if(align==NumberItemAlign::Right) opt.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    else if(align==NumberItemAlign::Center) opt.setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    QString textValue = "";
-    int num = 0;
-    if(afterPointDigCount) {
-        while(num<afterPointDigCount) {
-            textValue = "0" + textValue;
-            num++;
-        }
-        textValue = "." + textValue;
-    }
-    while(num<digCount) {num++;textValue = "0" + textValue;}
-    painter->drawText(QRectF(indent,0,width-indent*2,height), textValue, opt);
+
+    painter->drawText(QRectF(indent,0,width-indent*2,height), pattern);
     drawBorder(painter);
     Q_UNUSED(option)
     Q_UNUSED(widget)
@@ -94,54 +82,40 @@ RectItem *NumberItem::clone()
 void NumberItem::updateProperty(ElProperty prop)
 {
     RectItem::updateProperty(prop);
-    if(prop.getName()=="font_size") {
+    if(prop.getName()=="eng_font_index") {
         if(prop.getType()==ElProperty::Type::INT_T) {
             auto tVal = prop.getValue();
             if(auto val = std::get_if<int>(&tVal)) {
-                fontSize = *val;
-                lastFontSize = fontSize;
+                numFont = static_cast<EngFonts>(*val);
+                lastNumFont = numFont;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="font_size";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }
             }
         }
-    }else if(prop.getName()=="text_align") {
+    }else if(prop.getName()=="num_div") {
         if(prop.getType()==ElProperty::Type::INT_T) {
             auto tVal = prop.getValue();
             if(auto val = std::get_if<int>(&tVal)) {
-                if(*val==0) align = NumberItemAlign::Left;
-                else if(*val==1) align = NumberItemAlign::Right;
-                else if(*val==2) align = NumberItemAlign::Center;
+                div = static_cast<NumberDivider>(*val);
+                lastDiv = div;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="text_align";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_div";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }
             }
         }
-    }else if(prop.getName()=="dig_count") {
-        if(prop.getType()==ElProperty::Type::INT_T) {
+    }else if(prop.getName()=="num_pattern") {
+        if(prop.getType()==ElProperty::Type::STRING_T) {
             auto tVal = prop.getValue();
             if(auto val = std::get_if<int>(&tVal)) {
-                digCount = *val;
-                lastDigCount = digCount;
+                pattern = *val;
+                lastPattern = pattern;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="dig_count";});
-                if(it!=properties.end()) {
-                    it->setValue(*val);
-                }
-            }
-        }
-    }else if(prop.getName()=="after_point") {
-        if(prop.getType()==ElProperty::Type::INT_T) {
-            auto tVal = prop.getValue();
-            if(auto val = std::get_if<int>(&tVal)) {
-                afterPointDigCount = *val;
-                lastAfterPointDigCount = afterPointDigCount;
-                update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="after_point";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_pattern";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }

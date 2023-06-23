@@ -185,6 +185,10 @@ MainWindow::MainWindow(QWidget *parent)
         if(backgroundItem==nullptr) {
             QPixmap pix(fileName);
             pix = pix.scaled(800,480);
+            QFile file("background.png");
+            file.open(QIODevice::WriteOnly);
+            pix.save(&file, "PNG");
+            file.close();
             backgroundItem = sc->addPixmap(pix);
             backgroundItem->setZValue(-1000);
         }
