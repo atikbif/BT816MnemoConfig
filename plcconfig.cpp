@@ -31,6 +31,35 @@ std::vector<Var> PLCConfig::getDiscreteVarByType(DiscreteVarType vType) const
     return result;
 }
 
+std::vector<Var> PLCConfig::getAnalogueVarByType(AnalogueVarType vType) const
+{
+    std::vector<Var> result;
+    if(vType==AnalogueVarType::RAW_AI) {
+        for(const auto&input:anInput) {
+            Var v;
+            v.sysName = input.sysName + " RAW";
+            v.userName = input.userName;
+            result.push_back(v);
+        }
+    }else if(vType==AnalogueVarType::CALCULATED_AI) {
+        for(const auto&input:anInput) {
+            Var v;
+            v.sysName = input.sysName;
+            v.userName = input.userName;
+            result.push_back(v);
+        }
+    }else if(vType==AnalogueVarType::CLUSTER_REG) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::CLUSTER_REG) result.push_back(v);
+        }
+    }else if(vType==AnalogueVarType::NET_REG) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::NET_REG) result.push_back(v);
+        }
+    }
+    return result;
+}
+
 std::vector<DiscreteInp> PLCConfig::getDiscreteInputs() const
 {
     std::vector<DiscreteInp> result;

@@ -2,10 +2,9 @@
 #include <QPainter>
 
 NumberDivider NumberItem::lastDiv = NumberDivider::Div1;
-EngFonts NumberItem::lastNumFont = EngFonts::Height20;
-int NumberItem::lastVarType = 0;
-int NumberItem::lastVarIndex = 1;
+EngFonts NumberItem::lastNumFont = EngFonts::Height16;
 QString NumberItem::lastPattern = "000";
+AnalogueVarType NumberItem::lastLinkType = AnalogueVarType::RAW_AI;
 
 NumberItem::NumberItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
 {
@@ -23,7 +22,7 @@ NumberItem::NumberItem(qreal _width, qreal _height, QObject *parent):RectItem(_w
     numFont = lastNumFont;
     div = lastDiv;
     pattern = lastPattern;
-
+    linkType = lastLinkType;
 
 
     pr = ElProperty("eng_font_index",ElProperty::Type::INT_T);
@@ -38,15 +37,12 @@ NumberItem::NumberItem(qreal _width, qreal _height, QObject *parent):RectItem(_w
     pr.setValue(pattern);
     properties.push_back(pr);
 
-    varType = lastVarType;
-    varIndex = lastVarIndex;
-
-    pr = ElProperty("num_var_type",ElProperty::Type::INT_T);
-    pr.setValue(varType);
+    pr = ElProperty("link_analogue_type",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(linkType));
     properties.push_back(pr);
 
-    pr = ElProperty("num_var_index",ElProperty::Type::INT_T);
-    pr.setValue(varIndex);
+    pr = ElProperty("link_analogue_index",ElProperty::Type::INT_T);
+    pr.setValue(linkIndex);
     properties.push_back(pr);
 }
 
@@ -111,7 +107,7 @@ void NumberItem::updateProperty(ElProperty prop)
     }else if(prop.getName()=="num_pattern") {
         if(prop.getType()==ElProperty::Type::STRING_T) {
             auto tVal = prop.getValue();
-            if(auto val = std::get_if<int>(&tVal)) {
+            if(auto val = std::get_if<QString>(&tVal)) {
                 pattern = *val;
                 lastPattern = pattern;
                 update();
@@ -121,25 +117,25 @@ void NumberItem::updateProperty(ElProperty prop)
                 }
             }
         }
-    }else if(prop.getName()=="num_var_type") {
+    }else if(prop.getName()=="link_analogue_type") {
         if(prop.getType()==ElProperty::Type::INT_T) {
-            auto vVal = prop.getValue();
-            if(auto val = std::get_if<int>(&vVal)) {
-                varType = *val;
+            auto lVal = prop.getValue();
+            if(auto val = std::get_if<int>(&lVal)) {
+                linkType = static_cast<AnalogueVarType>(*val);
+                lastLinkType = linkType;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_type";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_type";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }
             }
         }
-    }else if(prop.getName()=="num_var_index") {
+    }else if(prop.getName()=="link_analogue_index") {
         if(prop.getType()==ElProperty::Type::INT_T) {
-            auto vVal = prop.getValue();
-            if(auto val = std::get_if<int>(&vVal)) {
-                varIndex = *val;
+            auto lVal = prop.getValue();
+            if(auto val = std::get_if<int>(&lVal)) {
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_index";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_index";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }

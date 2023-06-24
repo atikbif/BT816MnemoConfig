@@ -3,8 +3,8 @@
 
 #include "rectitem.h"
 #include "typical_fonts.h"
+#include "plcconfig.h"
 
-enum class NumberItemAlign {Left, Right, Center};
 enum class NumberDivider {Div1,Div10,Div100,Div1000};
 
 
@@ -14,14 +14,15 @@ class NumberItem : public RectItem
     static NumberDivider lastDiv;
     static EngFonts lastNumFont;
     static QString lastPattern;
-    static int lastVarType;
-    static int lastVarIndex;
+    static AnalogueVarType lastLinkType;
+    //static int lastVarType;
+    //static int lastVarIndex;
 
     Q_OBJECT
     EngFonts numFont;
     NumberDivider div;
-    int varType;
-    int varIndex;
+    AnalogueVarType linkType;
+    int linkIndex;
     QString pattern;
 public:
     NumberItem(qreal _width, qreal _height, QObject *parent=nullptr);

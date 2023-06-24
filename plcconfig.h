@@ -46,12 +46,40 @@ struct SysVar :public Var {
         return res;
     }
 
+    static QString getAnalogueVarTypeString(AnalogueVarType vType) {
+        QString res;
+        switch(vType) {
+            case AnalogueVarType::RAW_AI:
+            res = "RAW AI";
+            break;
+        case AnalogueVarType::CALCULATED_AI:
+            res = "SENS AI";
+            break;
+        case AnalogueVarType::CLUSTER_REG:
+            res = "CLUSTER REG";
+            break;
+        case AnalogueVarType::NET_REG:
+            res = "NET REG";
+            break;
+        }
+        return res;
+    }
+
     static DiscreteVarType getDiscreteVarTypeFromString(QString vType) {
         DiscreteVarType res = DiscreteVarType::DI;
         if(getDiscreteVarTypeString(DiscreteVarType::CLUSTER_BIT)==vType) res = DiscreteVarType::CLUSTER_BIT;
         else if(getDiscreteVarTypeString(DiscreteVarType::NET_BIT)==vType) res = DiscreteVarType::NET_BIT;
         else if(getDiscreteVarTypeString(DiscreteVarType::DI)==vType) res = DiscreteVarType::DI;
         else if(getDiscreteVarTypeString(DiscreteVarType::DO)==vType) res = DiscreteVarType::DO;
+        return res;
+    }
+
+    static AnalogueVarType getAnalogueVarTypeFromString(QString vType) {
+        AnalogueVarType res = AnalogueVarType::RAW_AI;
+        if(getAnalogueVarTypeString(AnalogueVarType::RAW_AI)==vType) res = AnalogueVarType::RAW_AI;
+        else if(getAnalogueVarTypeString(AnalogueVarType::CALCULATED_AI)==vType) res = AnalogueVarType::CALCULATED_AI;
+        else if(getAnalogueVarTypeString(AnalogueVarType::CLUSTER_REG)==vType) res = AnalogueVarType::CLUSTER_REG;
+        else if(getAnalogueVarTypeString(AnalogueVarType::NET_REG)==vType) res = AnalogueVarType::NET_REG;
         return res;
     }
 };
@@ -97,6 +125,7 @@ public:
     QString getPLCName() const {return plcName;}
     std::vector<SysVar> getSysVarByType(SysVarType vType) const;
     std::vector<Var> getDiscreteVarByType(DiscreteVarType vType) const;
+    std::vector<Var> getAnalogueVarByType(AnalogueVarType vType) const;
     std::vector<DiscreteInp> getDiscreteInputs() const;
     std::vector<AnalogueInp> getAnalogueInputs() const;
     std::vector<DiscreteOutput> getDiscreteOutputs() const;

@@ -14,6 +14,8 @@
 #include "Elements/Widgets/rectitem.h"
 #include "plcconfig.h"
 #include "typical_fonts.h"
+#include <QRegExp>
+#include "../Widgets/numberitem.h"
 
 void PropertiesView::clearLayout(QLayout *l)
 {
@@ -432,6 +434,161 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         widgets["font_size"] = spBox;
     }
 
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_pattern";});
+    if(it!=properties.end()) { // пример значения числа
+        QLabel *wName = new QLabel("значение");
+        wName->setStyleSheet(textColor);
+        wName->setFont(QFont("Times", textSize, QFont::Bold));
+        wName->setAlignment(Qt::AlignVCenter);
+
+        QLineEdit *numValuePattern = new QLineEdit();
+
+        numValuePattern->setText(getStringFromProperty(*it));
+
+        connect(numValuePattern,&QLineEdit::textChanged,[this,numValuePattern](const QString &val){
+            QString res = val;
+            res.remove(QRegExp("[A-Za-zА-Яа-я]"));
+            numValuePattern->setText(res);
+            ElProperty pr("num_pattern",ElProperty::Type::STRING_T);
+            pr.setValue(res);
+            emit updateProperty(pr);
+        });
+
+        fLayout->addRow(wName,numValuePattern);
+        widgets["num_pattern"] = spBox;
+    }
+
+
+
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_div";});
+    if(it!=properties.end()) { // делитель числа
+        QLabel *wName = new QLabel("делитель");
+        wName->setStyleSheet(textColor);
+        wName->setFont(QFont("Times", textSize, QFont::Bold));
+        wName->setAlignment(Qt::AlignVCenter);
+
+        QComboBox *dividerBox = new QComboBox();
+        dividerBox->addItem("1");
+        dividerBox->addItem("10");
+        dividerBox->addItem("100");
+        dividerBox->addItem("1000");
+
+        int v = getIntFromProperty(*it);
+        if((v<0) && (v>static_cast<int>(NumberDivider::Div1000))) v=0;
+
+        dividerBox->setCurrentIndex(v);
+
+
+        connect(dividerBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
+            ElProperty pr("num_div",ElProperty::Type::INT_T);
+            if(index>=0) {
+                pr.setValue(index);
+                emit updateProperty(pr);
+            }
+        });
+
+        fLayout->addRow(wName,dividerBox);
+        widgets["num_div"] = spBox;
+    }
+
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_type";});
+    if(it!=properties.end()) {
+
+        QComboBox *varTypeBox = new QComboBox();
+        varTypeBox->addItem(SysVar::getAnalogueVarTypeString(AnalogueVarType::RAW_AI));
+        varTypeBox->addItem(SysVar::getAnalogueVarTypeString(AnalogueVarType::CALCULATED_AI));
+        varTypeBox->addItem(SysVar::getAnalogueVarTypeString(AnalogueVarType::CLUSTER_REG));
+        varTypeBox->addItem(SysVar::getAnalogueVarTypeString(AnalogueVarType::NET_REG));
+
+        int index = getIntFromProperty(*it);
+        if(index>=0 && index<varTypeBox->count()) varTypeBox->setCurrentIndex(index);
+
+        connect(varTypeBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
+            ElProperty pr("link_analogue_type",ElProperty::Type::INT_T);
+            if(index>=0) {
+                pr.setValue(index);
+                emit updateProperty(pr);
+            }
+        });
+
+        widgets["link_analogue_type"] = varTypeBox;
+
+        QLabel *wName = new QLabel("тип переменной");
+        wName->setStyleSheet(textColor);
+        wName->setFont(QFont("Times", textSize, QFont::Bold));
+        wName->setAlignment(Qt::AlignVCenter);
+        fLayout->addRow(wName,varTypeBox);
+    }
+
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_index";});
+    if(it!=properties.end()) {
+
+        auto widgIt = widgets.find("link_analogue_type");
+        if(widgIt!=widgets.end()) {
+            QComboBox *comboBoxVarType = dynamic_cast<QComboBox*>(widgIt->second);
+            if(comboBoxVarType) {
+                AnalogueVarType varType = SysVar::getAnalogueVarTypeFromString(comboBoxVarType->currentText());
+                std::vector<Var> vars = plc.getAnalogueVarByType(varType);
+                QComboBox *varNameBox = new QComboBox();
+                for(const auto &v:vars) {
+                    QString varName = v.sysName;
+                    if(!v.userName.isEmpty()) {
+                        varName += " (" + v.userName + ")";
+                    }
+                    varNameBox->addItem(varName);
+                }
+
+                int index = getIntFromProperty(*it);
+                if(index>=0 && index<varNameBox->count()) varNameBox->setCurrentIndex(index);
+
+                connect(varNameBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
+                    ElProperty pr("link_analogue_index",ElProperty::Type::INT_T);
+                    if(index>=0) {
+                        pr.setValue(index);
+                        emit updateProperty(pr);
+                    }
+                });
+                connect(comboBoxVarType,QOverload<int>::of(&QComboBox::currentIndexChanged),[this, properties](int index){
+                    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_type";});
+                    if(it!=properties.end()) {
+                        auto widgIt = widgets.find("link_analogue_type");
+                        if(widgIt!=widgets.end()) {
+                            QComboBox *comboBoxVarType = dynamic_cast<QComboBox*>(widgIt->second);
+                            if(comboBoxVarType) {
+                                AnalogueVarType varType = SysVar::getAnalogueVarTypeFromString(comboBoxVarType->currentText());
+                                it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_index";});
+                                if(it!=properties.end()) {
+                                    auto widgNameIt = widgets.find("link_analogue_index");
+                                    if(widgNameIt!=widgets.end()) {
+                                        QComboBox *comboBoxVarName = dynamic_cast<QComboBox*>(widgNameIt->second);
+                                        if(comboBoxVarName) {
+                                            std::vector<Var> vars = plc.getAnalogueVarByType(varType);
+                                            comboBoxVarName->clear();
+                                            for(const auto &v:vars) {
+                                                QString varName = v.sysName;
+                                                if(!v.userName.isEmpty()) {
+                                                    varName += " (" + v.userName + ")";
+                                                }
+                                                comboBoxVarName->addItem(varName);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                widgets["link_analogue_index"] = varNameBox;
+
+                QLabel *wName = new QLabel("переменная");
+                wName->setStyleSheet(textColor);
+                wName->setFont(QFont("Times", textSize, QFont::Bold));
+                wName->setAlignment(Qt::AlignVCenter);
+                fLayout->addRow(wName,varNameBox);
+            }
+        }
+    }
 
 
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="font_size";});
@@ -580,116 +737,116 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         widgets["lamp_off_index"] = spBox;
     }
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="dig_count";});
-    if(it!=properties.end()) { // число символов
-        auto it2 = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="after_point";});
-        if(it2!=properties.end()) {
-            fLayout->addRow(new QLabel(), new QLabel());
-            QLabel *wNameType = new QLabel("число знакомест");
-            wNameType->setStyleSheet(textColor);
-            wNameType->setFont(QFont("Times", textSize, QFont::Bold));
-            wNameType->setAlignment(Qt::AlignVCenter);
+//    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="dig_count";});
+//    if(it!=properties.end()) { // число символов
+//        auto it2 = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="after_point";});
+//        if(it2!=properties.end()) {
+//            fLayout->addRow(new QLabel(), new QLabel());
+//            QLabel *wNameType = new QLabel("число знакомест");
+//            wNameType->setStyleSheet(textColor);
+//            wNameType->setFont(QFont("Times", textSize, QFont::Bold));
+//            wNameType->setAlignment(Qt::AlignVCenter);
 
-            QLabel *wNameIndex = new QLabel("после точки");
-            wNameIndex->setStyleSheet(textColor);
-            wNameIndex->setFont(QFont("Times", textSize, QFont::Bold));
-            wNameIndex->setAlignment(Qt::AlignVCenter);
+//            QLabel *wNameIndex = new QLabel("после точки");
+//            wNameIndex->setStyleSheet(textColor);
+//            wNameIndex->setFont(QFont("Times", textSize, QFont::Bold));
+//            wNameIndex->setAlignment(Qt::AlignVCenter);
 
-            QSpinBox *spBox1 = new QSpinBox();
-            spBox1->setFont(QFont("Times", textSize-2));
-            spBox1->setRange(1,7);
-            int cnt = getIntFromProperty(*it);
-            spBox1->setValue(cnt);
+//            QSpinBox *spBox1 = new QSpinBox();
+//            spBox1->setFont(QFont("Times", textSize-2));
+//            spBox1->setRange(1,7);
+//            int cnt = getIntFromProperty(*it);
+//            spBox1->setValue(cnt);
 
-            QSpinBox *spBox2 = new QSpinBox();
-            spBox2->setFont(QFont("Times", textSize-2));
-            spBox2->setRange(0,3);
-            int afterPoint = getIntFromProperty(*it2);
-            spBox2->setValue(afterPoint);
+//            QSpinBox *spBox2 = new QSpinBox();
+//            spBox2->setFont(QFont("Times", textSize-2));
+//            spBox2->setRange(0,3);
+//            int afterPoint = getIntFromProperty(*it2);
+//            spBox2->setValue(afterPoint);
 
-            connect(spBox1,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox1,spBox2](){
-                ElProperty pr("dig_count",ElProperty::Type::INT_T);
-                int cnt = spBox1->value();
-                pr.setValue(cnt);
-                emit updateProperty(pr);
-                if(spBox2->value()>cnt) spBox2->setValue(cnt);
-                else if(spBox2->value()==cnt) spBox2->setValue(cnt-1);
-            });
+//            connect(spBox1,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox1,spBox2](){
+//                ElProperty pr("dig_count",ElProperty::Type::INT_T);
+//                int cnt = spBox1->value();
+//                pr.setValue(cnt);
+//                emit updateProperty(pr);
+//                if(spBox2->value()>cnt) spBox2->setValue(cnt);
+//                else if(spBox2->value()==cnt) spBox2->setValue(cnt-1);
+//            });
 
-            connect(spBox2,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox1,spBox2](){
+//            connect(spBox2,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox1,spBox2](){
 
-                ElProperty pr("after_point",ElProperty::Type::INT_T);
-                int afterPoint = spBox2->value();
-                if(spBox1->value()==afterPoint) {
-                    afterPoint--;
-                    spBox2->setValue(afterPoint);
-                }
-                pr.setValue(afterPoint);
-                emit updateProperty(pr);
-            });
+//                ElProperty pr("after_point",ElProperty::Type::INT_T);
+//                int afterPoint = spBox2->value();
+//                if(spBox1->value()==afterPoint) {
+//                    afterPoint--;
+//                    spBox2->setValue(afterPoint);
+//                }
+//                pr.setValue(afterPoint);
+//                emit updateProperty(pr);
+//            });
 
-            fLayout->addRow(wNameType,spBox1);
-            fLayout->addRow(wNameIndex,spBox2);
-            widgets["dig_count"] = spBox1;
-            widgets["after_point"] = spBox2;
-        }
-    }
+//            fLayout->addRow(wNameType,spBox1);
+//            fLayout->addRow(wNameIndex,spBox2);
+//            widgets["dig_count"] = spBox1;
+//            widgets["after_point"] = spBox2;
+//        }
+//    }
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_type";});
-    if(it!=properties.end()) { // тип привязки
-        auto it2 = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_index";});
-        if(it2!=properties.end()) {
-            fLayout->addRow(new QLabel(), new QLabel());
-            QLabel *wNameType = new QLabel("привязка");
-            wNameType->setStyleSheet(textColor);
-            wNameType->setFont(QFont("Times", textSize, QFont::Bold));
-            wNameType->setAlignment(Qt::AlignVCenter);
+//    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_type";});
+//    if(it!=properties.end()) { // тип привязки
+//        auto it2 = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_index";});
+//        if(it2!=properties.end()) {
+//            fLayout->addRow(new QLabel(), new QLabel());
+//            QLabel *wNameType = new QLabel("привязка");
+//            wNameType->setStyleSheet(textColor);
+//            wNameType->setFont(QFont("Times", textSize, QFont::Bold));
+//            wNameType->setAlignment(Qt::AlignVCenter);
 
-            QLabel *wNameIndex = new QLabel("номер");
-            wNameIndex->setStyleSheet(textColor);
-            wNameIndex->setFont(QFont("Times", textSize, QFont::Bold));
-            wNameIndex->setAlignment(Qt::AlignVCenter);
+//            QLabel *wNameIndex = new QLabel("номер");
+//            wNameIndex->setStyleSheet(textColor);
+//            wNameIndex->setFont(QFont("Times", textSize, QFont::Bold));
+//            wNameIndex->setAlignment(Qt::AlignVCenter);
 
-            QComboBox *box = new QComboBox();
-            box->setFont(QFont("Times", textSize-1, QFont::Bold));
-            box->addItems(QStringList()<<"AI"<<"IBR"<<"IIR"<<"ILR");
-            int vType = getIntFromProperty(*it);
-            if(vType<0 || vType>=4) vType = 0;
-            box->setCurrentIndex(vType);
+//            QComboBox *box = new QComboBox();
+//            box->setFont(QFont("Times", textSize-1, QFont::Bold));
+//            box->addItems(QStringList()<<"AI"<<"IBR"<<"IIR"<<"ILR");
+//            int vType = getIntFromProperty(*it);
+//            if(vType<0 || vType>=4) vType = 0;
+//            box->setCurrentIndex(vType);
 
-            QSpinBox *spBox = new QSpinBox();
-            spBox->setFont(QFont("Times", textSize-2));
-            if(box->currentIndex()==0) spBox->setRange(1,98);
-            else if(box->currentIndex()==1) spBox->setRange(1,384);
-            else if(box->currentIndex()==2) spBox->setRange(1,224);
-            else if(box->currentIndex()==3) spBox->setRange(1,24);
-            int vIndex = getIntFromProperty(*it2);
-            spBox->setValue(vIndex);
+//            QSpinBox *spBox = new QSpinBox();
+//            spBox->setFont(QFont("Times", textSize-2));
+//            if(box->currentIndex()==0) spBox->setRange(1,98);
+//            else if(box->currentIndex()==1) spBox->setRange(1,384);
+//            else if(box->currentIndex()==2) spBox->setRange(1,224);
+//            else if(box->currentIndex()==3) spBox->setRange(1,24);
+//            int vIndex = getIntFromProperty(*it2);
+//            spBox->setValue(vIndex);
 
-            connect(box,QOverload<int>::of(&QComboBox::currentIndexChanged),[this,box,spBox](){
-                ElProperty pr("num_var_type",ElProperty::Type::INT_T);
-                int index = box->currentIndex();
-                pr.setValue(index);
-                emit updateProperty(pr);
-                if(index==0) spBox->setRange(1,98);
-                else if(index==1) spBox->setRange(1,384);
-                else if(index==2) spBox->setRange(1,224);
-                else if(index==3) spBox->setRange(1,24);
-            });
+//            connect(box,QOverload<int>::of(&QComboBox::currentIndexChanged),[this,box,spBox](){
+//                ElProperty pr("num_var_type",ElProperty::Type::INT_T);
+//                int index = box->currentIndex();
+//                pr.setValue(index);
+//                emit updateProperty(pr);
+//                if(index==0) spBox->setRange(1,98);
+//                else if(index==1) spBox->setRange(1,384);
+//                else if(index==2) spBox->setRange(1,224);
+//                else if(index==3) spBox->setRange(1,24);
+//            });
 
-            connect(spBox,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox](){
-                ElProperty pr("num_var_index",ElProperty::Type::INT_T);
-                int index = spBox->value();
-                pr.setValue(index);
-                emit updateProperty(pr);
-            });
+//            connect(spBox,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox](){
+//                ElProperty pr("num_var_index",ElProperty::Type::INT_T);
+//                int index = spBox->value();
+//                pr.setValue(index);
+//                emit updateProperty(pr);
+//            });
 
-            fLayout->addRow(wNameType,box);
-            fLayout->addRow(wNameIndex,spBox);
-            widgets["num_var_type"] = box;
-            widgets["num_var_index"] = spBox;
-        }
-    }
+//            fLayout->addRow(wNameType,box);
+//            fLayout->addRow(wNameIndex,spBox);
+//            widgets["num_var_type"] = box;
+//            widgets["num_var_index"] = spBox;
+//        }
+//    }
 
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="image_index";});
     if(it!=properties.end()) { // scalable image
