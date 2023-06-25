@@ -70,23 +70,13 @@ bool PropertiesView::getBoolFromProperty(ElProperty pr)
     return false;
 }
 
-PropertiesView::PropertiesView(QObject *parent) : QObject(parent)
+void PropertiesView::drawXYProperties(QFormLayout *fLayout)
 {
-    layout = new QVBoxLayout();
-}
-
-void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
-{
-    Q_UNUSED(properties)
-
     QString textColor = "QLabel { color : white}";
     QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
-    clearLayout(layout);
-
     layout->addSpacing(50);
-    QFormLayout *fLayout = new QFormLayout();
     ViewSpinbox *spBox = new ViewSpinbox();
     spBox->setStyleSheet(spinHeight);
     spBox->setRange(-10000,10000);
@@ -108,12 +98,23 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
     wName->setAlignment(Qt::AlignVCenter);
     fLayout->addRow(wName,spBox);
     widgets["y"] = spBox;
+}
+
+void PropertiesView::drawWidthHeightProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    QLabel *wName = nullptr;
+    ViewSpinbox *spBox = nullptr;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="change";});
     if(it!=properties.end()) {
         int val = getIntFromProperty(*it);
         ChangeMode chMode = static_cast<ChangeMode>(val);
-
+        spBox = new ViewSpinbox();
+        spBox->setStyleSheet(spinHeight);
         if(chMode!=ChangeMode::NoChange) {
             spBox = new ViewSpinbox();
             spBox->setStyleSheet(spinHeight);
@@ -141,19 +142,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
             widgets["height"] = spBox;
         }
     }
+}
 
-    spBox = new ViewSpinbox();
-    spBox->setStyleSheet(spinHeight);
-    spBox->setRange(0,50);
-    connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_line_width);
-    wName = new QLabel("толщина");
-    wName->setStyleSheet(textColor);
-    wName->setFont(QFont("Times", textSize, QFont::Bold));
-    wName->setAlignment(Qt::AlignVCenter);
-    fLayout->addRow(wName,spBox);
-    widgets["line_width"] = spBox;
+void PropertiesView::drawColorProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="line_color";});
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="line_color";});
     if(it!=properties.end()) { // цвет линии
 
         fLayout->addRow(new QLabel(), new QLabel());
@@ -190,8 +187,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         });
         fLayout->addRow(wName,colButton);
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="on_color";});
+void PropertiesView::drawOnColorProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="on_color";});
     if(it!=properties.end()) {
         QLabel *wName = new QLabel("цвет вкл");
         wName->setStyleSheet(textColor);
@@ -226,8 +230,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         });
         fLayout->addRow(wName,colButton);
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="off_color";});
+void PropertiesView::drawOffColorProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="off_color";});
     if(it!=properties.end()) {
         QLabel *wName = new QLabel("цвет выкл");
         wName->setStyleSheet(textColor);
@@ -262,8 +273,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         });
         fLayout->addRow(wName,colButton);
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
+void PropertiesView::drawLinkBoolTypeProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
     if(it!=properties.end()) {
 
         QComboBox *varTypeBox = new QComboBox();
@@ -291,8 +309,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         wName->setAlignment(Qt::AlignVCenter);
         fLayout->addRow(wName,varTypeBox);
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_index";});
+void PropertiesView::drawLinkBoolIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_index";});
     if(it!=properties.end()) {
 
         auto widgIt = widgets.find("bool_type");
@@ -321,6 +346,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
                     }
                 });
                 connect(comboBoxVarType,QOverload<int>::of(&QComboBox::currentIndexChanged),[this, properties](int index){
+                    Q_UNUSED(index)
                     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
                     if(it!=properties.end()) {
                         auto widgIt = widgets.find("bool_type");
@@ -361,31 +387,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
             }
         }
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="fill";});
-    if(it!=properties.end()) { // заливка
-        QLabel *wName = new QLabel("заливка");
-        wName->setStyleSheet(textColor);
-        wName->setFont(QFont("Times", textSize, QFont::Bold));
-        wName->setAlignment(Qt::AlignVCenter);
+void PropertiesView::drawTextValueProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
 
-        bool fill = getBoolFromProperty(*it);
-        QCheckBox *check = new QCheckBox();
-        check->setChecked(fill);
-        connect(check,&QCheckBox::stateChanged,[this](int state){
-            ElProperty pr("fill",ElProperty::Type::BOOL_T);
-            bool fill = false;
-            if(state==Qt::Checked) fill=true;
-            pr.setValue(fill);
-            emit updateProperty(pr);
-        });
-
-        fLayout->addRow(wName,check);
-        widgets["rect_radius"] = spBox;
-    }
-
-
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="text_value";});
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="text_value";});
     if(it!=properties.end()) { // текст
         fLayout->addRow(new QLabel(), new QLabel());
         QLabel *wName = new QLabel("текст");
@@ -402,9 +412,16 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         fLayout->addRow(wName,textWidget);
         widgets["text_value"] = textWidget;
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
-    if(it!=properties.end()) { // стандартный шртфт латиница
+void PropertiesView::drawEngFontProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
+    if(it!=properties.end()) { // стандартный шрифт латиница
         QLabel *wName = new QLabel("шрифт");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
@@ -431,10 +448,17 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         });
 
         fLayout->addRow(wName,fontHeightBox);
-        widgets["font_size"] = spBox;
+        widgets["eng_font_index"] = fontHeightBox;
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_pattern";});
+void PropertiesView::drawNumPatternProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_pattern";});
     if(it!=properties.end()) { // пример значения числа
         QLabel *wName = new QLabel("значение");
         wName->setStyleSheet(textColor);
@@ -455,12 +479,17 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         });
 
         fLayout->addRow(wName,numValuePattern);
-        widgets["num_pattern"] = spBox;
+        widgets["num_pattern"] = numValuePattern;
     }
+}
 
+void PropertiesView::drawNumDividerProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
 
-
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_div";});
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_div";});
     if(it!=properties.end()) { // делитель числа
         QLabel *wName = new QLabel("делитель");
         wName->setStyleSheet(textColor);
@@ -488,10 +517,17 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         });
 
         fLayout->addRow(wName,dividerBox);
-        widgets["num_div"] = spBox;
+        widgets["num_div"] = dividerBox;
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_type";});
+void PropertiesView::drawLinkAnalogueTypeProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_type";});
     if(it!=properties.end()) {
 
         QComboBox *varTypeBox = new QComboBox();
@@ -519,8 +555,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         wName->setAlignment(Qt::AlignVCenter);
         fLayout->addRow(wName,varTypeBox);
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_index";});
+void PropertiesView::drawLinkAnalogueIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_index";});
     if(it!=properties.end()) {
 
         auto widgIt = widgets.find("link_analogue_type");
@@ -549,6 +592,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
                     }
                 });
                 connect(comboBoxVarType,QOverload<int>::of(&QComboBox::currentIndexChanged),[this, properties](int index){
+                    Q_UNUSED(index)
                     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_type";});
                     if(it!=properties.end()) {
                         auto widgIt = widgets.find("link_analogue_type");
@@ -589,9 +633,15 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
             }
         }
     }
+}
 
+void PropertiesView::drawCyrFontProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="cyr_font_index";});
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="cyr_font_index";});
     if(it!=properties.end()) { // стандартный шртфт кириллица
         QLabel *wName = new QLabel("шрифт");
         wName->setStyleSheet(textColor);
@@ -619,10 +669,17 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         });
 
         fLayout->addRow(wName,fontHeightBox);
-        widgets["cyr_font_index"] = spBox;
+        widgets["cyr_font_index"] = fontHeightBox;
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_state";});
+void PropertiesView::drawLampStateProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_state";});
     if(it!=properties.end()) { // состояние лампы
         fLayout->addRow(new QLabel(), new QLabel());
         QLabel *wName = new QLabel("вкл");
@@ -650,8 +707,17 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         fLayout->addRow(l);
         widgets["lamp_state"] = check;
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_on_index";});
+void PropertiesView::drawLampOnIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    ViewSpinbox *spBox = nullptr;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_on_index";});
     if(it!=properties.end()) { // иконка для вкл состояния
         QLabel *wName = new QLabel("вкл");
         wName->setStyleSheet(textColor);
@@ -682,12 +748,20 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         l->addWidget(spBox);
         l->addWidget(b);
 
-        //fLayout->addRow(wName,spBox);
         fLayout->addRow(l);
         widgets["lamp_on_index"] = spBox;
     }
+}
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_off_index";});
+void PropertiesView::drawLampOffIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
+{
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
+    int textSize = 12;
+
+    ViewSpinbox *spBox = nullptr;
+
+    auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_off_index";});
     if(it!=properties.end()) { // иконка для выкл состояния
         QLabel *wName = new QLabel("выкл");
         wName->setStyleSheet(textColor);
@@ -723,152 +797,51 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
         fLayout->addRow(l);
         widgets["lamp_off_index"] = spBox;
     }
+}
 
-//    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="dig_count";});
-//    if(it!=properties.end()) { // число символов
-//        auto it2 = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="after_point";});
-//        if(it2!=properties.end()) {
-//            fLayout->addRow(new QLabel(), new QLabel());
-//            QLabel *wNameType = new QLabel("число знакомест");
-//            wNameType->setStyleSheet(textColor);
-//            wNameType->setFont(QFont("Times", textSize, QFont::Bold));
-//            wNameType->setAlignment(Qt::AlignVCenter);
+PropertiesView::PropertiesView(QObject *parent) : QObject(parent)
+{
+    layout = new QVBoxLayout();
+}
 
-//            QLabel *wNameIndex = new QLabel("после точки");
-//            wNameIndex->setStyleSheet(textColor);
-//            wNameIndex->setFont(QFont("Times", textSize, QFont::Bold));
-//            wNameIndex->setAlignment(Qt::AlignVCenter);
+void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
+{
+    Q_UNUSED(properties)
 
-//            QSpinBox *spBox1 = new QSpinBox();
-//            spBox1->setFont(QFont("Times", textSize-2));
-//            spBox1->setRange(1,7);
-//            int cnt = getIntFromProperty(*it);
-//            spBox1->setValue(cnt);
+    QString textColor = "QLabel { color : white}";
+    QString spinHeight = "QSpinBox { height : 24}";
 
-//            QSpinBox *spBox2 = new QSpinBox();
-//            spBox2->setFont(QFont("Times", textSize-2));
-//            spBox2->setRange(0,3);
-//            int afterPoint = getIntFromProperty(*it2);
-//            spBox2->setValue(afterPoint);
+    clearLayout(layout);
 
-//            connect(spBox1,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox1,spBox2](){
-//                ElProperty pr("dig_count",ElProperty::Type::INT_T);
-//                int cnt = spBox1->value();
-//                pr.setValue(cnt);
-//                emit updateProperty(pr);
-//                if(spBox2->value()>cnt) spBox2->setValue(cnt);
-//                else if(spBox2->value()==cnt) spBox2->setValue(cnt-1);
-//            });
+    QFormLayout *fLayout = new QFormLayout();
+    drawXYProperties(fLayout);
+    drawWidthHeightProperties(fLayout,properties);
 
-//            connect(spBox2,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox1,spBox2](){
+    //    spBox = new ViewSpinbox();
+    //    spBox->setStyleSheet(spinHeight);
+    //    spBox->setRange(0,50);
+    //    connect(spBox,&ViewSpinbox::valChanged,this,&PropertiesView::update_line_width);
+    //    wName = new QLabel("толщина");
+    //    wName->setStyleSheet(textColor);
+    //    wName->setFont(QFont("Times", textSize, QFont::Bold));
+    //    wName->setAlignment(Qt::AlignVCenter);
+    //    fLayout->addRow(wName,spBox);
+    //    widgets["line_width"] = spBox;
 
-//                ElProperty pr("after_point",ElProperty::Type::INT_T);
-//                int afterPoint = spBox2->value();
-//                if(spBox1->value()==afterPoint) {
-//                    afterPoint--;
-//                    spBox2->setValue(afterPoint);
-//                }
-//                pr.setValue(afterPoint);
-//                emit updateProperty(pr);
-//            });
-
-//            fLayout->addRow(wNameType,spBox1);
-//            fLayout->addRow(wNameIndex,spBox2);
-//            widgets["dig_count"] = spBox1;
-//            widgets["after_point"] = spBox2;
-//        }
-//    }
-
-//    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_type";});
-//    if(it!=properties.end()) { // тип привязки
-//        auto it2 = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_var_index";});
-//        if(it2!=properties.end()) {
-//            fLayout->addRow(new QLabel(), new QLabel());
-//            QLabel *wNameType = new QLabel("привязка");
-//            wNameType->setStyleSheet(textColor);
-//            wNameType->setFont(QFont("Times", textSize, QFont::Bold));
-//            wNameType->setAlignment(Qt::AlignVCenter);
-
-//            QLabel *wNameIndex = new QLabel("номер");
-//            wNameIndex->setStyleSheet(textColor);
-//            wNameIndex->setFont(QFont("Times", textSize, QFont::Bold));
-//            wNameIndex->setAlignment(Qt::AlignVCenter);
-
-//            QComboBox *box = new QComboBox();
-//            box->setFont(QFont("Times", textSize-1, QFont::Bold));
-//            box->addItems(QStringList()<<"AI"<<"IBR"<<"IIR"<<"ILR");
-//            int vType = getIntFromProperty(*it);
-//            if(vType<0 || vType>=4) vType = 0;
-//            box->setCurrentIndex(vType);
-
-//            QSpinBox *spBox = new QSpinBox();
-//            spBox->setFont(QFont("Times", textSize-2));
-//            if(box->currentIndex()==0) spBox->setRange(1,98);
-//            else if(box->currentIndex()==1) spBox->setRange(1,384);
-//            else if(box->currentIndex()==2) spBox->setRange(1,224);
-//            else if(box->currentIndex()==3) spBox->setRange(1,24);
-//            int vIndex = getIntFromProperty(*it2);
-//            spBox->setValue(vIndex);
-
-//            connect(box,QOverload<int>::of(&QComboBox::currentIndexChanged),[this,box,spBox](){
-//                ElProperty pr("num_var_type",ElProperty::Type::INT_T);
-//                int index = box->currentIndex();
-//                pr.setValue(index);
-//                emit updateProperty(pr);
-//                if(index==0) spBox->setRange(1,98);
-//                else if(index==1) spBox->setRange(1,384);
-//                else if(index==2) spBox->setRange(1,224);
-//                else if(index==3) spBox->setRange(1,24);
-//            });
-
-//            connect(spBox,QOverload<int>::of(&QSpinBox::valueChanged),[this,spBox](){
-//                ElProperty pr("num_var_index",ElProperty::Type::INT_T);
-//                int index = spBox->value();
-//                pr.setValue(index);
-//                emit updateProperty(pr);
-//            });
-
-//            fLayout->addRow(wNameType,box);
-//            fLayout->addRow(wNameIndex,spBox);
-//            widgets["num_var_type"] = box;
-//            widgets["num_var_index"] = spBox;
-//        }
-//    }
-
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="image_index";});
-    if(it!=properties.end()) { // scalable image
-        QLabel *wName = new QLabel("изображение");
-        wName->setStyleSheet(textColor);
-        wName->setFont(QFont("Times", textSize, QFont::Bold));
-        wName->setAlignment(Qt::AlignVCenter);
-
-        int index = getIntFromProperty(*it);
-        if(index<0 || index>=ScalImages::getQuantity()) index = 0;
-
-        QHBoxLayout *l = new QHBoxLayout();
-        l->addWidget(wName);
-
-        QPushButton *b = new QPushButton();
-        b->setIcon(QIcon(ScalImages::getImage(index)));
-        b->setIconSize(QSize(24,24));
-
-        spBox = new ViewSpinbox();
-        spBox->setStyleSheet(spinHeight);
-        spBox->setRange(0,ScalImages::getQuantity()-1);
-        spBox->setValue(index);
-        connect(spBox,&ViewSpinbox::valChanged,[this,spBox,b](){
-            ElProperty pr("image_index",ElProperty::Type::INT_T);
-            int index = spBox->value();
-            b->setIcon(QIcon(ScalImages::getImage(index)));
-            pr.setValue(index);
-            emit updateProperty(pr);
-        });
-        l->addWidget(spBox);
-        l->addWidget(b);
-
-        fLayout->addRow(l);
-        widgets["image_index"] = spBox;
-    }
+    drawColorProperties(fLayout,properties);
+    drawOnColorProperties(fLayout,properties);
+    drawOffColorProperties(fLayout,properties);
+    drawLinkBoolTypeProperties(fLayout,properties);
+    drawLinkBoolIndexProperties(fLayout,properties);
+    drawTextValueProperties(fLayout,properties);
+    drawEngFontProperties(fLayout,properties);
+    drawNumPatternProperties(fLayout,properties);
+    drawNumDividerProperties(fLayout,properties);
+    drawLinkAnalogueTypeProperties(fLayout,properties);
+    drawLinkAnalogueIndexProperties(fLayout,properties);
+    drawCyrFontProperties(fLayout,properties);
+    drawLampStateProperties(fLayout,properties);
+    drawLampOnIndexProperties(fLayout,properties);
 
     layout->addLayout(fLayout);
 }

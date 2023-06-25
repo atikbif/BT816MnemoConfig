@@ -8,6 +8,7 @@
 #include "elproperty.h"
 #include <QSpinBox>
 #include "plcconfig.h"
+#include <QFormLayout>
 
 class ViewSpinbox: public QSpinBox
 {
@@ -35,6 +36,25 @@ class PropertiesView : public QObject
     QString getStringFromProperty(ElProperty pr);
     int getIntFromProperty(ElProperty pr);
     bool getBoolFromProperty(ElProperty pr);
+
+    void drawXYProperties(QFormLayout *fLayout);
+    void drawWidthHeightProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawColorProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawOnColorProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawOffColorProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawLinkBoolTypeProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawLinkBoolIndexProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawTextValueProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawEngFontProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawNumPatternProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawNumDividerProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawLinkAnalogueTypeProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawLinkAnalogueIndexProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawCyrFontProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawLampStateProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawLampOnIndexProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+    void drawLampOffIndexProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);
+
 public:
     explicit PropertiesView(QObject *parent = nullptr);
     QLayout * getLayout() {return layout;}
