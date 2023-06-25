@@ -591,48 +591,35 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
     }
 
 
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="font_size";});
-    if(it!=properties.end()) { // размер шрифта
+    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="cyr_font_index";});
+    if(it!=properties.end()) { // стандартный шртфт кириллица
         QLabel *wName = new QLabel("шрифт");
         wName->setStyleSheet(textColor);
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        int fs = getIntFromProperty(*it);
-        spBox = new ViewSpinbox();
-        spBox->setStyleSheet(spinHeight);
-        spBox->setRange(8,50);
-        spBox->setValue(fs);
-        connect(spBox,&ViewSpinbox::valChanged,[this,spBox](){
-            ElProperty pr("font_size",ElProperty::Type::INT_T);
-            int fs = spBox->value();
-            pr.setValue(fs);
-            emit updateProperty(pr);
+        int f = getIntFromProperty(*it);
+
+        QComboBox *fontHeightBox = new QComboBox();
+        for(int i=0;i<static_cast<int>(CyrFonts::LastEl);i++) {
+            int height = getCyrFontHeight(static_cast<CyrFonts>(i));
+            fontHeightBox->addItem(QString::number(height));
+        }
+
+        if(f>=0 && f<fontHeightBox->count()) {
+            fontHeightBox->setCurrentIndex(f);
+        }
+
+        connect(fontHeightBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
+            ElProperty pr("cyr_font_index",ElProperty::Type::INT_T);
+            if(index>=0) {
+                pr.setValue(index);
+                emit updateProperty(pr);
+            }
         });
 
-        fLayout->addRow(wName,spBox);
-        widgets["font_size"] = spBox;
-    }
-
-    it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="text_align";});
-    if(it!=properties.end()) { // выравнивание
-        QLabel *wName = new QLabel("выравн.");
-        wName->setStyleSheet(textColor);
-        wName->setFont(QFont("Times", textSize, QFont::Bold));
-        wName->setAlignment(Qt::AlignVCenter);
-
-        int fs = getIntFromProperty(*it);
-        QComboBox *box = new QComboBox();
-        box->setFont(QFont("Times",textSize-1));
-        box->addItems(QStringList() << "слева" << "справа" << "по центру");
-        if(fs>=0 && fs<=2) box->setCurrentIndex(fs);
-        connect(box,QOverload<int>::of(&QComboBox::currentIndexChanged),[this,box](){
-            ElProperty pr("text_align",ElProperty::Type::INT_T);
-            pr.setValue(box->currentIndex());
-            emit updateProperty(pr);
-        });
-        fLayout->addRow(wName,box);
-        widgets["font_size"] = box;
+        fLayout->addRow(wName,fontHeightBox);
+        widgets["cyr_font_index"] = spBox;
     }
 
     it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_state";});

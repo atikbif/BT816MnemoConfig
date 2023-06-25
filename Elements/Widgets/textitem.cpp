@@ -3,29 +3,21 @@
 #include <QFont>
 #include <QTextOption>
 
-int TextItem::lastFontSize=18;
+CyrFonts TextItem::lastNumFont=CyrFonts::Height14;
 
 TextItem::TextItem(qreal _width, qreal _height, QObject *parent):RectItem(_width,_height,parent)
 {
-    fontSize = lastFontSize;
+    numFont = lastNumFont;
     ElProperty pr("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("text"));
     properties.push_back(pr);
 
-    pr = ElProperty("font_size",ElProperty::Type::INT_T);
-    pr.setValue(fontSize);
+    pr = ElProperty("cyr_font_index",ElProperty::Type::INT_T);
+    pr.setValue(static_cast<int>(numFont));
     properties.push_back(pr);
 
     pr = ElProperty("text_value",ElProperty::Type::STRING_T);
     pr.setValue(textValue);
-    properties.push_back(pr);
-
-    pr = ElProperty("text_align",ElProperty::Type::INT_T);
-    switch(align) {
-        case TextItemAlign::Left:pr.setValue(0);break;
-        case TextItemAlign::Right:pr.setValue(1);break;
-        case TextItemAlign::Center:pr.setValue(2);break;
-    }
     properties.push_back(pr);
 }
 
@@ -38,13 +30,9 @@ void TextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         painter->drawRect(QRectF(0,0,width,height));
     }else painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),1));
     QFont font("Courier New");
-    font.setPointSize(fontSize);
+    font.setPointSize(getCyrFontHeight(numFont));
     painter->setFont(font);
-    QTextOption opt;
-    if(align==TextItemAlign::Left) opt.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    else if(align==TextItemAlign::Right) opt.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    else if(align==TextItemAlign::Center) opt.setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    painter->drawText(QRectF(indent,0,width-indent*2,height), textValue, opt);
+    painter->drawText(QRectF(indent,0,width-indent*2,height), textValue);
     drawBorder(painter);
     Q_UNUSED(option)
     Q_UNUSED(widget)
@@ -75,28 +63,14 @@ void TextItem::updateProperty(ElProperty prop)
                 }
             }
         }
-    }else if(prop.getName()=="font_size") {
+    }else if(prop.getName()=="cyr_font_index") {
         if(prop.getType()==ElProperty::Type::INT_T) {
             auto tVal = prop.getValue();
             if(auto val = std::get_if<int>(&tVal)) {
-                fontSize = *val;
-                lastFontSize = fontSize;
+                numFont = static_cast<CyrFonts>(*val);
+                lastNumFont = numFont;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="font_size";});
-                if(it!=properties.end()) {
-                    it->setValue(*val);
-                }
-            }
-        }
-    }else if(prop.getName()=="text_align") {
-        if(prop.getType()==ElProperty::Type::INT_T) {
-            auto tVal = prop.getValue();
-            if(auto val = std::get_if<int>(&tVal)) {
-                if(*val==0) align = TextItemAlign::Left;
-                else if(*val==1) align = TextItemAlign::Right;
-                else if(*val==2) align = TextItemAlign::Center;
-                update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="text_align";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }

@@ -2,17 +2,15 @@
 #define TEXTITEM_H
 
 #include "rectitem.h"
-
-enum class TextItemAlign {Left, Right, Center};
+#include "typical_fonts.h"
 
 class TextItem : public RectItem
 {
     Q_OBJECT
 protected:
-    TextItemAlign align = TextItemAlign::Left;
     QString textValue="АБВ";
-    int fontSize;
-    static int lastFontSize;
+    CyrFonts numFont;
+    static CyrFonts lastNumFont;
 public:
     TextItem(qreal _width, qreal _height, QObject *parent=nullptr);
 

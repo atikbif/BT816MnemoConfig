@@ -21,21 +21,30 @@ int getEngFontHeight(EngFonts f) {
         case EngFonts::Height49:
             res = 49;
             break;
-        }
-        return res;
+        default:
+            res = 0;
+            break;
+    }
+    return res;
 }
 
 int getCyrFontHeight(CyrFonts f) {
     int res = 0;
     switch(f) {
-        case CyrFonts::Height20:
-            res = 20;
+        case CyrFonts::Height14:
+            res = 14;
+            break;
+        case CyrFonts::Height22:
+            res = 22;
             break;
         case CyrFonts::Height30:
             res = 30;
             break;
         case CyrFonts::Height40:
             res = 40;
+            break;
+        default:
+            res = 0;
             break;
     }
     return res;
