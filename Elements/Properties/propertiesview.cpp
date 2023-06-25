@@ -147,7 +147,6 @@ void PropertiesView::drawWidthHeightProperties(QFormLayout *fLayout, const std::
 void PropertiesView::drawColorProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="line_color";});
@@ -192,7 +191,6 @@ void PropertiesView::drawColorProperties(QFormLayout *fLayout, const std::vector
 void PropertiesView::drawOnColorProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="on_color";});
@@ -235,7 +233,6 @@ void PropertiesView::drawOnColorProperties(QFormLayout *fLayout, const std::vect
 void PropertiesView::drawOffColorProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="off_color";});
@@ -278,7 +275,6 @@ void PropertiesView::drawOffColorProperties(QFormLayout *fLayout, const std::vec
 void PropertiesView::drawLinkBoolTypeProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_type";});
@@ -314,7 +310,6 @@ void PropertiesView::drawLinkBoolTypeProperties(QFormLayout *fLayout, const std:
 void PropertiesView::drawLinkBoolIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_bool_index";});
@@ -392,7 +387,7 @@ void PropertiesView::drawLinkBoolIndexProperties(QFormLayout *fLayout, const std
 void PropertiesView::drawTextValueProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
+
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="text_value";});
@@ -404,9 +399,10 @@ void PropertiesView::drawTextValueProperties(QFormLayout *fLayout, const std::ve
         wName->setAlignment(Qt::AlignVCenter);
 
         QLineEdit *textWidget = new QLineEdit(getStringFromProperty(*it));
-        connect(textWidget,&QLineEdit::returnPressed,[this,textWidget](){
+
+        connect(textWidget,&QLineEdit::textChanged,[this](const QString &val){
             ElProperty pr("text_value",ElProperty::Type::STRING_T);
-            pr.setValue(textWidget->text());
+            pr.setValue(val);
             emit updateProperty(pr);
         });
         fLayout->addRow(wName,textWidget);
@@ -417,7 +413,6 @@ void PropertiesView::drawTextValueProperties(QFormLayout *fLayout, const std::ve
 void PropertiesView::drawEngFontProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
@@ -455,7 +450,6 @@ void PropertiesView::drawEngFontProperties(QFormLayout *fLayout, const std::vect
 void PropertiesView::drawNumPatternProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_pattern";});
@@ -486,7 +480,6 @@ void PropertiesView::drawNumPatternProperties(QFormLayout *fLayout, const std::v
 void PropertiesView::drawNumDividerProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="num_div";});
@@ -524,7 +517,6 @@ void PropertiesView::drawNumDividerProperties(QFormLayout *fLayout, const std::v
 void PropertiesView::drawLinkAnalogueTypeProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_type";});
@@ -560,7 +552,6 @@ void PropertiesView::drawLinkAnalogueTypeProperties(QFormLayout *fLayout, const 
 void PropertiesView::drawLinkAnalogueIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="link_analogue_index";});
@@ -638,7 +629,6 @@ void PropertiesView::drawLinkAnalogueIndexProperties(QFormLayout *fLayout, const
 void PropertiesView::drawCyrFontProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="cyr_font_index";});
@@ -676,7 +666,6 @@ void PropertiesView::drawCyrFontProperties(QFormLayout *fLayout, const std::vect
 void PropertiesView::drawLampStateProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
     int textSize = 12;
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="lamp_state";});
@@ -806,11 +795,6 @@ PropertiesView::PropertiesView(QObject *parent) : QObject(parent)
 
 void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
 {
-    Q_UNUSED(properties)
-
-    QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
-
     clearLayout(layout);
 
     QFormLayout *fLayout = new QFormLayout();
@@ -842,6 +826,7 @@ void PropertiesView::setProperties(const std::vector<ElProperty> &properties)
     drawCyrFontProperties(fLayout,properties);
     drawLampStateProperties(fLayout,properties);
     drawLampOnIndexProperties(fLayout,properties);
+    drawLampOffIndexProperties(fLayout,properties);
 
     layout->addLayout(fLayout);
 }
