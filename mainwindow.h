@@ -6,6 +6,7 @@
 #include "Elements/Properties/propertiesview.h"
 #include <QSpinBox>
 #include "plcconfig.h"
+#include "editablesysvariables.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -19,6 +20,7 @@ class MainWindow : public QMainWindow
     PropertiesView *prView = nullptr;
     QSpinBox *distanceItem = nullptr;
     QGraphicsPixmapItem *backgroundItem = nullptr;
+    EditableSysVariables editVars;
 
     PLCConfig plc;
 

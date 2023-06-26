@@ -37,7 +37,10 @@ SOURCES += \
     Elements/Widgets/scalableimageitem.cpp \
     Elements/Widgets/scalimages.cpp \
     Elements/Widgets/textitem.cpp \
+    dialogaddeditablevar.cpp \
+    dialogprojectconfig.cpp \
     displayscene.cpp \
+    editablesysvariables.cpp \
     jsonplcconfigreader.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -61,7 +64,10 @@ HEADERS += \
     Elements/Widgets/scalimages.h \
     Elements/Widgets/selectionmode.h \
     Elements/Widgets/textitem.h \
+    dialogaddeditablevar.h \
+    dialogprojectconfig.h \
     displayscene.h \
+    editablesysvariables.h \
     jsonplcconfigreader.h \
     mainwindow.h \
     plcconfig.h \
@@ -69,6 +75,8 @@ HEADERS += \
     typical_fonts.h
 
 FORMS += \
+    dialogaddeditablevar.ui \
+    dialogprojectconfig.ui \
     mainwindow.ui
 
 # Default rules for deployment.

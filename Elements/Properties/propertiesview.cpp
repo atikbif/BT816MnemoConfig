@@ -701,7 +701,7 @@ void PropertiesView::drawLampStateProperties(QFormLayout *fLayout, const std::ve
 void PropertiesView::drawLampOnIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
+    QString spinHeight = "QSpinBox { height : 20}";
     int textSize = 12;
 
     ViewSpinbox *spBox = nullptr;
@@ -745,7 +745,7 @@ void PropertiesView::drawLampOnIndexProperties(QFormLayout *fLayout, const std::
 void PropertiesView::drawLampOffIndexProperties(QFormLayout *fLayout, const std::vector<ElProperty> &properties)
 {
     QString textColor = "QLabel { color : white}";
-    QString spinHeight = "QSpinBox { height : 24}";
+    QString spinHeight = "QSpinBox { height : 20}";
     int textSize = 12;
 
     ViewSpinbox *spBox = nullptr;

@@ -4,6 +4,23 @@ std::vector<SysVar> PLCConfig::getSysVarByType(SysVarType vType) const
 {
     Q_UNUSED(vType)
     std::vector<SysVar> result;
+    if(vType==SysVarType::CLUSTER_BIT) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::CLUSTER_BIT) result.push_back(v);
+        }
+    }else if(vType==SysVarType::NET_BIT) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::NET_BIT) result.push_back(v);
+        }
+    }else if(vType==SysVarType::CLUSTER_REG) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::CLUSTER_REG) result.push_back(v);
+        }
+    }else if(vType==SysVarType::NET_REG) {
+        for(const auto&v:sysVar) {
+            if(v.varType==SysVarType::NET_REG) result.push_back(v);
+        }
+    }
     return result;
 }
 

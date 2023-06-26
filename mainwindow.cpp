@@ -18,6 +18,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include "jsonplcconfigreader.h"
+#include "dialogprojectconfig.h"
 
 void MainWindow::setProperties(const std::vector<ElProperty> &properties)
 {
@@ -232,8 +233,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(prView,&PropertiesView::update_line_width,sc,&DisplayScene::update_line_width);
     connect(prView,&PropertiesView::updateProperty,sc,&DisplayScene::updateProperty);
 
-    connect(ui->action_project_properties,&QAction::triggered,[](){
-
+    connect(ui->action_project_properties,&QAction::triggered,[this](){
+        DialogProjectConfig *dialogPrConfig = new DialogProjectConfig();
+        dialogPrConfig->setPLC(plc);
+        dialogPrConfig->setCanAddr(3);
+        dialogPrConfig->setVars(editVars.getVars());
+        dialogPrConfig->updateGUI();
+        if(dialogPrConfig->exec()==QDialog::Accepted) {
+            editVars.setVars(dialogPrConfig->getVars());
+        }
+        delete dialogPrConfig;
     });
 
     connect(ui->action_PC21,&QAction::triggered,[this](){
