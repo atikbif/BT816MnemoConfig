@@ -51,6 +51,8 @@ void MainWindow::save()
     result["key"] = "DISPLAY MTS";
     result["version"] = "1";
     result["items"] = grItems;
+    result["plc project"] = plcPrName;
+    result["background image"] = backgroundImage;
 
     QString fileName = QFileDialog::getSaveFileName(this, "Сохранить проект", "",  "Проект пульта *.plt");
 
@@ -80,6 +82,14 @@ void MainWindow::open()
             ui->statusbar->showMessage("Неверный формат файла", 3000);
             return;
         }
+        if(json.contains("plc project") && json["plc project"].isString()) {
+            plcPrName = json["plc project"].toString();
+        }else plcPrName = "";
+
+        if(json.contains("background image") && json["background image"].isString()) {
+            backgroundImage = json["background image"].toString();
+        }else backgroundImage = "";
+
         if (json.contains("items") && json["items"].isArray()) {
             QJsonArray itemsArray = json["items"].toArray();
             for(auto itemRef: itemsArray) {
@@ -144,6 +154,38 @@ void MainWindow::open()
                 }
             }
             ui->statusbar->showMessage("Файл успешно открыт", 3000);
+
+            if(!plcPrName.isEmpty()) {
+                if(QFile::exists(plcPrName)) {
+                    JSONPLCConfigReader reader;
+                    auto res = reader.readFromFile(plcPrName);
+                    if(res) {
+                        plc = res.value();
+                        if(prView) {
+                            prView->setPLCConfig(plc);
+                        }
+                    }
+                }
+            }
+
+            if(!backgroundImage.isEmpty()) {
+                if(backgroundItem) {
+                    sc->removeItem(backgroundItem);
+                    delete backgroundItem;
+                    backgroundItem = nullptr;
+                }
+
+                if(backgroundItem==nullptr) {
+                    if(QFile::exists(backgroundImage)) {
+                        QPixmap pix(backgroundImage);
+                        pix = pix.scaled(800,480);
+                        backgroundItem = sc->addPixmap(pix);
+                        backgroundItem->setZValue(-1000);
+                    }
+
+                }
+            }
+
         }else ui->statusbar->showMessage("Неверный формат файла", 3000);
     }else ui->statusbar->showMessage("Ошибка открытия файла", 3000);
 
@@ -186,7 +228,16 @@ MainWindow::MainWindow(QWidget *parent)
         if(backgroundItem==nullptr) {
             QPixmap pix(fileName);
             pix = pix.scaled(800,480);
-            QFile file("background.png");
+
+            QDir dir("PRDATA");
+            if (!dir.exists()) dir.mkpath(".");
+
+            QFileInfo fInfo(fileName);
+            fInfo.baseName();
+
+            QString copyFileName = "PRDATA/" + fInfo.baseName() + ".png";
+            QFile file(copyFileName);
+            backgroundImage = copyFileName;
             file.open(QIODevice::WriteOnly);
             pix.save(&file, "PNG");
             file.close();
@@ -254,6 +305,14 @@ MainWindow::MainWindow(QWidget *parent)
                 plc = res.value();
                 if(prView) {
                     prView->setPLCConfig(plc);
+
+                    QDir dir("PRDATA");
+                    if (!dir.exists()) dir.mkpath(".");
+
+                    QFileInfo fInfo(fileName);
+                    fInfo.baseName();
+                    QFile::copy(fileName,"PRDATA/"+fInfo.baseName()+".ldp");
+                    plcPrName = "PRDATA/"+fInfo.baseName()+".ldp";
                 }
             }
         }

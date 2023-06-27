@@ -23,6 +23,8 @@ class MainWindow : public QMainWindow
     EditableSysVariables editVars;
 
     PLCConfig plc;
+    QString backgroundImage;
+    QString plcPrName;
 
     void setProperties(const std::vector<ElProperty> &properties);
     void updateRect(int x, int y, int w, int h, int lw);
