@@ -7,6 +7,8 @@ CONFIG += c++17
 RC_ICONS = display.ico
 VERSION = 1.0.0.0
 
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
 QMAKE_TARGET_COMPANY = Modern Technical Solutions Co
 QMAKE_TARGET_PRODUCT = Display Editor 1.0
 QMAKE_TARGET_DESCRIPTION = Display Editor

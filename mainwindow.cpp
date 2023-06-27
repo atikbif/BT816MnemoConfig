@@ -3,9 +3,7 @@
 #include "ui_mainwindow.h"
 #include "displayscene.h"
 #include "Elements/Widgets/rectitem.h"
-#include "Elements/Widgets/circleitem.h"
 #include "Elements/Widgets/filledrectitem.h"
-#include "Elements/Widgets/scalableimageitem.h"
 #include "Elements/Widgets/filledcircleitem.h"
 #include "Elements/Widgets/textitem.h"
 #include "Elements/Widgets/lampitem.h"
@@ -19,6 +17,7 @@
 #include <QFileDialog>
 #include "jsonplcconfigreader.h"
 #include "dialogprojectconfig.h"
+#include <QMessageBox>
 
 void MainWindow::setProperties(const std::vector<ElProperty> &properties)
 {
@@ -229,6 +228,8 @@ MainWindow::MainWindow(QWidget *parent)
     auto *border = sc->addRect(0,0,800,480,QPen(Qt::gray,1));
     border->setZValue(-1000);
 
+
+
     ui->toolBar->addAction(QIcon(":/images/Open.png"),"открыть",[this](){open();});
     ui->toolBar->addAction(QIcon(":/images/Save.png"),"сохранить",[this](){save();});
     ui->toolBar->addSeparator();
@@ -337,7 +338,10 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     connect(ui->action_about,&QAction::triggered,[](){
-
+        QMessageBox msgBox;
+        msgBox.setWindowTitle("Редактор мнемосхем");
+        msgBox.setText("Версия " + QString(APP_VERSION));
+        msgBox.exec();
     });
 
     connect(ui->action_clear_background,&QAction::triggered,[this](){
@@ -346,6 +350,44 @@ MainWindow::MainWindow(QWidget *parent)
             delete(backgroundItem);
             sc->update();
             backgroundItem = nullptr;
+        }
+    });
+
+    connect(ui->actionOpenProject,&QAction::triggered,[this](){
+        open();
+    });
+
+    connect(ui->actionSaveProject,&QAction::triggered,[this](){
+        save();
+    });
+
+    connect(ui->actionSetBackground,&QAction::triggered,[this](){
+        QString fileName = QFileDialog::getOpenFileName(this, "Открыть файл с фоновым изображением", "", "*.png");
+        if(fileName.isEmpty()) return;
+        if(backgroundItem) {
+            sc->removeItem(backgroundItem);
+            delete backgroundItem;
+            backgroundItem = nullptr;
+        }
+
+        if(backgroundItem==nullptr) {
+            QPixmap pix(fileName);
+            pix = pix.scaled(800,480);
+
+            QDir dir("PRDATA");
+            if (!dir.exists()) dir.mkpath(".");
+
+            QFileInfo fInfo(fileName);
+            fInfo.baseName();
+
+            QString copyFileName = "PRDATA/" + fInfo.baseName() + ".png";
+            QFile file(copyFileName);
+            backgroundImage = copyFileName;
+            file.open(QIODevice::WriteOnly);
+            pix.save(&file, "PNG");
+            file.close();
+            backgroundItem = sc->addPixmap(pix);
+            backgroundItem->setZValue(-1000);
         }
     });
 

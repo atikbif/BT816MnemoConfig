@@ -363,9 +363,12 @@ QGroupBox::title {
     <property name="title">
      <string>Проект</string>
     </property>
-    <addaction name="action_PC21"/>
+    <addaction name="actionOpenProject"/>
+    <addaction name="actionSaveProject"/>
     <addaction name="action_project_properties"/>
+    <addaction name="action_PC21"/>
     <addaction name="action_clear_background"/>
+    <addaction name="actionSetBackground"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -406,6 +409,33 @@ QGroupBox::title {
   <action name="action_clear_background">
    <property name="text">
     <string>Очистить фон</string>
+   </property>
+  </action>
+  <action name="actionOpenProject">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/Open.png</normaloff>:/images/Open.png</iconset>
+   </property>
+   <property name="text">
+    <string>открыть проект</string>
+   </property>
+  </action>
+  <action name="actionSaveProject">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/Save.png</normaloff>:/images/Save.png</iconset>
+   </property>
+   <property name="text">
+    <string>сохранить проект</string>
+   </property>
+  </action>
+  <action name="actionSetBackground">
+   <property name="icon">
+    <iconset resource="images.qrc">
+     <normaloff>:/images/background.png</normaloff>:/images/background.png</iconset>
+   </property>
+   <property name="text">
+    <string>Установить фон</string>
    </property>
   </action>
  </widget>
