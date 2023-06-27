@@ -17,6 +17,7 @@ DialogProjectConfig::~DialogProjectConfig()
 void DialogProjectConfig::setCanAddr(uint8_t value)
 {
     can_addr = value;
+    ui->spinBox->setValue(can_addr);
 }
 
 void DialogProjectConfig::setVars(const std::vector<SysVar> &v)
@@ -52,7 +53,7 @@ void DialogProjectConfig::updateGUI()
 
 uint8_t DialogProjectConfig::getCanAddr() const
 {
-    return can_addr;
+    return ui->spinBox->value();
 }
 
 std::vector<SysVar> DialogProjectConfig::getVars() const

@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow
     PLCConfig plc;
     QString backgroundImage;
     QString plcPrName;
+    uint8_t canAddr = 1;
 
     void setProperties(const std::vector<ElProperty> &properties);
     void updateRect(int x, int y, int w, int h, int lw);

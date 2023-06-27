@@ -53,6 +53,9 @@ void MainWindow::save()
     result["items"] = grItems;
     result["plc project"] = plcPrName;
     result["background image"] = backgroundImage;
+    result["can address"] = canAddr;
+
+    editVars.toJSON(result);
 
     QString fileName = QFileDialog::getSaveFileName(this, "Сохранить проект", "",  "Проект пульта *.plt");
 
@@ -69,6 +72,16 @@ void MainWindow::open()
     if(fileName.isEmpty()) return;
     QFile loadFile(fileName);
     if (loadFile.open(QIODevice::ReadOnly)) {
+
+        editVars.clear();
+        if(backgroundItem) {
+            sc->removeItem(backgroundItem);
+            delete(backgroundItem);
+            sc->update();
+            backgroundItem = nullptr;
+        }
+        plc = PLCConfig();
+
         sc->deselectAllItems();
         sc->removeInsertItem();
         sc->clear();
@@ -81,6 +94,9 @@ void MainWindow::open()
         if(!(json.contains("key") && json["key"]=="DISPLAY MTS")) {
             ui->statusbar->showMessage("Неверный формат файла", 3000);
             return;
+        }
+        if(json.contains("can address")) {
+            canAddr = json["can address"].toInt();
         }
         if(json.contains("plc project") && json["plc project"].isString()) {
             plcPrName = json["plc project"].toString();
@@ -153,6 +169,7 @@ void MainWindow::open()
                     }
                 }
             }
+            editVars.fromJSON(json);
             ui->statusbar->showMessage("Файл успешно открыт", 3000);
 
             if(!plcPrName.isEmpty()) {
@@ -287,11 +304,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_project_properties,&QAction::triggered,[this](){
         DialogProjectConfig *dialogPrConfig = new DialogProjectConfig();
         dialogPrConfig->setPLC(plc);
-        dialogPrConfig->setCanAddr(3);
+        dialogPrConfig->setCanAddr(canAddr);
         dialogPrConfig->setVars(editVars.getVars());
         dialogPrConfig->updateGUI();
         if(dialogPrConfig->exec()==QDialog::Accepted) {
             editVars.setVars(dialogPrConfig->getVars());
+            canAddr = dialogPrConfig->getCanAddr();
         }
         delete dialogPrConfig;
     });
