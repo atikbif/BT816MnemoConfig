@@ -32,6 +32,27 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="3">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Путь к EVE Asset Builder:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QLineEdit" name="lineEditEvePath">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QPushButton" name="pushButtonEvePath">
+     <property name="text">
+      <string>Папка</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="5">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Переменные, доступные для редактирования</string>
@@ -101,7 +122,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="2">
+   <item row="3" column="2" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

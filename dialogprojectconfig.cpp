@@ -1,6 +1,7 @@
 #include "dialogprojectconfig.h"
 #include "ui_dialogprojectconfig.h"
 #include "dialogaddeditablevar.h"
+#include <QFileDialog>
 
 DialogProjectConfig::DialogProjectConfig(QWidget *parent) :
     QDialog(parent),
@@ -49,6 +50,7 @@ void DialogProjectConfig::updateGUI()
     }
     //ui->tableWidget->resizeColumnsToContents();
     if(ui->tableWidget->rowCount()) ui->tableWidget->selectRow(0);
+    ui->lineEditEvePath->setText(evePath);
 }
 
 uint8_t DialogProjectConfig::getCanAddr() const
@@ -64,6 +66,12 @@ std::vector<SysVar> DialogProjectConfig::getVars() const
 void DialogProjectConfig::setPLC(PLCConfig plc)
 {
     this->plc = plc;
+}
+
+void DialogProjectConfig::setEVEPath(const QString &value)
+{
+    evePath = value;
+    ui->lineEditEvePath->setText(evePath);
 }
 
 void DialogProjectConfig::on_pushButtonAdd_clicked()
@@ -143,6 +151,16 @@ void DialogProjectConfig::on_pushButtonDown_clicked()
                 ui->tableWidget->selectRow(index);
             }
         }
+    }
+}
+
+
+void DialogProjectConfig::on_pushButtonEvePath_clicked()
+{
+    QString dirName = QFileDialog::getExistingDirectory(this, "Путь к EVE Asset Builder", evePath);
+    if(!dirName.isEmpty()) {
+        evePath = dirName;
+        ui->lineEditEvePath->setText(evePath);
     }
 }
 

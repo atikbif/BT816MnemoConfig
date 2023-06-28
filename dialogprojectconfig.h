@@ -14,6 +14,7 @@ class DialogProjectConfig : public QDialog
     uint8_t can_addr;
     std::vector<SysVar> vars;
     PLCConfig plc;
+    QString evePath;
 public:
     explicit DialogProjectConfig(QWidget *parent = nullptr);
     ~DialogProjectConfig();
@@ -24,6 +25,8 @@ public:
     uint8_t getCanAddr() const;
     std::vector<SysVar> getVars() const;
     void setPLC(PLCConfig plc);
+    void setEVEPath(const QString &value);
+    QString getEVEPath() {return evePath;}
 
 private slots:
     void on_pushButtonAdd_clicked();
@@ -33,6 +36,8 @@ private slots:
     void on_pushButtonUp_clicked();
 
     void on_pushButtonDown_clicked();
+
+    void on_pushButtonEvePath_clicked();
 
 private:
     Ui::DialogProjectConfig *ui;

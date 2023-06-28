@@ -7,6 +7,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QCoreApplication::setOrganizationName("MTS");
+    QCoreApplication::setApplicationName("PC21 Display Editor");
+
     qApp->setStyle(QStyleFactory::create("Fusion"));
 
     QPalette darkPalette;

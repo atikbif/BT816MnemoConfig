@@ -18,6 +18,7 @@
 #include "jsonplcconfigreader.h"
 #include "dialogprojectconfig.h"
 #include <QMessageBox>
+#include "QSettings"
 
 void MainWindow::setProperties(const std::vector<ElProperty> &properties)
 {
@@ -97,6 +98,7 @@ void MainWindow::open()
         if(json.contains("can address")) {
             canAddr = json["can address"].toInt();
         }
+
         if(json.contains("plc project") && json["plc project"].isString()) {
             plcPrName = json["plc project"].toString();
         }else plcPrName = "";
@@ -307,10 +309,14 @@ MainWindow::MainWindow(QWidget *parent)
         dialogPrConfig->setPLC(plc);
         dialogPrConfig->setCanAddr(canAddr);
         dialogPrConfig->setVars(editVars.getVars());
+        dialogPrConfig->setEVEPath(evePath);
         dialogPrConfig->updateGUI();
         if(dialogPrConfig->exec()==QDialog::Accepted) {
             editVars.setVars(dialogPrConfig->getVars());
             canAddr = dialogPrConfig->getCanAddr();
+            evePath = dialogPrConfig->getEVEPath();
+            QSettings settings;
+            settings.setValue("/Settings/evePath",evePath);
         }
         delete dialogPrConfig;
     });
@@ -391,7 +397,8 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
-    //item2->setZValue(1);
+    QSettings settings;
+    evePath = settings.value("/Settings/evePath",QString()).toString();
 }
 
 MainWindow::~MainWindow()
