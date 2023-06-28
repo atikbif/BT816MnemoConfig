@@ -19,6 +19,7 @@
 #include "dialogprojectconfig.h"
 #include <QMessageBox>
 #include "QSettings"
+#include "QProcess"
 
 void MainWindow::setProperties(const std::vector<ElProperty> &properties)
 {
@@ -209,6 +210,33 @@ void MainWindow::open()
 
 }
 
+void MainWindow::buildConfigFile()
+{
+    if((backgroundItem!=nullptr) && (!backgroundImage.isEmpty())) {
+        QFile converterFile = QFile(evePath + "/tools/eab_tools.exe");
+        if(converterFile.exists()) {
+            QString program = "\"" + QFileInfo(converterFile).absoluteFilePath() + "\"";
+
+            QFile backgroundFile = QFile(backgroundImage);
+
+            QString attr = QString(" img_cvt -i ") +  "\"" + QFileInfo(backgroundFile).absoluteFilePath() + "\"" + " -o " + "\"" + QFileInfo(backgroundFile).absolutePath() + "/conversion\"" +  " -f 24 -e thorough";
+            QProcess builder;
+
+            builder.setProcessChannelMode(QProcess::MergedChannels);
+            builder.start(program+attr);
+            if (!builder.waitForFinished()) {
+                QMessageBox::warning(this,"ошибка конвертации",builder.errorString() + " команда " + program + attr);
+                return;
+            }
+
+        }else {
+            QMessageBox::warning(this,"ошибка конвертации","Не найден файл "+QFileInfo(converterFile).absoluteFilePath());
+            return;
+        }
+    }
+    QMessageBox::information(this,"сборка проекта","файл конфигурации дисплея успешно сгенерирован");
+}
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -292,6 +320,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->toolBar->addSeparator();
     ui->toolBar->addAction(QIcon(":/images/lamps/lamp2.png"),"включить все лампы",[this](){sc->turnOnAllLamps();});
     ui->toolBar->addAction(QIcon(":/images/lamps/lamp1.png"),"выключить все лампы",[this](){sc->turnOffAllLamps();});
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(QIcon(":/images/build.png"),"сгенерировать файл конфигурации дисплея",[this](){
+        buildConfigFile();
+    });
     prView = new PropertiesView();
     prView->setPLCConfig(plc);
     QLayout *layout = prView->getLayout();

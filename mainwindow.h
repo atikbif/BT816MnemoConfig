@@ -33,6 +33,7 @@ class MainWindow : public QMainWindow
     void clearProperties();
     void save();
     void open();
+    void buildConfigFile();
 
 public:
     MainWindow(QWidget *parent = nullptr);
