@@ -85,8 +85,7 @@ std::vector<DiscreteInp> PLCConfig::getDiscreteInputs() const
 
 std::vector<AnalogueInp> PLCConfig::getAnalogueInputs() const
 {
-    std::vector<AnalogueInp> result;
-    return result;
+    return anInput;
 }
 
 std::vector<DiscreteOutput> PLCConfig::getDiscreteOutputs() const

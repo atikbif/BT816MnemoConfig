@@ -16,6 +16,11 @@ QByteArray LCDConfCreator::getApplicationConfig(uint32_t par)
     // length
     res.append('\0');
     res.append('\0');
+
+    // version
+    res.append('\0');
+    res.append(1);
+
     res.append(static_cast<char>(plcConf.getAppCN()>>8));
     res.append(static_cast<char>(plcConf.getAppCN()&0xFF));
     QString vers = plcConf.getAppVersion();
@@ -104,6 +109,10 @@ QByteArray LCDConfCreator::getPasswordConfig(uint32_t par)
     res.append('\0');
     res.append('\0');
 
+    // version
+    res.append('\0');
+    res.append(1);
+
     // password value
 
     res.append(1);
@@ -132,9 +141,74 @@ QByteArray LCDConfCreator::getPasswordConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getAIConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfAI);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    // input cnt
+    std::vector<AnalogueInp> inputs = plcConf.getAnalogueInputs();
+    res.append(inputs.size());
+
+    for(const auto &ai:inputs) {
+        res.append(static_cast<char>(ai.inpType));
+        res.append(static_cast<char>(ai.usedFlag));
+
+        std::array<char,40> ai_sys_name;
+        for(char &v:ai_sys_name) v = 0;
+        QByteArray aiSysNameUTF8 = ai.sysName.toUtf8();
+        if(aiSysNameUTF8.count()>=ai_sys_name.size()) {
+            aiSysNameUTF8.resize(static_cast<int>(ai_sys_name.size()-2));
+        }
+        std::copy(aiSysNameUTF8.begin(),aiSysNameUTF8.end(),ai_sys_name.begin());
+        for(char v:ai_sys_name) {
+            res.append(v);
+        }
+
+        std::array<char,40> ai_user_name;
+        for(char &v:ai_user_name) v = 0;
+        QByteArray aiUserNameUTF8 = ai.userName.toUtf8();
+        if(aiUserNameUTF8.count()>=ai_sys_name.size()) {
+            aiUserNameUTF8.resize(static_cast<int>(ai_sys_name.size()-2));
+        }
+        std::copy(aiUserNameUTF8.begin(),aiUserNameUTF8.end(),ai_user_name.begin());
+        for(char v:ai_user_name) {
+            res.append(v);
+        }
+
+        res.append(static_cast<char>(ai.sensor.sensType));
+
+        std::array<char,20> meas_unit;
+        for(char &v:meas_unit) v = 0;
+        QByteArray aiMeasUnitUTF8 = ai.sensor.measureUnit.toUtf8();
+        if(aiMeasUnitUTF8.count()>=meas_unit.size()) {
+            aiMeasUnitUTF8.resize(static_cast<int>(meas_unit.size()-2));
+        }
+        std::copy(aiMeasUnitUTF8.begin(),aiMeasUnitUTF8.end(),meas_unit.begin());
+        for(char v:meas_unit) {
+            res.append(v);
+        }
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
@@ -205,6 +279,10 @@ QByteArray LCDConfCreator::getCANConfig(uint32_t par)
     // length
     res.append('\0');
     res.append('\0');
+
+    // version
+    res.append('\0');
+    res.append(1);
 
     res.append(canAddr);
 
