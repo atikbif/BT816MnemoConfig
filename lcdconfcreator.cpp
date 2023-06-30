@@ -94,9 +94,39 @@ QByteArray LCDConfCreator::getApplicationConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getPasswordConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfPassw);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // password value
+
     res.append(1);
+    res.append(1);
+    res.append(1);
+    res.append(1);
+    res.append(1);
+    res.append(1);
+
+    // password rewrite flag
+
+    res.append(1);
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
