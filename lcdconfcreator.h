@@ -11,6 +11,7 @@ enum class ConfID {ConfAppl, ConfPassw, ConfAI, ConfDI, ConfDO, ConfNetReg, Conf
 class LCDConfCreator
 {
     PLCConfig plcConf;
+    uint8_t canAddr = 1;
     QByteArray getApplicationConfig(uint32_t par);
     QByteArray getPasswordConfig(uint32_t par);
     QByteArray getAIConfig(uint32_t par);
@@ -31,6 +32,7 @@ public:
     LCDConfCreator() = default;
     QByteArray createLCDConf();
     void setPLCConfig(const PLCConfig &conf);
+    void setCanAddr(uint8_t value);
 };
 
 #endif // LCDCONFCREATOR_H

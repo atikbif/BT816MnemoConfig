@@ -196,9 +196,28 @@ QByteArray LCDConfCreator::getCalculationConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getCANConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
-    res.append(1);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfCAN);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    res.append(canAddr);
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
@@ -550,4 +569,9 @@ QByteArray LCDConfCreator::createLCDConf()
 void LCDConfCreator::setPLCConfig(const PLCConfig &conf)
 {
     plcConf = conf;
+}
+
+void LCDConfCreator::setCanAddr(uint8_t value)
+{
+    canAddr = value;
 }
