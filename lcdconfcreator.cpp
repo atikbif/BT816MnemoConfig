@@ -217,7 +217,7 @@ QByteArray LCDConfCreator::getDIConfig(uint32_t par)
     const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
-    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfAI);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfDI);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));
     // length
@@ -274,9 +274,59 @@ QByteArray LCDConfCreator::getDIConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getDOConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfDO);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    // input cnt
+    std::vector<DiscreteOutput> outs = plcConf.getDiscreteOutputs();
+    res.append(static_cast<char>(outs.size()));
+
+    for(const auto &dout:outs) {
+
+        std::array<char,40> do_sys_name;
+        for(char &v:do_sys_name) v = 0;
+        QByteArray doSysNameUTF8 = dout.sysName.toUtf8();
+        if(doSysNameUTF8.count()>=do_sys_name.size()) {
+            doSysNameUTF8.resize(static_cast<int>(do_sys_name.size()-2));
+        }
+        std::copy(doSysNameUTF8.begin(),doSysNameUTF8.end(),do_sys_name.begin());
+        for(char v:do_sys_name) {
+            res.append(v);
+        }
+
+        std::array<char,40> do_user_name;
+        for(char &v:do_user_name) v = 0;
+        QByteArray doUserNameUTF8 = dout.userName.toUtf8();
+        if(doUserNameUTF8.count()>=do_user_name.size()) {
+            doUserNameUTF8.resize(static_cast<int>(do_user_name.size()-2));
+        }
+        std::copy(doUserNameUTF8.begin(),doUserNameUTF8.end(),do_user_name.begin());
+        for(char v:do_user_name) {
+            res.append(v);
+        }
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 

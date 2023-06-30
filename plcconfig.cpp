@@ -89,8 +89,7 @@ std::vector<AnalogueInp> PLCConfig::getAnalogueInputs() const
 
 std::vector<DiscreteOutput> PLCConfig::getDiscreteOutputs() const
 {
-    std::vector<DiscreteOutput> result;
-    return result;
+    return dOut;
 }
 
 PLCConfig::PLCConfig(const QString plcName)
