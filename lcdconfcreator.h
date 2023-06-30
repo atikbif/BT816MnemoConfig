@@ -2,6 +2,7 @@
 #define LCDCONFCREATOR_H
 
 #include <QByteArray>
+#include "plcconfig.h"
 
 enum class ConfID {ConfAppl, ConfPassw, ConfAI, ConfDI, ConfDO, ConfNetReg, ConfClusterReg,
             ConfNetBit, ConfClusterBit, ConfCalculation, ConfCAN, ConfInpDescr, ConfOutputDescr,
@@ -9,6 +10,7 @@ enum class ConfID {ConfAppl, ConfPassw, ConfAI, ConfDI, ConfDO, ConfNetReg, Conf
 
 class LCDConfCreator
 {
+    PLCConfig plcConf;
     QByteArray getApplicationConfig(uint32_t par);
     QByteArray getPasswordConfig(uint32_t par);
     QByteArray getAIConfig(uint32_t par);
@@ -28,6 +30,7 @@ class LCDConfCreator
 public:
     LCDConfCreator() = default;
     QByteArray createLCDConf();
+    void setPLCConfig(const PLCConfig &conf);
 };
 
 #endif // LCDCONFCREATOR_H

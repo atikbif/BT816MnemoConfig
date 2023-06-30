@@ -2,12 +2,93 @@
 #include <array>
 #include "checksum.h"
 #include <QDebug>
+#include <QRegExp>
+#include "checksum.h"
 
 QByteArray LCDConfCreator::getApplicationConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
-    res.append(1);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfAppl);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+    res.append(static_cast<char>(plcConf.getAppCN()>>8));
+    res.append(static_cast<char>(plcConf.getAppCN()&0xFF));
+    QString vers = plcConf.getAppVersion();
+    QRegExp versExp = QRegExp("^(\\d+)\\D(\\d+)$");
+
+    quint8 majorVers = 0;
+    quint8 minorVers = 0;
+
+    if(versExp.indexIn(vers)!=-1) {
+        majorVers = versExp.cap(1).toInt()&0xFF;
+        minorVers = versExp.cap(2).toInt()&0xFF;
+    }
+
+    res.append(majorVers);
+    res.append(minorVers);
+
+    QString appTime = plcConf.getAppTime();
+    QRegExp timeExp = QRegExp("^(\\d+)\\D(\\d+)\\D(\\d+)\\D(\\d+)\\D(\\d+)\\D(\\d+)$");
+
+    uint8_t app_date = 1;
+    uint8_t app_month = 1;
+    uint8_t app_year = 0;
+    uint8_t app_hour = 0;
+    uint8_t app_min = 0;
+    uint8_t app_sec = 0;
+
+    if(timeExp.indexIn(appTime)!=-1) {
+        app_date = timeExp.cap(1).toInt() & 0xFF;
+        app_month = timeExp.cap(2).toInt() & 0xFF;
+        app_year = timeExp.cap(3).toInt() % 100;
+
+        app_hour = timeExp.cap(4).toInt() & 0xFF;
+        app_min = timeExp.cap(5).toInt() & 0xFF;
+        app_sec = timeExp.cap(6).toInt() & 0xFF;
+    }
+
+    res.append(app_date);
+    res.append(app_month);
+    res.append(app_year);
+    res.append(app_hour);
+    res.append(app_min);
+    res.append(app_sec);
+
+    quint16 app_crc = plcConf.getAppCheckSum();
+
+    res.append(static_cast<char>(app_crc>>8));
+    res.append(static_cast<char>(app_crc&0xFF));
+
+    std::array<char,40> app_name;
+
+    for(char &v:app_name) v = 0;
+
+    QByteArray appNameUTF8 = plcConf.getAppName().toUtf8();
+    if(appNameUTF8.count()>=app_name.size()) {
+        appNameUTF8.resize(static_cast<int>(app_name.size()-2));
+    }
+
+    std::copy(appNameUTF8.begin(),appNameUTF8.end(),app_name.begin());
+
+    for(char v:app_name) {
+        res.append(v);
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
@@ -429,9 +510,14 @@ QByteArray LCDConfCreator::createLCDConf()
     res[headelLengthOffset] = static_cast<char>(length>>8);
     res[headelLengthOffset+1] = static_cast<char>(length&0xFF);
 
-    while(res.count()<dataStartPos) {
+    while(res.count()<static_cast<int>(dataStartPos)) {
         addEmptyByte(res);
     }
     res.append(dataArray);
     return res;
+}
+
+void LCDConfCreator::setPLCConfig(const PLCConfig &conf)
+{
+    plcConf = conf;
 }

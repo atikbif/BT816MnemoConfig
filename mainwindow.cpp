@@ -224,6 +224,7 @@ void MainWindow::buildConfigFile()
     }
 
     LCDConfCreator confCreator;
+    confCreator.setPLCConfig(plc);
 
     QByteArray confArray = confCreator.createLCDConf();
 
