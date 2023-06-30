@@ -39,11 +39,13 @@ SOURCES += \
     Elements/Widgets/scalableimageitem.cpp \
     Elements/Widgets/scalimages.cpp \
     Elements/Widgets/textitem.cpp \
+    checksum.cpp \
     dialogaddeditablevar.cpp \
     dialogprojectconfig.cpp \
     displayscene.cpp \
     editablesysvariables.cpp \
     jsonplcconfigreader.cpp \
+    lcdconfcreator.cpp \
     main.cpp \
     mainwindow.cpp \
     plcconfig.cpp \
@@ -66,11 +68,13 @@ HEADERS += \
     Elements/Widgets/scalimages.h \
     Elements/Widgets/selectionmode.h \
     Elements/Widgets/textitem.h \
+    checksum.h \
     dialogaddeditablevar.h \
     dialogprojectconfig.h \
     displayscene.h \
     editablesysvariables.h \
     jsonplcconfigreader.h \
+    lcdconfcreator.h \
     mainwindow.h \
     plcconfig.h \
     plcconfigreader.h \

@@ -28,6 +28,8 @@ class MainWindow : public QMainWindow
     uint8_t canAddr = 1;
     QString evePath;
 
+    QString lcdConfPrName = "PC21LCDConfig.bin";
+
     void setProperties(const std::vector<ElProperty> &properties);
     void updateRect(int x, int y, int w, int h, int lw);
     void clearProperties();

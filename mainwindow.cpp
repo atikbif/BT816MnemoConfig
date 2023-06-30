@@ -20,6 +20,7 @@
 #include <QMessageBox>
 #include "QSettings"
 #include "QProcess"
+#include "lcdconfcreator.h"
 
 void MainWindow::setProperties(const std::vector<ElProperty> &properties)
 {
@@ -63,6 +64,7 @@ void MainWindow::save()
     QFile saveFile(fileName);
     if(saveFile.open(QIODevice::WriteOnly)) {
         saveFile.write(QJsonDocument(result).toJson());
+        lcdConfPrName = QFileInfo(saveFile).baseName() + "_lcdconf.bin";
         ui->statusbar->showMessage("Файл успешно сохранён", 3000);
     }else ui->statusbar->showMessage("Ошибка записи файла", 3000);
 }
@@ -96,6 +98,9 @@ void MainWindow::open()
             ui->statusbar->showMessage("Неверный формат файла", 3000);
             return;
         }
+
+        lcdConfPrName = QFileInfo(loadFile).baseName() + "_lcdconf.bin";
+
         if(json.contains("can address")) {
             canAddr = json["can address"].toInt();
         }
@@ -212,6 +217,16 @@ void MainWindow::open()
 
 void MainWindow::buildConfigFile()
 {
+    QFile confFile = QFile(lcdConfPrName);
+    if (!confFile.open(QIODevice::WriteOnly)) {
+        QMessageBox::warning(this,"ошибка конвертации","Не найден создать файл "+QFileInfo(confFile).absoluteFilePath());
+        return;
+    }
+
+    LCDConfCreator confCreator;
+
+    QByteArray confArray = confCreator.createLCDConf();
+
     if((backgroundItem!=nullptr) && (!backgroundImage.isEmpty())) {
         QFile converterFile = QFile(evePath + "/tools/eab_tools.exe");
         if(converterFile.exists()) {
@@ -234,6 +249,9 @@ void MainWindow::buildConfigFile()
             return;
         }
     }
+    confFile.write(confArray);
+
+    confFile.close();
     QMessageBox::information(this,"сборка проекта","файл конфигурации дисплея успешно сгенерирован");
 }
 
