@@ -157,7 +157,7 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
 
     // input cnt
     std::vector<AnalogueInp> inputs = plcConf.getAnalogueInputs();
-    res.append(inputs.size());
+    res.append(static_cast<char>(inputs.size()));
 
     for(const auto &ai:inputs) {
         res.append(static_cast<char>(ai.inpType));
@@ -177,8 +177,8 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
         std::array<char,40> ai_user_name;
         for(char &v:ai_user_name) v = 0;
         QByteArray aiUserNameUTF8 = ai.userName.toUtf8();
-        if(aiUserNameUTF8.count()>=ai_sys_name.size()) {
-            aiUserNameUTF8.resize(static_cast<int>(ai_sys_name.size()-2));
+        if(aiUserNameUTF8.count()>=ai_user_name.size()) {
+            aiUserNameUTF8.resize(static_cast<int>(ai_user_name.size()-2));
         }
         std::copy(aiUserNameUTF8.begin(),aiUserNameUTF8.end(),ai_user_name.begin());
         for(char v:ai_user_name) {
@@ -214,10 +214,62 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getDIConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfAI);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    // input cnt
+    std::vector<DiscreteInp> inputs = plcConf.getDiscreteInputs();
+    res.append(static_cast<char>(inputs.size()));
+
+    for(const auto &di:inputs) {
+        res.append(static_cast<char>(di.usedFlag));
+
+        std::array<char,40> di_sys_name;
+        for(char &v:di_sys_name) v = 0;
+        QByteArray diSysNameUTF8 = di.sysName.toUtf8();
+        if(diSysNameUTF8.count()>=di_sys_name.size()) {
+            diSysNameUTF8.resize(static_cast<int>(di_sys_name.size()-2));
+        }
+        std::copy(diSysNameUTF8.begin(),diSysNameUTF8.end(),di_sys_name.begin());
+        for(char v:di_sys_name) {
+            res.append(v);
+        }
+
+        std::array<char,40> di_user_name;
+        for(char &v:di_user_name) v = 0;
+        QByteArray diUserNameUTF8 = di.userName.toUtf8();
+        if(diUserNameUTF8.count()>=di_user_name.size()) {
+            diUserNameUTF8.resize(static_cast<int>(di_user_name.size()-2));
+        }
+        std::copy(diUserNameUTF8.begin(),diUserNameUTF8.end(),di_user_name.begin());
+        for(char v:di_user_name) {
+            res.append(v);
+        }
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
+
 }
 
 QByteArray LCDConfCreator::getDOConfig(uint32_t par)

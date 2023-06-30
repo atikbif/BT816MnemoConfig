@@ -79,8 +79,7 @@ std::vector<Var> PLCConfig::getAnalogueVarByType(AnalogueVarType vType) const
 
 std::vector<DiscreteInp> PLCConfig::getDiscreteInputs() const
 {
-    std::vector<DiscreteInp> result;
-    return result;
+    return dInput;
 }
 
 std::vector<AnalogueInp> PLCConfig::getAnalogueInputs() const
