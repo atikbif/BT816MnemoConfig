@@ -655,9 +655,76 @@ QByteArray LCDConfCreator::getCANConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getInputDescriptionConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
+    const int varCntOffset = 6;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfCAN);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    uint16_t varCnt = 0;
+    res.append(static_cast<char>(varCnt>>8));
+    res.append(static_cast<char>(varCnt&0xFF));
+
+    std::vector<AnalogueInp> anInputs = plcConf.getAnalogueInputs();
+    std::vector<DiscreteInp> dinInputs = plcConf.getDiscreteInputs();
+
+    if(anInputs.size()==dinInputs.size()) {
+        int inpCnt = static_cast<int>(anInputs.size());
+        for(int i=0;i<inpCnt;i++) {
+            if(!dinInputs.at(i).userName.isEmpty()) {
+                res.push_back('\0'); // input type (di)
+                res.push_back(static_cast<char>(i)); // input num
+                std::array<char,40> input_user_name;
+                for(char &v:input_user_name) v = 0;
+                QByteArray inputUserNameUTF8 = dinInputs.at(i).userName.toUtf8();
+                if(inputUserNameUTF8.count()>=input_user_name.size()) {
+                    inputUserNameUTF8.resize(static_cast<int>(input_user_name.size()-2));
+                }
+                std::copy(inputUserNameUTF8.begin(),inputUserNameUTF8.end(),input_user_name.begin());
+                for(char v:input_user_name) {
+                    res.append(v);
+                }
+                varCnt++;
+            }else if(!anInputs.at(i).userName.isEmpty()) {
+                res.push_back(1); // input type (ai)
+                res.push_back(static_cast<char>(i)); // input num
+                std::array<char,40> input_user_name;
+                for(char &v:input_user_name) v = 0;
+                QByteArray inputUserNameUTF8 = anInputs.at(i).userName.toUtf8();
+                if(inputUserNameUTF8.count()>=input_user_name.size()) {
+                    inputUserNameUTF8.resize(static_cast<int>(input_user_name.size()-2));
+                }
+                std::copy(inputUserNameUTF8.begin(),inputUserNameUTF8.end(),input_user_name.begin());
+                for(char v:input_user_name) {
+                    res.append(v);
+                }
+                varCnt++;
+            }
+        }
+    }
+
+    res[varCntOffset] = static_cast<char>(varCnt>>8);
+    res[varCntOffset+1] = static_cast<char>(varCnt&0xFF);
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
