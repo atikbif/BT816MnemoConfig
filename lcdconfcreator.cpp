@@ -564,9 +564,58 @@ QByteArray LCDConfCreator::getClusterBitConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getCalculationConfig(uint32_t par)
 {
+    union {
+        float a;
+        unsigned char bytes[4];
+    } float_converter;
+
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfCalculation);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    std::vector<AnalogueInp> inputs = plcConf.getAnalogueInputs();
+    res.append(static_cast<char>(inputs.size()));   // count of variables
+
+    int aiNum = 0;
+
+    for(const auto &ai:inputs) {
+        res.append(static_cast<char>(aiNum&0xFF));  // index
+        res.append('\0'); // link type (RAW AI)
+        res.append('\0');   // divider/precision
+        AnalogInputConfig aiConf = getAnalogInputConfig(ai);
+        float_converter.a = aiConf.k;
+        res.append(static_cast<char>(float_converter.bytes[0]));
+        res.append(static_cast<char>(float_converter.bytes[1]));
+        res.append(static_cast<char>(float_converter.bytes[2]));
+        res.append(static_cast<char>(float_converter.bytes[3]));
+        float_converter.a = aiConf.b;
+        res.append(static_cast<char>(float_converter.bytes[0]));
+        res.append(static_cast<char>(float_converter.bytes[1]));
+        res.append(static_cast<char>(float_converter.bytes[2]));
+        res.append(static_cast<char>(float_converter.bytes[3]));
+        aiNum++;
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
@@ -637,6 +686,57 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
 void LCDConfCreator::addEmptyByte(QByteArray &conf)
 {
     conf.append('\0');
+}
+
+AnalogInputConfig LCDConfCreator::getAnalogInputConfig(AnalogueInp inp)
+{
+    AnalogInputConfig res;
+    res.k = 1;
+    res.b = 0;
+    res.overLimit = 65535;
+    res.overAlarmLimit = 65535;
+    res.underLimit = 0;
+    res.underAlarmLimit = 0;
+
+    switch (inp.sensor.sensType) {
+        case SensType::NC:
+        res.k = static_cast<float>(255.0/2000);
+        res.b = 0;
+        break;
+    case SensType::I0__20mA:
+        res.k = static_cast<float>(255.0/20000);
+        res.b = 0;
+        break;
+    case SensType::I2__10mA:
+        res.k = static_cast<float>(255.0/800);
+        res.b = static_cast<float>(-255.0/4);
+        res.underAlarmLimit = 1000;
+        res.underLimit = 1700;
+        res.overLimit = 10250;
+        res.overAlarmLimit = 11000;
+        break;
+    case SensType::I4__20mA:
+        res.k = static_cast<float>(255.0/16000);
+        res.b = static_cast<float>(-255.0/4);
+        res.underAlarmLimit = 2000;
+        res.underLimit = 3400;
+        res.overLimit = 20500;
+        res.overAlarmLimit = 22000;
+        break;
+    case SensType::U0_4__2V:
+        res.k = static_cast<float>(255.0/1600);
+        res.b = static_cast<float>(-255.0/4);
+        res.underAlarmLimit = 200;
+        res.underLimit = 340;
+        res.overLimit = 2050;
+        res.overAlarmLimit = 2200;
+        break;
+    case SensType::U0__2_5V:
+        res.k = static_cast<float>(255.0/2500);
+        res.b = 0;
+        break;
+    }
+    return res;
 }
 
 QByteArray LCDConfCreator::createLCDConf()

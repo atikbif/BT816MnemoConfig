@@ -8,6 +8,15 @@ enum class ConfID {ConfAppl, ConfPassw, ConfAI, ConfDI, ConfDO, ConfNetReg, Conf
             ConfNetBit, ConfClusterBit, ConfCalculation, ConfCAN, ConfInpDescr, ConfOutputDescr,
             ConfBackgrImage, ConfMnemo};
 
+struct AnalogInputConfig {
+    float k;
+    float b;
+    uint16_t underLimit;
+    uint16_t underAlarmLimit;
+    uint16_t overLimit;
+    uint16_t overAlarmLimit;
+};
+
 class LCDConfCreator
 {
     PLCConfig plcConf;
@@ -28,6 +37,7 @@ class LCDConfCreator
     QByteArray getBackgroundImageConfig(uint32_t par);
     QByteArray getMnemoConfig(uint32_t par, uint32_t backgroundAddr);
     void addEmptyByte(QByteArray &conf);
+    AnalogInputConfig getAnalogInputConfig(AnalogueInp inp);
 public:
     LCDConfCreator() = default;
     QByteArray createLCDConf();
