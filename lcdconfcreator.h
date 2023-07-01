@@ -21,6 +21,7 @@ class LCDConfCreator
 {
     PLCConfig plcConf;
     uint8_t canAddr = 1;
+    QString backgroundImageFileName;
     QByteArray getApplicationConfig(uint32_t par);
     QByteArray getPasswordConfig(uint32_t par);
     QByteArray getAIConfig(uint32_t par);
@@ -43,6 +44,7 @@ public:
     QByteArray createLCDConf();
     void setPLCConfig(const PLCConfig &conf);
     void setCanAddr(uint8_t value);
+    void setBackgroundImage(const QString &value);
 };
 
 #endif // LCDCONFCREATOR_H

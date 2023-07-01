@@ -4,6 +4,9 @@
 #include <QDebug>
 #include <QRegExp>
 #include "checksum.h"
+#include <QFile>
+#include <QFileInfo>
+#include <QDir>
 
 QByteArray LCDConfCreator::getApplicationConfig(uint32_t par)
 {
@@ -659,7 +662,7 @@ QByteArray LCDConfCreator::getInputDescriptionConfig(uint32_t par)
     const int varCntOffset = 6;
     Q_UNUSED(par)
     QByteArray res;
-    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfCAN);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfInpDescr);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));
     // length
@@ -734,7 +737,7 @@ QByteArray LCDConfCreator::getOutputDescriptionConfig(uint32_t par)
     const int varCntOffset = 6;
     Q_UNUSED(par)
     QByteArray res;
-    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfCAN);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfOutputDescr);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));
     // length
@@ -791,9 +794,59 @@ QByteArray LCDConfCreator::getOutputDescriptionConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getBackgroundImageConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfBackgrImage);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    uint32_t imageLength = 0;
+
+    QByteArray imageData;
+
+    if(!backgroundImageFileName.isEmpty()) {
+        if(QFile::exists(backgroundImageFileName)) {
+            QString path = QFileInfo(backgroundImageFileName).dir().absolutePath();
+            QString fName = QFileInfo(backgroundImageFileName).baseName();
+            fName += "_800x480_COMPRESSED_RGBA_ASTC_10x10_KHR.raw";
+            fName = path + "/conversion/" + fName;
+            if(QFile::exists(fName)) {
+                QFile imageFile = QFile(fName);
+                if(imageFile.open(QFile::ReadOnly)) {
+                    imageData = imageFile.readAll();
+                }
+            }
+        }
+    }
+
+    imageLength = static_cast<uint32_t>(imageData.count());
+
+    res.append((imageLength>>24)&0xFF);
+    res.append((imageLength>>16)&0xFF);
+    res.append((imageLength>>16)&0xFF);
+    res.append((imageLength>>0)&0xFF);
+
+    res.append(imageData);
+
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
@@ -1177,4 +1230,9 @@ void LCDConfCreator::setPLCConfig(const PLCConfig &conf)
 void LCDConfCreator::setCanAddr(uint8_t value)
 {
     canAddr = value;
+}
+
+void LCDConfCreator::setBackgroundImage(const QString &value)
+{
+    backgroundImageFileName = value;
 }
