@@ -584,7 +584,10 @@ QByteArray LCDConfCreator::getCalculationConfig(uint32_t par)
     res.append(1);
 
     std::vector<AnalogueInp> inputs = plcConf.getAnalogueInputs();
-    res.append(static_cast<char>(inputs.size()));   // count of variables
+
+    uint16_t varCnt = static_cast<uint16_t>(inputs.size());
+    res.append(static_cast<char>(varCnt>>8));
+    res.append(static_cast<char>(varCnt&0xFF));
 
     int aiNum = 0;
 
@@ -660,9 +663,62 @@ QByteArray LCDConfCreator::getInputDescriptionConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getOutputDescriptionConfig(uint32_t par)
 {
+    const int lengthOffset = 2;
+    const int varCntOffset = 6;
     Q_UNUSED(par)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfCAN);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    uint16_t varCnt = 0;
+    res.append(static_cast<char>(varCnt>>8));
+    res.append(static_cast<char>(varCnt&0xFF));
+
+    std::vector<DiscreteOutput> outs = plcConf.getDiscreteOutputs();
+    res.append(static_cast<char>(outs.size()));
+
+    int doNum = 0;
+    for(const auto &dout:outs) {
+        if(!dout.userName.isEmpty()) {
+
+            res.append(static_cast<char>(doNum));
+
+            std::array<char,40> do_user_name;
+            for(char &v:do_user_name) v = 0;
+            QByteArray doUserNameUTF8 = dout.userName.toUtf8();
+            if(doUserNameUTF8.count()>=do_user_name.size()) {
+                doUserNameUTF8.resize(static_cast<int>(do_user_name.size()-2));
+            }
+            std::copy(doUserNameUTF8.begin(),doUserNameUTF8.end(),do_user_name.begin());
+            for(char v:do_user_name) {
+                res.append(v);
+            }
+            varCnt++;
+        }
+        doNum++;
+    }
+
+    res[varCntOffset] = static_cast<char>(varCnt>>8);
+    res[varCntOffset+1] = static_cast<char>(varCnt&0xFF);
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
