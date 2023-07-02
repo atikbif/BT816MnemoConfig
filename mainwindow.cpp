@@ -217,18 +217,12 @@ void MainWindow::open()
 
 void MainWindow::buildConfigFile()
 {
+
     QFile confFile = QFile(lcdConfPrName);
     if (!confFile.open(QIODevice::WriteOnly)) {
-        QMessageBox::warning(this,"ошибка конвертации","Не найден создать файл "+QFileInfo(confFile).absoluteFilePath());
+        QMessageBox::warning(this,"ошибка конвертации","Не удалось создать файл "+QFileInfo(confFile).absoluteFilePath());
         return;
     }
-
-    LCDConfCreator confCreator;
-    confCreator.setPLCConfig(plc);
-    confCreator.setCanAddr(canAddr);
-    confCreator.setBackgroundImage(backgroundImage);
-
-    QByteArray confArray = confCreator.createLCDConf();
 
     if((backgroundItem!=nullptr) && (!backgroundImage.isEmpty())) {
         QFile converterFile = QFile(evePath + "/tools/eab_tools.exe");
@@ -252,10 +246,111 @@ void MainWindow::buildConfigFile()
             return;
         }
     }
+
+    LCDConfCreator confCreator;
+    confCreator.setPLCConfig(plc);
+    confCreator.setCanAddr(canAddr);
+    confCreator.setBackgroundImage(backgroundImage);
+
+    std::vector<RectItem*> grItems = getGraphicsItems();
+    std::vector<RectItem*> textItems = getTextItems();
+
+    confCreator.setGraphicsItems(grItems);
+    confCreator.setTextItems(textItems);
+
+    QByteArray confArray = confCreator.createLCDConf();
+
+
     confFile.write(confArray);
 
     confFile.close();
+
+    for(RectItem* item:grItems) delete item;
+    for(RectItem* item:textItems) delete item;
+
     QMessageBox::information(this,"сборка проекта","файл конфигурации дисплея успешно сгенерирован");
+}
+
+std::vector<RectItem *> MainWindow::getGraphicsItems()
+{
+    std::vector<RectItem*> result;
+    QList<QGraphicsItem*> items = sc->items();
+
+    // сортировка по z координате
+
+    // ...
+
+    std::vector<RectItem*> allItems;
+
+    for(int i=0;i<items.count();i++) {
+        RectItem* item = dynamic_cast<RectItem*>(items[i]);
+        if(item!=nullptr) {
+            allItems.push_back(item->clone());
+        }
+    }
+    for(RectItem* rect:allItems) {
+        auto properties = rect->getProperties();
+        for(const auto &pr:properties) {
+            if((pr.getType()==ElProperty::Type::STRING_T)) {
+                if(pr.getName()=="type") {
+                    auto prVal = pr.getValue();
+                    if(auto val = std::get_if<QString>(&prVal)) {
+                        if(QString("text")!=val->toStdString().c_str()) {
+                            result.push_back(rect->clone());
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    for(RectItem* rect:allItems) {
+        delete rect;
+    }
+
+    return result;
+}
+
+std::vector<RectItem *> MainWindow::getTextItems()
+{
+    std::vector<RectItem*> result;
+    QList<QGraphicsItem*> items = sc->items();
+
+    // сортировка по z координате
+
+    // ...
+
+    std::vector<RectItem*> allItems;
+
+    for(int i=0;i<items.count();i++) {
+        RectItem* item = dynamic_cast<RectItem*>(items[i]);
+        if(item!=nullptr) {
+            allItems.push_back(item->clone());
+        }
+    }
+    for(RectItem* rect:allItems) {
+        auto properties = rect->getProperties();
+        for(const auto &pr:properties) {
+            if((pr.getType()==ElProperty::Type::STRING_T)) {
+                if(pr.getName()=="type") {
+                    auto prVal = pr.getValue();
+                    if(auto val = std::get_if<QString>(&prVal)) {
+                        if(QString("text")==val->toStdString().c_str()) {
+                            result.push_back(rect->clone());
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    for(RectItem* rect:allItems) {
+        delete rect;
+    }
+
+    return result;
 }
 
 

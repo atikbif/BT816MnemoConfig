@@ -20,7 +20,9 @@ FilledRectItem::FilledRectItem(qreal _width, qreal _height, QObject *parent):Rec
 
     pr = ElProperty("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("filled_rect"));
-    properties.push_back(pr);
+    updateProperty(pr);
+
+    removeProperty("line_color");
 
     pr = ElProperty("on_color",ElProperty::Type::STRING_T);
     QColor col = QColor(onColor.r,onColor.g,onColor.b);

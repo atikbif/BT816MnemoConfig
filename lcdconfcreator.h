@@ -3,6 +3,7 @@
 
 #include <QByteArray>
 #include "plcconfig.h"
+#include "Elements/Widgets/rectitem.h"
 
 enum class ConfID {ConfAppl, ConfPassw, ConfAI, ConfDI, ConfDO, ConfNetReg, ConfClusterReg,
             ConfNetBit, ConfClusterBit, ConfCalculation, ConfCAN, ConfInpDescr, ConfOutputDescr,
@@ -22,6 +23,10 @@ class LCDConfCreator
     PLCConfig plcConf;
     uint8_t canAddr = 1;
     QString backgroundImageFileName;
+
+    std::vector<RectItem*> graphicsItems;
+    std::vector<RectItem*> textItems;
+
     QByteArray getApplicationConfig(uint32_t par);
     QByteArray getPasswordConfig(uint32_t par);
     QByteArray getAIConfig(uint32_t par);
@@ -39,12 +44,16 @@ class LCDConfCreator
     QByteArray getMnemoConfig(uint32_t par, uint32_t backgroundAddr);
     void addEmptyByte(QByteArray &conf);
     AnalogInputConfig getAnalogInputConfig(AnalogueInp inp);
+    std::vector<uint8_t> getItemMnemoData(RectItem *item);
+    std::vector<uint8_t> getBackgroundItemData(uint32_t addr);
 public:
     LCDConfCreator() = default;
     QByteArray createLCDConf();
     void setPLCConfig(const PLCConfig &conf);
     void setCanAddr(uint8_t value);
     void setBackgroundImage(const QString &value);
+    void setGraphicsItems(std::vector<RectItem*> items);
+    void setTextItems(std::vector<RectItem*> items);
 };
 
 #endif // LCDCONFCREATOR_H

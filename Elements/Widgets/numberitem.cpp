@@ -10,7 +10,7 @@ NumberItem::NumberItem(qreal _width, qreal _height, QObject *parent):RectItem(_w
 {
     ElProperty pr("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("number"));
-    properties.push_back(pr);
+    updateProperty(pr);
 
     engFontSize.push_back(16);
     engFontSize.push_back(20);

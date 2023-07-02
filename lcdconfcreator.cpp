@@ -852,10 +852,102 @@ QByteArray LCDConfCreator::getBackgroundImageConfig(uint32_t par)
 
 QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
 {
+    const int lengthOffset = 2;
     Q_UNUSED(par)
-    Q_UNUSED(backgroundAddr)
     QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfMnemo);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
     res.append(1);
+
+    std::vector<uint8_t> mnemoData;
+
+    uint16_t mnemo_key = 0x15A2;
+    mnemoData.push_back(static_cast<uint8_t>(mnemo_key>>8));
+    mnemoData.push_back(static_cast<uint8_t>(mnemo_key&0xFF));
+
+    uint16_t itemCnt = 0;
+
+    if(!backgroundImageFileName.isEmpty()) {
+        itemCnt++;
+    }
+
+    itemCnt+=static_cast<uint16_t>(graphicsItems.size());
+    itemCnt+=static_cast<uint16_t>(textItems.size());
+
+    mnemoData.push_back(static_cast<uint8_t>(itemCnt>>8));
+    mnemoData.push_back(static_cast<uint8_t>(itemCnt&0xFF));
+
+    int headerOffset = static_cast<int>(mnemoData.size());
+
+    // place for items offset address
+
+    for(int i=0;i<static_cast<int>(itemCnt);i++) {
+        mnemoData.push_back(0);
+        mnemoData.push_back(0);
+    }
+
+    uint16_t dataOffset = static_cast<uint16_t>(mnemoData.size());
+
+    int itemNum = 0;
+
+    // add background image item
+    if(!backgroundImageFileName.isEmpty()) {
+
+        mnemoData[headerOffset+itemNum*2] = dataOffset>>8;
+        mnemoData[headerOffset+itemNum*2+1] = dataOffset&0xFF;
+
+        // get background item data
+        std::vector<uint8_t> itemData = getBackgroundItemData(backgroundAddr);
+        for(int i=0;i<itemData.size();i++) mnemoData.push_back(itemData.at(i));
+        dataOffset+=static_cast<uint16_t>(itemData.size());
+        itemNum++;
+    }
+
+    for(int i=0;i<graphicsItems.size();i++) {
+        mnemoData[headerOffset+itemNum*2] = dataOffset>>8;
+        mnemoData[headerOffset+itemNum*2+1] = dataOffset&0xFF;
+
+        // get item data
+        std::vector<uint8_t> itemData = getItemMnemoData(graphicsItems.at(i));
+
+        for(int j=0;j<itemData.size();i++) mnemoData.push_back(itemData.at(j));
+        dataOffset+=static_cast<uint16_t>(itemData.size());
+        itemNum++;
+    }
+
+    for(int i=0;i<textItems.size();i++) {
+        mnemoData[headerOffset+itemNum*2] = dataOffset>>8;
+        mnemoData[headerOffset+itemNum*2+1] = dataOffset&0xFF;
+
+        // get item data
+        std::vector<uint8_t> itemData = getItemMnemoData(textItems.at(i));
+
+        for(int j=0;j<itemData.size();i++) mnemoData.push_back(itemData.at(j));
+        dataOffset+=static_cast<uint16_t>(itemData.size());
+        itemNum++;
+    }
+
+    for(uint8_t v:mnemoData) {
+        res.push_back(static_cast<char>(v));
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
     return res;
 }
 
@@ -912,6 +1004,20 @@ AnalogInputConfig LCDConfCreator::getAnalogInputConfig(AnalogueInp inp)
         res.b = 0;
         break;
     }
+    return res;
+}
+
+std::vector<uint8_t> LCDConfCreator::getItemMnemoData(RectItem *item)
+{
+    Q_UNUSED(item)
+    std::vector<uint8_t> res;
+    return res;
+}
+
+std::vector<uint8_t> LCDConfCreator::getBackgroundItemData(uint32_t addr)
+{
+    Q_UNUSED(addr)
+    std::vector<uint8_t> res;
     return res;
 }
 
@@ -1235,4 +1341,14 @@ void LCDConfCreator::setCanAddr(uint8_t value)
 void LCDConfCreator::setBackgroundImage(const QString &value)
 {
     backgroundImageFileName = value;
+}
+
+void LCDConfCreator::setGraphicsItems(std::vector<RectItem *> items)
+{
+    graphicsItems = items;
+}
+
+void LCDConfCreator::setTextItems(std::vector<RectItem *> items)
+{
+    textItems = items;
 }

@@ -74,6 +74,8 @@ public:
     int getLineWidth() const;
     ChangeMode getChangeMode() {return chMode;}
 
+    void removeProperty(const QString &prName);
+
     virtual void updateProperty(ElProperty prop);
     virtual void updateCaughtPos(QPointF point, qreal dx, qreal dy, MovePoint pointType);
     virtual RectItem* clone();

@@ -10,7 +10,7 @@ TextItem::TextItem(qreal _width, qreal _height, QObject *parent):RectItem(_width
     numFont = lastNumFont;
     ElProperty pr("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("text"));
-    properties.push_back(pr);
+    updateProperty(pr);
 
     pr = ElProperty("cyr_font_index",ElProperty::Type::INT_T);
     pr.setValue(static_cast<int>(numFont));

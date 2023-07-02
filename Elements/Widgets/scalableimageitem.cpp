@@ -8,7 +8,7 @@ ScalableImageItem::ScalableImageItem(qreal _width, qreal _height, QObject *paren
 {
     ElProperty pr("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("scal_image"));
-    properties.push_back(pr);
+    updateProperty(pr);
     index = lastIndex;
 
     pr = ElProperty("image_index",ElProperty::Type::INT_T);

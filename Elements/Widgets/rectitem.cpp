@@ -392,6 +392,16 @@ void RectItem::updateProperty(ElProperty prop)
                 }
             }
         }
+    }else if(prop.getName()=="type"){
+        if(prop.getType()==ElProperty::Type::STRING_T) {
+            auto typeVal = prop.getValue();
+            if(auto val = std::get_if<QString>(&typeVal)) {
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="type";});
+                if(it!=properties.end()) {
+                    it->setValue(*val);
+                }
+            }
+        }
     }
 }
 
@@ -432,6 +442,14 @@ void RectItem::updateLineWidth(int value)
 int RectItem::getLineWidth() const
 {
     return lineWidth;
+}
+
+void RectItem::removeProperty(const QString &prName)
+{
+    auto it = std::find_if(properties.begin(),properties.end(),[prName](const ElProperty &pr){return pr.getName()==prName;});
+    if(it!=properties.end()) {
+        properties.erase(it);
+    }
 }
 
 void RectItem::write(QJsonObject &json)

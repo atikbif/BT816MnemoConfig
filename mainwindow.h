@@ -36,6 +36,8 @@ class MainWindow : public QMainWindow
     void save();
     void open();
     void buildConfigFile();
+    std::vector<RectItem*> getGraphicsItems();
+    std::vector<RectItem*> getTextItems();
 
 public:
     MainWindow(QWidget *parent = nullptr);

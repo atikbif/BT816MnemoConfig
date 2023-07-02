@@ -19,7 +19,7 @@ LampItem::LampItem(qreal _width, qreal _height, QObject *parent):RectItem(_width
 
     pr = ElProperty("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("lamp"));
-    properties.push_back(pr);
+    updateProperty(pr);
     onIndex = lastOnIndex;
     offIndex = lastOffIndex;
 

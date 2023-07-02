@@ -19,7 +19,9 @@ FilledCircleItem::FilledCircleItem(qreal _width, qreal _height, QObject *parent)
 
     pr = ElProperty("type",ElProperty::Type::STRING_T);
     pr.setValue(QString("filled_circle"));
-    properties.push_back(pr);
+    updateProperty(pr);
+
+    removeProperty("line_color");
 
     pr = ElProperty("on_color",ElProperty::Type::STRING_T);
     QColor col = QColor(onColor.r,onColor.g,onColor.b);
