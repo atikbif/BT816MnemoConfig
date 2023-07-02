@@ -1009,15 +1009,54 @@ AnalogInputConfig LCDConfCreator::getAnalogInputConfig(AnalogueInp inp)
 
 std::vector<uint8_t> LCDConfCreator::getItemMnemoData(RectItem *item)
 {
-    Q_UNUSED(item)
     std::vector<uint8_t> res;
+
+    auto properties = item->getProperties();
+
+    QString itemType;
+
+    for(const auto &pr:properties) {
+        if((pr.getType()==ElProperty::Type::STRING_T)) {
+            if(pr.getName()=="type") {
+                auto prVal = pr.getValue();
+                if(auto val = std::get_if<QString>(&prVal)) {
+                    itemType = val->toStdString().c_str();
+                }
+                break;
+            }
+        }
+    }
+
+    if(itemType=="text") {
+
+    }else if(itemType=="filled_rect") {
+
+    }else if(itemType=="filled_circle") {
+
+    }else if(itemType=="lamp") {
+
+    }else if(itemType=="number") {
+
+    }
     return res;
 }
 
 std::vector<uint8_t> LCDConfCreator::getBackgroundItemData(uint32_t addr)
 {
-    Q_UNUSED(addr)
     std::vector<uint8_t> res;
+
+    uint16_t backgroundImageId = 2;
+
+    res.push_back(static_cast<uint8_t>(backgroundImageId>>8));
+    res.push_back(static_cast<uint8_t>(backgroundImageId&0xFF));
+
+    res.push_back(0x01); // version
+
+    res.push_back(static_cast<uint8_t>((addr>>24)&0xFF));
+    res.push_back(static_cast<uint8_t>((addr>>16)&0xFF));
+    res.push_back(static_cast<uint8_t>((addr>>8)&0xFF));
+    res.push_back(static_cast<uint8_t>((addr>>0)&0xFF));
+
     return res;
 }
 
