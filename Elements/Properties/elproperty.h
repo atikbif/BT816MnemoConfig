@@ -21,6 +21,10 @@ public:
     void setValue(int v);
     void setValue(double v);
     void setValue(const QString &v);
+
+    static QString getStringFromProperty(ElProperty pr);
+    static int getIntFromProperty(ElProperty pr);
+    static bool getBoolFromProperty(ElProperty pr);
 };
 
 #endif // ELPROPERTY_H

@@ -37,39 +37,6 @@ void PropertiesView::clearLayout(QLayout *l)
     }
 }
 
-QString PropertiesView::getStringFromProperty(ElProperty pr)
-{
-    if(pr.getType()==ElProperty::Type::STRING_T) {
-        auto prVal = pr.getValue();
-        if(auto val = std::get_if<QString>(&prVal)) {
-            return *val;
-        }
-    }
-    return "";
-}
-
-int PropertiesView::getIntFromProperty(ElProperty pr)
-{
-    if(pr.getType()==ElProperty::Type::INT_T) {
-        auto prVal = pr.getValue();
-        if(auto val = std::get_if<int>(&prVal)) {
-            return *val;
-        }
-    }
-    return 0;
-}
-
-bool PropertiesView::getBoolFromProperty(ElProperty pr)
-{
-    if(pr.getType()==ElProperty::Type::BOOL_T) {
-        auto prVal = pr.getValue();
-        if(auto val = std::get_if<bool>(&prVal)) {
-            return *val;
-        }
-    }
-    return false;
-}
-
 void PropertiesView::drawXYProperties(QFormLayout *fLayout)
 {
     QString textColor = "QLabel { color : white}";
@@ -111,7 +78,7 @@ void PropertiesView::drawWidthHeightProperties(QFormLayout *fLayout, const std::
 
     auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="change";});
     if(it!=properties.end()) {
-        int val = getIntFromProperty(*it);
+        int val = ElProperty::getIntFromProperty(*it);
         ChangeMode chMode = static_cast<ChangeMode>(val);
         spBox = new ViewSpinbox();
         spBox->setStyleSheet(spinHeight);
@@ -158,7 +125,7 @@ void PropertiesView::drawColorProperties(QFormLayout *fLayout, const std::vector
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        QString col = getStringFromProperty(*it);
+        QString col = ElProperty::getStringFromProperty(*it);
         bool res = false;
         long rgb = col.toLong(&res,16);
         int r_color = (rgb>>16) & 0xFF;
@@ -200,7 +167,7 @@ void PropertiesView::drawOnColorProperties(QFormLayout *fLayout, const std::vect
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        QString col = getStringFromProperty(*it);
+        QString col = ElProperty::getStringFromProperty(*it);
         bool res = false;
         long rgb = col.toLong(&res,16);
         int r_color = (rgb>>16) & 0xFF;
@@ -242,7 +209,7 @@ void PropertiesView::drawOffColorProperties(QFormLayout *fLayout, const std::vec
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        QString col = getStringFromProperty(*it);
+        QString col = ElProperty::getStringFromProperty(*it);
         bool res = false;
         long rgb = col.toLong(&res,16);
         int r_color = (rgb>>16) & 0xFF;
@@ -286,7 +253,7 @@ void PropertiesView::drawLinkBoolTypeProperties(QFormLayout *fLayout, const std:
         varTypeBox->addItem(SysVar::getDiscreteVarTypeString(DiscreteVarType::CLUSTER_BIT));
         varTypeBox->addItem(SysVar::getDiscreteVarTypeString(DiscreteVarType::NET_BIT));
 
-        int index = getIntFromProperty(*it);
+        int index = ElProperty::getIntFromProperty(*it);
         if(index>=0 && index<varTypeBox->count()) varTypeBox->setCurrentIndex(index);
 
         connect(varTypeBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
@@ -330,7 +297,7 @@ void PropertiesView::drawLinkBoolIndexProperties(QFormLayout *fLayout, const std
                     varNameBox->addItem(varName);
                 }
 
-                int index = getIntFromProperty(*it);
+                int index = ElProperty::getIntFromProperty(*it);
                 if(index>=0 && index<varNameBox->count()) varNameBox->setCurrentIndex(index);
 
                 connect(varNameBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
@@ -398,7 +365,7 @@ void PropertiesView::drawTextValueProperties(QFormLayout *fLayout, const std::ve
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        QLineEdit *textWidget = new QLineEdit(getStringFromProperty(*it));
+        QLineEdit *textWidget = new QLineEdit(ElProperty::getStringFromProperty(*it));
 
         connect(textWidget,&QLineEdit::textChanged,[this](const QString &val){
             ElProperty pr("text_value",ElProperty::Type::STRING_T);
@@ -422,7 +389,7 @@ void PropertiesView::drawEngFontProperties(QFormLayout *fLayout, const std::vect
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        int f = getIntFromProperty(*it);
+        int f = ElProperty::getIntFromProperty(*it);
 
         QComboBox *fontHeightBox = new QComboBox();
         for(int i=0;i<static_cast<int>(EngFonts::LastEl);i++) {
@@ -461,7 +428,7 @@ void PropertiesView::drawNumPatternProperties(QFormLayout *fLayout, const std::v
 
         QLineEdit *numValuePattern = new QLineEdit();
 
-        numValuePattern->setText(getStringFromProperty(*it));
+        numValuePattern->setText(ElProperty::getStringFromProperty(*it));
 
         connect(numValuePattern,&QLineEdit::textChanged,[this,numValuePattern](const QString &val){
             QString res = val;
@@ -495,7 +462,7 @@ void PropertiesView::drawNumDividerProperties(QFormLayout *fLayout, const std::v
         dividerBox->addItem("100");
         dividerBox->addItem("1000");
 
-        int v = getIntFromProperty(*it);
+        int v = ElProperty::getIntFromProperty(*it);
         if((v<0) && (v>static_cast<int>(NumberDivider::Div1000))) v=0;
 
         dividerBox->setCurrentIndex(v);
@@ -528,7 +495,7 @@ void PropertiesView::drawLinkAnalogueTypeProperties(QFormLayout *fLayout, const 
         varTypeBox->addItem(SysVar::getAnalogueVarTypeString(AnalogueVarType::CLUSTER_REG));
         varTypeBox->addItem(SysVar::getAnalogueVarTypeString(AnalogueVarType::NET_REG));
 
-        int index = getIntFromProperty(*it);
+        int index = ElProperty::getIntFromProperty(*it);
         if(index>=0 && index<varTypeBox->count()) varTypeBox->setCurrentIndex(index);
 
         connect(varTypeBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
@@ -572,7 +539,7 @@ void PropertiesView::drawLinkAnalogueIndexProperties(QFormLayout *fLayout, const
                     varNameBox->addItem(varName);
                 }
 
-                int index = getIntFromProperty(*it);
+                int index = ElProperty::getIntFromProperty(*it);
                 if(index>=0 && index<varNameBox->count()) varNameBox->setCurrentIndex(index);
 
                 connect(varNameBox,QOverload<int>::of(&QComboBox::currentIndexChanged),[this](int index){
@@ -638,7 +605,7 @@ void PropertiesView::drawCyrFontProperties(QFormLayout *fLayout, const std::vect
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        int f = getIntFromProperty(*it);
+        int f = ElProperty::getIntFromProperty(*it);
 
         QComboBox *fontHeightBox = new QComboBox();
         for(int i=0;i<static_cast<int>(CyrFonts::LastEl);i++) {
@@ -676,7 +643,7 @@ void PropertiesView::drawLampStateProperties(QFormLayout *fLayout, const std::ve
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        bool ls = getBoolFromProperty(*it);
+        bool ls = ElProperty::getBoolFromProperty(*it);
 
         QHBoxLayout *l = new QHBoxLayout();
         QCheckBox *check = new QCheckBox();
@@ -713,7 +680,7 @@ void PropertiesView::drawLampOnIndexProperties(QFormLayout *fLayout, const std::
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        int index = getIntFromProperty(*it);
+        int index = ElProperty::getIntFromProperty(*it);
         if(index<0 || index>=LampImages::getQuantity()) index = 0;
 
         QHBoxLayout *l = new QHBoxLayout();
@@ -757,7 +724,7 @@ void PropertiesView::drawLampOffIndexProperties(QFormLayout *fLayout, const std:
         wName->setFont(QFont("Times", textSize, QFont::Bold));
         wName->setAlignment(Qt::AlignVCenter);
 
-        int index = getIntFromProperty(*it);
+        int index = ElProperty::getIntFromProperty(*it);
         if(index<0 || index>=LampImages::getQuantity()) index = 0;
 
         QHBoxLayout *l = new QHBoxLayout();

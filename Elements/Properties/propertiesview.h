@@ -33,9 +33,6 @@ class PropertiesView : public QObject
     PLCConfig plc;
 
     void clearLayout(QLayout* l);
-    QString getStringFromProperty(ElProperty pr);
-    int getIntFromProperty(ElProperty pr);
-    bool getBoolFromProperty(ElProperty pr);
 
     void drawXYProperties(QFormLayout *fLayout);
     void drawWidthHeightProperties(QFormLayout *fLayout,const std::vector<ElProperty> &properties);

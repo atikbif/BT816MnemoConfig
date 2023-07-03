@@ -45,3 +45,36 @@ void ElProperty::setValue(const QString &v)
 {
     if(type==Type::STRING_T) value = v;
 }
+
+QString ElProperty::getStringFromProperty(ElProperty pr)
+{
+    if(pr.getType()==ElProperty::Type::STRING_T) {
+        auto prVal = pr.getValue();
+        if(auto val = std::get_if<QString>(&prVal)) {
+            return *val;
+        }
+    }
+    return "";
+}
+
+int ElProperty::getIntFromProperty(ElProperty pr)
+{
+    if(pr.getType()==ElProperty::Type::INT_T) {
+        auto prVal = pr.getValue();
+        if(auto val = std::get_if<int>(&prVal)) {
+            return *val;
+        }
+    }
+    return 0;
+}
+
+bool ElProperty::getBoolFromProperty(ElProperty pr)
+{
+    if(pr.getType()==ElProperty::Type::BOOL_T) {
+        auto prVal = pr.getValue();
+        if(auto val = std::get_if<bool>(&prVal)) {
+            return *val;
+        }
+    }
+    return false;
+}

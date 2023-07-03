@@ -7,6 +7,12 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
+#include "Elements/Widgets/textitem.h"
+#include "Elements/Widgets/filledrectitem.h"
+#include "Elements/Widgets/filledcircleitem.h"
+#include "Elements/Widgets/lampitem.h"
+#include "Elements/Widgets/numberitem.h"
+#include "typical_fonts.h"
 
 QByteArray LCDConfCreator::getApplicationConfig(uint32_t par)
 {
@@ -1018,25 +1024,407 @@ std::vector<uint8_t> LCDConfCreator::getItemMnemoData(RectItem *item)
     for(const auto &pr:properties) {
         if((pr.getType()==ElProperty::Type::STRING_T)) {
             if(pr.getName()=="type") {
-                auto prVal = pr.getValue();
-                if(auto val = std::get_if<QString>(&prVal)) {
-                    itemType = val->toStdString().c_str();
-                }
+                itemType = ElProperty::getStringFromProperty(pr);
                 break;
             }
         }
     }
-
     if(itemType=="text") {
+        TextItem* curItem = dynamic_cast<TextItem*>(item);
+        if(curItem) {
+            const uint16_t mnemo_id_text = 0x04;
+            res.push_back(mnemo_id_text>>8);
+            res.push_back(mnemo_id_text&0xFF);
+            res.push_back(0x01); // version
+            auto properties = curItem->getProperties();
 
+
+            uint8_t redColor = 0;
+            uint8_t greenColor = 0;
+            uint8_t blueColor = 0;
+            auto it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="line_color";
+            });
+            if(it!=properties.end()) {
+                QString colorValue = ElProperty::getStringFromProperty(*it);
+                bool resFl = false;
+                long col = colorValue.toLong(&resFl,16);
+                if(resFl) {
+                    redColor = (col>>16)&0xFF;
+                    greenColor = (col>>8)&0xFF;
+                    blueColor = col&0xFF;
+                }
+            }
+
+            res.push_back(redColor);
+            res.push_back(greenColor);
+            res.push_back(blueColor);
+
+            uint16_t xPos = curItem->getX();
+            uint16_t yPos = curItem->getY();
+
+            res.push_back(static_cast<uint8_t>(xPos>>8));
+            res.push_back(static_cast<uint8_t>(xPos&0xFF));
+
+            res.push_back(static_cast<uint8_t>(yPos>>8));
+            res.push_back(static_cast<uint8_t>(yPos&0xFF));
+
+            uint8_t fontNum = 1;
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="cyr_font_index";
+            });
+            if(it!=properties.end()) {
+                CyrFonts cyrFont = static_cast<CyrFonts>(ElProperty::getIntFromProperty(*it));
+                switch(cyrFont) {
+                    case CyrFonts::Height14:
+                        fontNum = 1;
+                        break;
+                    case CyrFonts::Height22:
+                        fontNum = 2;
+                        break;
+                    case CyrFonts::Height30:
+                        fontNum = 3;
+                        break;
+                    case CyrFonts::Height40:
+                        fontNum = 4;
+                        break;
+                    default:
+                        fontNum = 1;
+                        break;
+                }
+            }
+
+            res.push_back(fontNum);
+
+            QString textValue;
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="text_value";
+            });
+            if(it!=properties.end()) {
+                textValue = ElProperty::getStringFromProperty(*it);
+            }
+            QByteArray utf8TextValue = textValue.toUtf8();
+
+            if(utf8TextValue.count()>38) {
+                utf8TextValue.resize(38);
+            }
+            utf8TextValue.append('\0');
+            utf8TextValue.append('\0');
+
+            for(char v:utf8TextValue) {
+                res.push_back(static_cast<uint8_t>(v));
+            }
+        }
     }else if(itemType=="filled_rect") {
+        FilledRectItem* curItem = dynamic_cast<FilledRectItem*>(item);
+        if(curItem) {
+            const uint16_t mnemo_id_filled_rect = 10;
+            res.push_back(mnemo_id_filled_rect>>8);
+            res.push_back(mnemo_id_filled_rect&0xFF);
+            res.push_back(0x01); // version
+            auto properties = curItem->getProperties();
+
+            uint16_t xPos = curItem->getX();
+            uint16_t yPos = curItem->getY();
+
+            res.push_back(static_cast<uint8_t>(xPos>>8));
+            res.push_back(static_cast<uint8_t>(xPos&0xFF));
+
+            res.push_back(static_cast<uint8_t>(yPos>>8));
+            res.push_back(static_cast<uint8_t>(yPos&0xFF));
+
+            uint16_t itemWidth = curItem->getWidth();
+            uint16_t itemHeight = curItem->getHeight();
+
+            res.push_back(static_cast<uint8_t>(itemWidth>>8));
+            res.push_back(static_cast<uint8_t>(itemWidth&0xFF));
+
+            res.push_back(static_cast<uint8_t>(itemHeight>>8));
+            res.push_back(static_cast<uint8_t>(itemHeight&0xFF));
+
+            uint8_t redOnColor = 0;
+            uint8_t greenOnColor = 0;
+            uint8_t blueOnColor = 0;
+            auto it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="on_color";
+            });
+            if(it!=properties.end()) {
+                QString colorValue = ElProperty::getStringFromProperty(*it);
+                bool resFl = false;
+                long col = colorValue.toLong(&resFl,16);
+                if(resFl) {
+                    redOnColor = (col>>16)&0xFF;
+                    greenOnColor = (col>>8)&0xFF;
+                    blueOnColor = col&0xFF;
+                }
+            }
+
+            uint8_t redOffColor = 0;
+            uint8_t greenOffColor = 0;
+            uint8_t blueOffColor = 0;
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="off_color";
+            });
+            if(it!=properties.end()) {
+                QString colorValue = ElProperty::getStringFromProperty(*it);
+                bool resFl = false;
+                long col = colorValue.toLong(&resFl,16);
+                if(resFl) {
+                    redOffColor = (col>>16)&0xFF;
+                    greenOffColor = (col>>8)&0xFF;
+                    blueOffColor = col&0xFF;
+                }
+            }
+
+            res.push_back(redOnColor);
+            res.push_back(greenOnColor);
+            res.push_back(blueOnColor);
+
+            res.push_back(redOffColor);
+            res.push_back(greenOffColor);
+            res.push_back(blueOffColor);
+
+            int linkType = 0;
+            int linkIndex = 0;
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_bool_type";
+            });
+
+            if(it!=properties.end()) {
+                linkType = ElProperty::getIntFromProperty(*it);
+            }
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_bool_index";
+            });
+
+            if(it!=properties.end()) {
+                linkIndex = ElProperty::getIntFromProperty(*it);
+            }
+
+            res.push_back(static_cast<uint8_t>(linkType>>8));
+            res.push_back(static_cast<uint8_t>(linkType&0xFF));
+
+            res.push_back(static_cast<uint8_t>(linkIndex>>8));
+            res.push_back(static_cast<uint8_t>(linkIndex&0xFF));
+        }
 
     }else if(itemType=="filled_circle") {
+        FilledCircleItem* curItem = dynamic_cast<FilledCircleItem*>(item);
+        if(curItem) {
+            const uint16_t mnemo_id_filled_circle = 11;
+            res.push_back(mnemo_id_filled_circle>>8);
+            res.push_back(mnemo_id_filled_circle&0xFF);
+            res.push_back(0x01); // version
+            auto properties = curItem->getProperties();
+
+            uint16_t xPos = curItem->getX();
+            uint16_t yPos = curItem->getY();
+
+            res.push_back(static_cast<uint8_t>(xPos>>8));
+            res.push_back(static_cast<uint8_t>(xPos&0xFF));
+
+            res.push_back(static_cast<uint8_t>(yPos>>8));
+            res.push_back(static_cast<uint8_t>(yPos&0xFF));
+
+            uint16_t itemWidth = curItem->getWidth();
+
+            res.push_back(static_cast<uint8_t>(itemWidth>>8));
+            res.push_back(static_cast<uint8_t>(itemWidth&0xFF));
+
+            uint8_t redOnColor = 0;
+            uint8_t greenOnColor = 0;
+            uint8_t blueOnColor = 0;
+            auto it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="on_color";
+            });
+            if(it!=properties.end()) {
+                QString colorValue = ElProperty::getStringFromProperty(*it);
+                bool resFl = false;
+                long col = colorValue.toLong(&resFl,16);
+                if(resFl) {
+                    redOnColor = (col>>16)&0xFF;
+                    greenOnColor = (col>>8)&0xFF;
+                    blueOnColor = col&0xFF;
+                }
+            }
+
+            uint8_t redOffColor = 0;
+            uint8_t greenOffColor = 0;
+            uint8_t blueOffColor = 0;
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="off_color";
+            });
+            if(it!=properties.end()) {
+                QString colorValue = ElProperty::getStringFromProperty(*it);
+                bool resFl = false;
+                long col = colorValue.toLong(&resFl,16);
+                if(resFl) {
+                    redOffColor = (col>>16)&0xFF;
+                    greenOffColor = (col>>8)&0xFF;
+                    blueOffColor = col&0xFF;
+                }
+            }
+
+            res.push_back(redOnColor);
+            res.push_back(greenOnColor);
+            res.push_back(blueOnColor);
+
+            res.push_back(redOffColor);
+            res.push_back(greenOffColor);
+            res.push_back(blueOffColor);
+
+            int linkType = 0;
+            int linkIndex = 0;
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_bool_type";
+            });
+
+            if(it!=properties.end()) {
+                linkType = ElProperty::getIntFromProperty(*it);
+            }
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_bool_index";
+            });
+
+            if(it!=properties.end()) {
+                linkIndex = ElProperty::getIntFromProperty(*it);
+            }
+
+            res.push_back(static_cast<uint8_t>(linkType>>8));
+            res.push_back(static_cast<uint8_t>(linkType&0xFF));
+
+            res.push_back(static_cast<uint8_t>(linkIndex>>8));
+            res.push_back(static_cast<uint8_t>(linkIndex&0xFF));
+        }
 
     }else if(itemType=="lamp") {
+        LampItem* curItem = dynamic_cast<LampItem*>(item);
+        if(curItem) {
+            const uint16_t mnemo_id_lamp = 1;
+            res.push_back(mnemo_id_lamp>>8);
+            res.push_back(mnemo_id_lamp&0xFF);
+            res.push_back(0x01); // version
+            auto properties = curItem->getProperties();
 
+            uint16_t xPos = curItem->getX();
+            uint16_t yPos = curItem->getY();
+
+            res.push_back(static_cast<uint8_t>(xPos>>8));
+            res.push_back(static_cast<uint8_t>(xPos&0xFF));
+
+            res.push_back(static_cast<uint8_t>(yPos>>8));
+            res.push_back(static_cast<uint8_t>(yPos&0xFF));
+
+            uint8_t onIndex = 0;
+            uint8_t offIndex = 1;
+
+            auto it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="lamp_on_index";
+            });
+            if(it!=properties.end()) {
+                onIndex = ElProperty::getIntFromProperty(*it);
+            }
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="lamp_off_index";
+            });
+            if(it!=properties.end()) {
+                onIndex = ElProperty::getIntFromProperty(*it);
+            }
+            res.push_back(onIndex);
+            res.push_back(offIndex);
+
+            int linkType = 0;
+            int linkIndex = 0;
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_bool_type";
+            });
+
+            if(it!=properties.end()) {
+                linkType = ElProperty::getIntFromProperty(*it);
+            }
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_bool_index";
+            });
+
+            if(it!=properties.end()) {
+                linkIndex = ElProperty::getIntFromProperty(*it);
+            }
+
+            res.push_back(static_cast<uint8_t>(linkType>>8));
+            res.push_back(static_cast<uint8_t>(linkType&0xFF));
+
+            res.push_back(static_cast<uint8_t>(linkIndex>>8));
+            res.push_back(static_cast<uint8_t>(linkIndex&0xFF));
+        }
     }else if(itemType=="number") {
+        NumberItem* curItem = dynamic_cast<NumberItem*>(item);
+        if(curItem) {
+            const uint16_t mnemo_id_number = 8;
+            res.push_back(mnemo_id_number>>8);
+            res.push_back(mnemo_id_number&0xFF);
+            res.push_back(0x01); // version
+            auto properties = curItem->getProperties();
 
+            uint16_t xPos = curItem->getX();
+            uint16_t yPos = curItem->getY();
+
+            res.push_back(static_cast<uint8_t>(xPos>>8));
+            res.push_back(static_cast<uint8_t>(xPos&0xFF));
+
+            res.push_back(static_cast<uint8_t>(yPos>>8));
+            res.push_back(static_cast<uint8_t>(yPos&0xFF));
+
+            uint8_t fontNum = 0;
+            uint8_t valueDivider = 0;
+
+            auto it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="eng_font_index";
+            });
+            if(it!=properties.end()) {
+                fontNum = ElProperty::getIntFromProperty(*it);
+            }
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="num_div";
+            });
+            if(it!=properties.end()) {
+                valueDivider = ElProperty::getIntFromProperty(*it);
+            }
+            res.push_back(fontNum);
+            res.push_back(valueDivider);
+
+            int linkType = 0;
+            int linkIndex = 0;
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_analogue_type";
+            });
+
+            if(it!=properties.end()) {
+                linkType = ElProperty::getIntFromProperty(*it);
+            }
+
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="link_analogue_index";
+            });
+
+            if(it!=properties.end()) {
+                linkIndex = ElProperty::getIntFromProperty(*it);
+            }
+
+            res.push_back(static_cast<uint8_t>(linkType>>8));
+            res.push_back(static_cast<uint8_t>(linkType&0xFF));
+
+            res.push_back(static_cast<uint8_t>(linkIndex>>8));
+            res.push_back(static_cast<uint8_t>(linkIndex&0xFF));
+        }
     }
     return res;
 }
