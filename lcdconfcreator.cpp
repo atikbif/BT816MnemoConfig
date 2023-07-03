@@ -923,7 +923,7 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
         // get item data
         std::vector<uint8_t> itemData = getItemMnemoData(graphicsItems.at(i));
 
-        for(int j=0;j<itemData.size();i++) mnemoData.push_back(itemData.at(j));
+        for(int j=0;j<itemData.size();j++) mnemoData.push_back(itemData.at(j));
         dataOffset+=static_cast<uint16_t>(itemData.size());
         itemNum++;
     }
@@ -935,7 +935,7 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
         // get item data
         std::vector<uint8_t> itemData = getItemMnemoData(textItems.at(i));
 
-        for(int j=0;j<itemData.size();i++) mnemoData.push_back(itemData.at(j));
+        for(int j=0;j<itemData.size();j++) mnemoData.push_back(itemData.at(j));
         dataOffset+=static_cast<uint16_t>(itemData.size());
         itemNum++;
     }
