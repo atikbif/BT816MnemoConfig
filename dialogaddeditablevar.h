@@ -23,7 +23,7 @@ public:
     void setVarType(SysVarType value);
     SysVarType getVarType() const;
     int getVarIndex() const;
-    void setPLC(PLCConfig plc);
+    void setPLC(const PLCConfig &plc);
 
 private slots:
     void on_comboBoxVarType_currentIndexChanged(int index);

@@ -2,7 +2,6 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
-#include "Elements/Widgets/lampitem.h"
 #include <QApplication>
 #include <QTimer>
 
@@ -426,9 +425,9 @@ void DisplayScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
                         rectItem->setSelection(SelectionMode::Single);
 
                         if(selItems.size()==1) {
-                            RectItem *item = selItems.at(0);
-                            emit setProperties(item->getProperties());
-                            emit updateRect(item->getX(),item->getY(),item->getWidth(),item->getHeight(),item->getLineWidth());
+                            RectItem *rectItem = selItems.at(0);
+                            emit setProperties(rectItem->getProperties());
+                            emit updateRect(rectItem->getX(),rectItem->getY(),rectItem->getWidth(),rectItem->getHeight(),rectItem->getLineWidth());
                         }else emit clearProperties();
                     }
                     else {

@@ -50,7 +50,7 @@ int DialogAddEditableVar::getVarIndex() const
     return varIndex;
 }
 
-void DialogAddEditableVar::setPLC(PLCConfig plc)
+void DialogAddEditableVar::setPLC(const PLCConfig &plc)
 {
     this->plc = plc;
     on_comboBoxVarType_currentIndexChanged(ui->comboBoxVarType->currentIndex());

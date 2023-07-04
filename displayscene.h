@@ -10,7 +10,7 @@ class DisplayScene : public QGraphicsScene
 {
     Q_OBJECT
     RectItem *caughtRect = nullptr;
-    MovePoint caughtPointType;
+    MovePoint caughtPointType = MovePoint::All;
     QGraphicsItem *insertItem = nullptr;
 
     std::vector<RectItem*> selItems;

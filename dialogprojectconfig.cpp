@@ -24,13 +24,15 @@ void DialogProjectConfig::setCanAddr(uint8_t value)
 void DialogProjectConfig::setVars(const std::vector<SysVar> &v)
 {
     vars = v;
-    for(auto &v: vars) {
-        SysVarType vType = v.varType;
-        for(const auto &plcV:plc.getSysVarByType(vType)) {
-            if(plcV.sysName==v.sysName) {
-                v.userName = plcV.userName;
-                break;
-            }
+
+    for(auto &var: vars) {
+        SysVarType vType = var.varType;
+        std::vector<SysVar> varsByType = plc.getSysVarByType(vType);
+        auto it = std::find_if(varsByType.begin(),varsByType.end(),[&](const SysVar &sysVar){
+            return (sysVar.sysName==var.sysName);
+        });
+        if(it!=varsByType.end()) {
+            var.userName = it->userName;
         }
     }
 }
@@ -63,7 +65,7 @@ std::vector<SysVar> DialogProjectConfig::getVars() const
     return vars;
 }
 
-void DialogProjectConfig::setPLC(PLCConfig plc)
+void DialogProjectConfig::setPLC(const PLCConfig &plc)
 {
     this->plc = plc;
 }
@@ -81,13 +83,13 @@ void DialogProjectConfig::on_pushButtonAdd_clicked()
     if(dialogAddVar->exec()==QDialog::Accepted) {
         SysVarType vType = dialogAddVar->getVarType();
         int index = dialogAddVar->getVarIndex();
-        std::vector<SysVar> vars = plc.getSysVarByType(vType);
-        if(vars.size()>=index) {
+        std::vector<SysVar> sysVars = plc.getSysVarByType(vType);
+        if(sysVars.size()>=index) {
             int i = ui->tableWidget->rowCount();
             ui->tableWidget->insertRow(i);
             ui->tableWidget->setItem(i,0,new QTableWidgetItem(vars.at(index).sysName));
             ui->tableWidget->setItem(i,1,new QTableWidgetItem(vars.at(index).userName));
-            this->vars.push_back(vars.at(index));
+            vars.push_back(sysVars.at(index));
             ui->tableWidget->selectRow(ui->tableWidget->rowCount()-1);
         }
     }

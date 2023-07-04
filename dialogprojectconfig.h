@@ -24,7 +24,7 @@ public:
     void updateGUI();
     uint8_t getCanAddr() const;
     std::vector<SysVar> getVars() const;
-    void setPLC(PLCConfig plc);
+    void setPLC(const PLCConfig &plc);
     void setEVEPath(const QString &value);
     QString getEVEPath() {return evePath;}
 
