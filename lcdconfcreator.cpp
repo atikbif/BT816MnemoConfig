@@ -837,8 +837,10 @@ QByteArray LCDConfCreator::getBackgroundImageConfig(uint32_t par)
 
     res.append((imageLength>>24)&0xFF);
     res.append((imageLength>>16)&0xFF);
-    res.append((imageLength>>16)&0xFF);
+    res.append((imageLength>>8)&0xFF);
     res.append((imageLength>>0)&0xFF);
+
+    while(res.count()<4096) res.append('\0');
 
     res.append(imageData);
 
@@ -1704,6 +1706,7 @@ QByteArray LCDConfCreator::createLCDConf()
         dataOffset++;
     }
     QByteArray backgroundImageConf = getBackgroundImageConfig(0);
+    uint32_t image_offset = headerAddr+dataOffset;
     idNum = static_cast<uint16_t>(ConfID::ConfBackgrImage);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));
@@ -1721,7 +1724,7 @@ QByteArray LCDConfCreator::createLCDConf()
         addEmptyByte(dataArray);
         dataOffset++;
     }
-    QByteArray mnemoConf = getMnemoConfig(0,0);
+    QByteArray mnemoConf = getMnemoConfig(0,image_offset);
     idNum = static_cast<uint16_t>(ConfID::ConfMnemo);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));

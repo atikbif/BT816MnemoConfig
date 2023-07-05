@@ -87,8 +87,8 @@ void DialogProjectConfig::on_pushButtonAdd_clicked()
         if(sysVars.size()>=index) {
             int i = ui->tableWidget->rowCount();
             ui->tableWidget->insertRow(i);
-            ui->tableWidget->setItem(i,0,new QTableWidgetItem(vars.at(index).sysName));
-            ui->tableWidget->setItem(i,1,new QTableWidgetItem(vars.at(index).userName));
+            ui->tableWidget->setItem(i,0,new QTableWidgetItem(sysVars.at(index).sysName));
+            ui->tableWidget->setItem(i,1,new QTableWidgetItem(sysVars.at(index).userName));
             vars.push_back(sysVars.at(index));
             ui->tableWidget->selectRow(ui->tableWidget->rowCount()-1);
         }

@@ -15,7 +15,7 @@ protected:
     static DiscreteVarType lastLinkType;
     bool state = true;
     DiscreteVarType linkType;
-    int linkIndex;
+    int linkIndex=0;
 public:
     FilledRectItem(qreal _width, qreal _height, QObject *parent=nullptr);
 
