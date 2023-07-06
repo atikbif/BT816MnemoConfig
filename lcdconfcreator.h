@@ -46,6 +46,7 @@ class LCDConfCreator
     AnalogInputConfig getAnalogInputConfig(AnalogueInp inp);
     std::vector<uint8_t> getItemMnemoData(RectItem *item);
     std::vector<uint8_t> getBackgroundItemData(uint32_t addr);
+    std::vector<uint8_t> getLoadFontsData();
 public:
     LCDConfCreator() = default;
     QByteArray createLCDConf();

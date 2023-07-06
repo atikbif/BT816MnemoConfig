@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QFont>
 #include <QTextOption>
+#include <QDebug>
 
 CyrFonts TextItem::lastNumFont=CyrFonts::Height14;
 
@@ -29,10 +30,13 @@ void TextItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),lineWidth));
         painter->drawRect(QRectF(0,0,width,height));
     }else painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),1));
-    QFont font("Courier New");
-    font.setPointSize(getCyrFontHeight(numFont));
+
+    QFont font("IBM Plex Mono");
+
+    font.setStyleStrategy(QFont::PreferMatch);
+    font.setPixelSize(getCyrFontHeight(numFont));
     painter->setFont(font);
-    painter->drawText(QRectF(indent,0,width-indent*2,height), textValue);
+    painter->drawText(QRectF(0,0,width,height), textValue);
     drawBorder(painter);
     Q_UNUSED(option)
     Q_UNUSED(widget)
@@ -70,7 +74,7 @@ void TextItem::updateProperty(ElProperty prop)
                 numFont = static_cast<CyrFonts>(*val);
                 lastNumFont = numFont;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="cyr_font_index";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }

@@ -888,6 +888,7 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
 
     itemCnt+=static_cast<uint16_t>(graphicsItems.size());
     itemCnt+=static_cast<uint16_t>(textItems.size());
+    if(textItems.size()) itemCnt++;
 
     mnemoData.push_back(static_cast<uint8_t>(itemCnt>>8));
     mnemoData.push_back(static_cast<uint8_t>(itemCnt&0xFF));
@@ -924,6 +925,18 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
 
         // get item data
         std::vector<uint8_t> itemData = getItemMnemoData(graphicsItems.at(i));
+
+        for(int j=0;j<itemData.size();j++) mnemoData.push_back(itemData.at(j));
+        dataOffset+=static_cast<uint16_t>(itemData.size());
+        itemNum++;
+    }
+
+    if(textItems.size()) {  // load fonts item
+        mnemoData[headerOffset+itemNum*2] = dataOffset>>8;
+        mnemoData[headerOffset+itemNum*2+1] = dataOffset&0xFF;
+
+        // get item data
+        std::vector<uint8_t> itemData = getLoadFontsData();
 
         for(int j=0;j<itemData.size();j++) mnemoData.push_back(itemData.at(j));
         dataOffset+=static_cast<uint16_t>(itemData.size());
@@ -1447,6 +1460,16 @@ std::vector<uint8_t> LCDConfCreator::getBackgroundItemData(uint32_t addr)
     res.push_back(static_cast<uint8_t>((addr>>8)&0xFF));
     res.push_back(static_cast<uint8_t>((addr>>0)&0xFF));
 
+    return res;
+}
+
+std::vector<uint8_t> LCDConfCreator::getLoadFontsData()
+{
+    std::vector<uint8_t> res;
+    uint16_t id = 3;
+    res.push_back(static_cast<uint8_t>(id>>8));
+    res.push_back(static_cast<uint8_t>(id&0xFF));
+    res.push_back(0x01); // version
     return res;
 }
 
