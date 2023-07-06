@@ -14,7 +14,7 @@ class LampItem : public RectItem
     bool state = true;
     static DiscreteVarType lastLinkType;
     DiscreteVarType linkType;
-    int linkIndex;
+    int linkIndex = 0;
 public:
     LampItem(qreal _width, qreal _height, QObject *parent=nullptr);
 

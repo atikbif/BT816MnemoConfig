@@ -1349,7 +1349,7 @@ std::vector<uint8_t> LCDConfCreator::getItemMnemoData(RectItem *item)
                 return pr.getName()=="lamp_off_index";
             });
             if(it!=properties.end()) {
-                onIndex = ElProperty::getIntFromProperty(*it);
+                offIndex = ElProperty::getIntFromProperty(*it);
             }
             res.push_back(onIndex);
             res.push_back(offIndex);
