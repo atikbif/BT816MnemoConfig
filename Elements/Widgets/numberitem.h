@@ -12,17 +12,17 @@ class NumberItem : public RectItem
 {
     std::vector<int> engFontSize;
     static NumberDivider lastDiv;
-    static EngFonts lastNumFont;
+    static CyrFonts lastNumFont;
     static QString lastPattern;
     static AnalogueVarType lastLinkType;
     //static int lastVarType;
     //static int lastVarIndex;
 
     Q_OBJECT
-    EngFonts numFont;
+    CyrFonts numFont;
     NumberDivider div;
     AnalogueVarType linkType;
-    int linkIndex;
+    int linkIndex = 0;
     QString pattern;
 public:
     NumberItem(qreal _width, qreal _height, QObject *parent=nullptr);

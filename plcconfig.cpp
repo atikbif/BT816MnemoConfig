@@ -128,21 +128,21 @@ PLCConfig::PLCConfig(const QString plcName)
             sysVar.push_back(v);
         }
 
-        for(int i=0;i<224;i++) {
+        for(int i=0;i<28;i++) {
             SysVar v;
             v.varType = SysVarType::CLUSTER_BIT;
             v.sysName = "CLBIT" + QString::number(17+i);
             sysVar.push_back(v);
         }
 
-        for(int i=0;i<128;i++) {
+        for(int i=0;i<16;i++) {
             SysVar v;
             v.varType = SysVarType::NET_BIT;
-            v.sysName = "NBIT" + QString::number(257+i);
+            v.sysName = "NBIT" + QString::number(241+i);
             sysVar.push_back(v);
         }
 
-        for(int i=0;i<128;i++) {
+        for(int i=0;i<16;i++) {
             SysVar v;
             v.varType = SysVarType::NET_REG;
             v.sysName = "NREG" + QString::number(81+i);

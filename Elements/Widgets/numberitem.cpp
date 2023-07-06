@@ -2,7 +2,7 @@
 #include <QPainter>
 
 NumberDivider NumberItem::lastDiv = NumberDivider::Div1;
-EngFonts NumberItem::lastNumFont = EngFonts::Height16;
+CyrFonts NumberItem::lastNumFont = CyrFonts::Height22;
 QString NumberItem::lastPattern = "000";
 AnalogueVarType NumberItem::lastLinkType = AnalogueVarType::RAW_AI;
 
@@ -25,7 +25,7 @@ NumberItem::NumberItem(qreal _width, qreal _height, QObject *parent):RectItem(_w
     linkType = lastLinkType;
 
 
-    pr = ElProperty("eng_font_index",ElProperty::Type::INT_T);
+    pr = ElProperty("cyr_font_index",ElProperty::Type::INT_T);
     pr.setValue(static_cast<int>(numFont));
     properties.push_back(pr);
 
@@ -54,12 +54,11 @@ void NumberItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
         painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),lineWidth));
         painter->drawRect(QRectF(0,0,width,height));
     }else painter->setPen(QPen(QBrush(QColor(borderColor.r,borderColor.g,borderColor.b)),1));
-    QFont font("Times");
-    //font.setBold(true);
-    font.setPointSize(getEngFontHeight(numFont));
+    QFont font("IBM Plex Mono");
+    font.setPixelSize(getCyrFontHeight(numFont));
     painter->setFont(font);
 
-    painter->drawText(QRectF(indent,0,width-indent*2,height), pattern);
+    painter->drawText(QRectF(0,0,width,height), pattern);
     drawBorder(painter);
     Q_UNUSED(option)
     Q_UNUSED(widget)
@@ -78,14 +77,14 @@ RectItem *NumberItem::clone()
 void NumberItem::updateProperty(ElProperty prop)
 {
     RectItem::updateProperty(prop);
-    if(prop.getName()=="eng_font_index") {
+    if(prop.getName()=="cyr_font_index") {
         if(prop.getType()==ElProperty::Type::INT_T) {
             auto tVal = prop.getValue();
             if(auto val = std::get_if<int>(&tVal)) {
-                numFont = static_cast<EngFonts>(*val);
+                numFont = static_cast<CyrFonts>(*val);
                 lastNumFont = numFont;
                 update();
-                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="eng_font_index";});
+                auto it = std::find_if(properties.begin(),properties.end(),[](ElProperty pr){return pr.getName()=="cyr_font_index";});
                 if(it!=properties.end()) {
                     it->setValue(*val);
                 }

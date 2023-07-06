@@ -1382,7 +1382,7 @@ std::vector<uint8_t> LCDConfCreator::getItemMnemoData(RectItem *item)
     }else if(itemType=="number") {
         NumberItem* curItem = dynamic_cast<NumberItem*>(item);
         if(curItem) {
-            const uint16_t mnemo_id_number = 8;
+            const uint16_t mnemo_id_number = 7;
             res.push_back(mnemo_id_number>>8);
             res.push_back(mnemo_id_number&0xFF);
             res.push_back(0x01); // version
@@ -1401,7 +1401,7 @@ std::vector<uint8_t> LCDConfCreator::getItemMnemoData(RectItem *item)
             uint8_t valueDivider = 0;
 
             auto it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
-                return pr.getName()=="eng_font_index";
+                return pr.getName()=="cyr_font_index";
             });
             if(it!=properties.end()) {
                 fontNum = ElProperty::getIntFromProperty(*it);
@@ -1439,6 +1439,28 @@ std::vector<uint8_t> LCDConfCreator::getItemMnemoData(RectItem *item)
 
             res.push_back(static_cast<uint8_t>(linkIndex>>8));
             res.push_back(static_cast<uint8_t>(linkIndex&0xFF));
+
+            uint8_t redColor = 0;
+            uint8_t greenColor = 0;
+            uint8_t blueColor = 0;
+            it = std::find_if(properties.begin(),properties.end(),[](const ElProperty &pr){
+                return pr.getName()=="line_color";
+            });
+            if(it!=properties.end()) {
+                QString colorValue = ElProperty::getStringFromProperty(*it);
+                bool resFl = false;
+                long col = colorValue.toLong(&resFl,16);
+                if(resFl) {
+                    redColor = (col>>16)&0xFF;
+                    greenColor = (col>>8)&0xFF;
+                    blueColor = col&0xFF;
+                }
+            }
+
+            res.push_back(redColor);
+            res.push_back(greenColor);
+            res.push_back(blueColor);
+
         }
     }
     return res;

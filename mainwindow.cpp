@@ -293,11 +293,9 @@ std::vector<RectItem *> MainWindow::getGraphicsItems()
         for(const auto &pr:properties) {
             if((pr.getType()==ElProperty::Type::STRING_T)) {
                 if(pr.getName()=="type") {
-                    auto prVal = pr.getValue();
-                    if(auto val = std::get_if<QString>(&prVal)) {
-                        if(QString("text")!=val->toStdString().c_str()) {
-                            result.push_back(rect->clone());
-                        }
+                    QString val = ElProperty::getStringFromProperty(pr);
+                    if(!(val=="text" || val=="number")) {
+                        result.push_back(rect->clone());
                     }
                     break;
                 }
@@ -334,12 +332,8 @@ std::vector<RectItem *> MainWindow::getTextItems()
         for(const auto &pr:properties) {
             if((pr.getType()==ElProperty::Type::STRING_T)) {
                 if(pr.getName()=="type") {
-                    auto prVal = pr.getValue();
-                    if(auto val = std::get_if<QString>(&prVal)) {
-                        if(QString("text")==val->toStdString().c_str()) {
-                            result.push_back(rect->clone());
-                        }
-                    }
+                    QString val = ElProperty::getStringFromProperty(pr);
+                    if(val=="text" || val=="number") result.push_back(rect->clone());
                     break;
                 }
             }
@@ -597,7 +591,7 @@ void MainWindow::on_pushButtonFilledCircle_clicked()
 void MainWindow::on_pushButtonText_clicked()
 {
     clearProperties();
-    TextItem *item = new TextItem(150,35);
+    TextItem *item = new TextItem(30,20);
     item->setZValue(sc->getMaxZValue());
     item->updateLineWidth(0);
     setProperties(item->getProperties());
@@ -621,7 +615,7 @@ void MainWindow::on_pushButtonLamp_clicked()
 void MainWindow::on_pushButtonNumber_clicked()
 {
     clearProperties();
-    NumberItem *item = new NumberItem(100,35);
+    NumberItem *item = new NumberItem(40,30);
     item->setZValue(sc->getMaxZValue());
     item->updateLineWidth(0);
     setProperties(item->getProperties());

@@ -230,7 +230,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                         QJsonArray nodeVarsArray = elOb["Groups"].toArray();
                                         for(auto gr:nodeVarsArray) {
                                             QJsonObject grOb = gr.toObject();
-                                            if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                            if(grOb.contains("Name") && (grOb["Name"].toString()=="NODE0") && grOb.contains("Variables") && grOb["Variables"].isArray()) {
                                                  QJsonArray clBitArray = grOb["Variables"].toArray();
                                                  for(auto clBit:clBitArray) {
                                                      QJsonObject clBitOb = clBit.toObject();
@@ -260,7 +260,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                         QJsonArray nodeVarsArray = elOb["Groups"].toArray();
                                         for(auto gr:nodeVarsArray) {
                                             QJsonObject grOb = gr.toObject();
-                                            if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                            if(grOb.contains("Name") && (grOb["Name"].toString()=="TX") && grOb.contains("Variables") && grOb["Variables"].isArray()) {
                                                  QJsonArray netBitArray = grOb["Variables"].toArray();
                                                  for(auto netBit:netBitArray) {
                                                      QJsonObject netBitOb = netBit.toObject();
@@ -290,7 +290,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                         QJsonArray nodeVarsArray = elOb["Groups"].toArray();
                                         for(auto gr:nodeVarsArray) {
                                             QJsonObject grOb = gr.toObject();
-                                            if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                            if(grOb.contains("Name") && (grOb["Name"].toString()=="TX") && grOb.contains("Variables") && grOb["Variables"].isArray()) {
                                                  QJsonArray netRegArray = grOb["Variables"].toArray();
                                                  for(auto netReg:netRegArray) {
                                                      QJsonObject netRegOb = netReg.toObject();
