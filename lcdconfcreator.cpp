@@ -601,7 +601,8 @@ QByteArray LCDConfCreator::getCalculationConfig(uint32_t par)
     int aiNum = 0;
 
     for(const auto &ai:inputs) {
-        res.append(static_cast<char>(aiNum&0xFF));  // index
+        res.append('\0');  // index high byte
+        res.append(static_cast<char>(aiNum&0xFF));  // index low byte
         res.append('\0'); // link type (RAW AI)
         res.append('\0');   // divider/precision
         AnalogInputConfig aiConf = getAnalogInputConfig(ai);
@@ -987,42 +988,45 @@ AnalogInputConfig LCDConfCreator::getAnalogInputConfig(AnalogueInp inp)
     res.underLimit = 0;
     res.underAlarmLimit = 0;
 
+    int highLimit = inp.sensor.highLimit.toInt();
+    int lowLimit = inp.sensor.lowLimit.toInt();
+
     switch (inp.sensor.sensType) {
         case SensType::NC:
-        res.k = static_cast<float>(255.0/2000);
+        res.k = 1;
         res.b = 0;
         break;
     case SensType::I0__20mA:
-        res.k = static_cast<float>(255.0/20000);
+        res.k = static_cast<float>(highLimit-lowLimit)/20000;
         res.b = 0;
         break;
     case SensType::I2__10mA:
-        res.k = static_cast<float>(255.0/800);
-        res.b = static_cast<float>(-255.0/4);
+        res.k = static_cast<float>(highLimit-lowLimit)/8000;
+        res.b = static_cast<float>(lowLimit) - static_cast<float>(highLimit-lowLimit)/4;
         res.underAlarmLimit = 1000;
         res.underLimit = 1700;
         res.overLimit = 10250;
         res.overAlarmLimit = 11000;
         break;
     case SensType::I4__20mA:
-        res.k = static_cast<float>(255.0/16000);
-        res.b = static_cast<float>(-255.0/4);
+        res.k = static_cast<float>(highLimit-lowLimit)/16000;
+        res.b = static_cast<float>(lowLimit) - static_cast<float>(highLimit-lowLimit)/4;
         res.underAlarmLimit = 2000;
         res.underLimit = 3400;
         res.overLimit = 20500;
         res.overAlarmLimit = 22000;
         break;
     case SensType::U0_4__2V:
-        res.k = static_cast<float>(255.0/1600);
-        res.b = static_cast<float>(-255.0/4);
+        res.k = static_cast<float>(highLimit-lowLimit)/1600;
+        res.b = static_cast<float>(lowLimit) - static_cast<float>(highLimit-lowLimit)/4;
         res.underAlarmLimit = 200;
         res.underLimit = 340;
         res.overLimit = 2050;
         res.overAlarmLimit = 2200;
         break;
     case SensType::U0__2_5V:
-        res.k = static_cast<float>(255.0/2500);
-        res.b = 0;
+        res.k = static_cast<float>(highLimit-lowLimit)/2500;
+        res.b = static_cast<float>(lowLimit);
         break;
     }
     return res;
@@ -1530,7 +1534,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(applConf);
     dataOffset += applConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1548,7 +1552,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(passwConf);
     dataOffset += passwConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1566,7 +1570,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(aiConf);
     dataOffset += aiConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1584,7 +1588,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(diConf);
     dataOffset += diConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1602,7 +1606,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(doConf);
     dataOffset += doConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1620,7 +1624,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(netRegConf);
     dataOffset += netRegConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1638,7 +1642,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(clRegConf);
     dataOffset += clRegConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1656,7 +1660,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(netBitConf);
     dataOffset += netBitConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1674,7 +1678,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(clBitConf);
     dataOffset += clBitConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1692,7 +1696,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(calcConf);
     dataOffset += calcConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1710,7 +1714,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(canConf);
     dataOffset += canConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1728,7 +1732,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(inpDescrConf);
     dataOffset += inpDescrConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
@@ -1783,7 +1787,7 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(mnemoConf);
     dataOffset += mnemoConf.count();
-    while((dataOffset%4)!=0) {
+    while((dataOffset%64)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }

@@ -48,6 +48,8 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                 }
             }
 
+            std::sort(sensors.begin(),sensors.end(),[](const Sensor &s1, const Sensor &s2){return s1.name<s2.name;});
+
             std::vector<int> sensConnection;
 
             if(plcOb.contains("Sensor Connection") && plcOb["Sensor Connection"].isArray()) {
