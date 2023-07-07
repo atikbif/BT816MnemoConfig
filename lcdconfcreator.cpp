@@ -360,28 +360,36 @@ QByteArray LCDConfCreator::getNetRegConfig(uint32_t par)
     res.append(static_cast<char>(varCnt>>8));
     res.append(static_cast<char>(varCnt&0xFF));
 
+    while(res.size()<64) res.append('\0');
+
     for(const auto &var:vars) {
         std::array<char,40> sys_name;
         for(char &v:sys_name) v = 0;
         QByteArray sysNameUTF8 = var.sysName.toUtf8();
         if(sysNameUTF8.count()>=sys_name.size()) {
-            sysNameUTF8.resize(static_cast<int>(sys_name.size()-2));
+            sysNameUTF8.resize(static_cast<int>(sys_name.size()));
         }
+        sys_name[sys_name.size()-1] = 0;
+        sys_name[sys_name.size()-2] = 0;
         std::copy(sysNameUTF8.begin(),sysNameUTF8.end(),sys_name.begin());
         for(char v:sys_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
 
         std::array<char,40> user_name;
         for(char &v:user_name) v = 0;
         QByteArray userNameUTF8 = var.userName.toUtf8();
         if(userNameUTF8.count()>=user_name.size()) {
-            userNameUTF8.resize(static_cast<int>(user_name.size()-2));
+            userNameUTF8.resize(static_cast<int>(user_name.size()));
         }
+        user_name[user_name.size()-1] = 0;
+        user_name[user_name.size()-2] = 0;
         std::copy(userNameUTF8.begin(),userNameUTF8.end(),user_name.begin());
         for(char v:user_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
     }
 
     int crc = CheckSum::getCRC16(res);
