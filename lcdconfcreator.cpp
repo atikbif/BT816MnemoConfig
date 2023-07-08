@@ -710,6 +710,8 @@ QByteArray LCDConfCreator::getInputDescriptionConfig(uint32_t par)
     res.append(static_cast<char>(varCnt>>8));
     res.append(static_cast<char>(varCnt&0xFF));
 
+    while(res.size()%64) res.append('\0');
+
     std::vector<AnalogueInp> anInputs = plcConf.getAnalogueInputs();
     std::vector<DiscreteInp> dinInputs = plcConf.getDiscreteInputs();
 
@@ -717,34 +719,39 @@ QByteArray LCDConfCreator::getInputDescriptionConfig(uint32_t par)
         int inpCnt = static_cast<int>(anInputs.size());
         for(int i=0;i<inpCnt;i++) {
             if(!dinInputs.at(i).userName.isEmpty()) {
-                res.push_back('\0'); // input type (di)
-                res.push_back(static_cast<char>(i)); // input num
                 std::array<char,40> input_user_name;
                 for(char &v:input_user_name) v = 0;
                 QByteArray inputUserNameUTF8 = dinInputs.at(i).userName.toUtf8();
                 if(inputUserNameUTF8.count()>=input_user_name.size()) {
-                    inputUserNameUTF8.resize(static_cast<int>(input_user_name.size()-2));
+                    inputUserNameUTF8.resize(static_cast<int>(input_user_name.size()));
                 }
+                input_user_name[input_user_name.size()-1] = 0;
+                input_user_name[input_user_name.size()-2] = 0;
                 std::copy(inputUserNameUTF8.begin(),inputUserNameUTF8.end(),input_user_name.begin());
                 for(char v:input_user_name) {
                     res.append(v);
                 }
+                res.push_back('\0'); // input type (di)
+                res.push_back(static_cast<char>(i)); // input num
                 varCnt++;
             }else if(!anInputs.at(i).userName.isEmpty()) {
-                res.push_back(1); // input type (ai)
-                res.push_back(static_cast<char>(i)); // input num
                 std::array<char,40> input_user_name;
                 for(char &v:input_user_name) v = 0;
                 QByteArray inputUserNameUTF8 = anInputs.at(i).userName.toUtf8();
                 if(inputUserNameUTF8.count()>=input_user_name.size()) {
-                    inputUserNameUTF8.resize(static_cast<int>(input_user_name.size()-2));
+                    inputUserNameUTF8.resize(static_cast<int>(input_user_name.size()));
                 }
+                input_user_name[input_user_name.size()-1] = 0;
+                input_user_name[input_user_name.size()-2] = 0;
                 std::copy(inputUserNameUTF8.begin(),inputUserNameUTF8.end(),input_user_name.begin());
                 for(char v:input_user_name) {
                     res.append(v);
                 }
+                res.push_back(1); // input type (ai)
+                res.push_back(static_cast<char>(i)); // input num
                 varCnt++;
             }
+            while(res.size()%64) res.append('\0');
         }
     }
 
@@ -788,22 +795,25 @@ QByteArray LCDConfCreator::getOutputDescriptionConfig(uint32_t par)
     std::vector<DiscreteOutput> outs = plcConf.getDiscreteOutputs();
     res.append(static_cast<char>(outs.size()));
 
+    while(res.size()%64) res.append('\0');
+
     int doNum = 0;
     for(const auto &dout:outs) {
         if(!dout.userName.isEmpty()) {
-
-            res.append(static_cast<char>(doNum));
-
             std::array<char,40> do_user_name;
             for(char &v:do_user_name) v = 0;
             QByteArray doUserNameUTF8 = dout.userName.toUtf8();
             if(doUserNameUTF8.count()>=do_user_name.size()) {
-                doUserNameUTF8.resize(static_cast<int>(do_user_name.size()-2));
+                doUserNameUTF8.resize(static_cast<int>(do_user_name.size()));
             }
+            do_user_name[do_user_name.size()-1] = 0;
+            do_user_name[do_user_name.size()-2] = 0;
             std::copy(doUserNameUTF8.begin(),doUserNameUTF8.end(),do_user_name.begin());
             for(char v:do_user_name) {
                 res.append(v);
             }
+            res.append(static_cast<char>(doNum));
+            while(res.size()%64) res.append('\0');
             varCnt++;
         }
         doNum++;
