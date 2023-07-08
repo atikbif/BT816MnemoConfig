@@ -168,16 +168,18 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
     std::vector<AnalogueInp> inputs = plcConf.getAnalogueInputs();
     res.append(static_cast<char>(inputs.size()));
 
+    while(res.size()%64) res.append('\0');
+
     for(const auto &ai:inputs) {
-        res.append(static_cast<char>(ai.inpType));
-        res.append(static_cast<char>(ai.usedFlag));
 
         std::array<char,40> ai_sys_name;
         for(char &v:ai_sys_name) v = 0;
         QByteArray aiSysNameUTF8 = ai.sysName.toUtf8();
         if(aiSysNameUTF8.count()>=ai_sys_name.size()) {
-            aiSysNameUTF8.resize(static_cast<int>(ai_sys_name.size()-2));
+            aiSysNameUTF8.resize(static_cast<int>(ai_sys_name.size()));
         }
+        ai_sys_name[ai_sys_name.size()-1] = 0;
+        ai_sys_name[ai_sys_name.size()-2] = 0;
         std::copy(aiSysNameUTF8.begin(),aiSysNameUTF8.end(),ai_sys_name.begin());
         for(char v:ai_sys_name) {
             res.append(v);
@@ -187,25 +189,33 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
         for(char &v:ai_user_name) v = 0;
         QByteArray aiUserNameUTF8 = ai.userName.toUtf8();
         if(aiUserNameUTF8.count()>=ai_user_name.size()) {
-            aiUserNameUTF8.resize(static_cast<int>(ai_user_name.size()-2));
+            aiUserNameUTF8.resize(static_cast<int>(ai_user_name.size()));
         }
+        ai_user_name[ai_user_name.size()-1] = 0;
+        ai_user_name[ai_user_name.size()-2] = 0;
         std::copy(aiUserNameUTF8.begin(),aiUserNameUTF8.end(),ai_user_name.begin());
         for(char v:ai_user_name) {
             res.append(v);
         }
 
-        res.append(static_cast<char>(ai.sensor.sensType));
-
         std::array<char,20> meas_unit;
         for(char &v:meas_unit) v = 0;
         QByteArray aiMeasUnitUTF8 = ai.sensor.measureUnit.toUtf8();
         if(aiMeasUnitUTF8.count()>=meas_unit.size()) {
-            aiMeasUnitUTF8.resize(static_cast<int>(meas_unit.size()-2));
+            aiMeasUnitUTF8.resize(static_cast<int>(meas_unit.size()));
         }
+        meas_unit[meas_unit.size()-1] = 0;
+        meas_unit[meas_unit.size()-2] = 0;
         std::copy(aiMeasUnitUTF8.begin(),aiMeasUnitUTF8.end(),meas_unit.begin());
         for(char v:meas_unit) {
             res.append(v);
         }
+
+        res.append(static_cast<char>(ai.inpType));
+        res.append(static_cast<char>(ai.usedFlag));
+        res.append(static_cast<char>(ai.sensor.sensType));
+
+        while(res.size()%64) res.append('\0');
     }
 
     int crc = CheckSum::getCRC16(res);
