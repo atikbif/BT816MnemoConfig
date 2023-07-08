@@ -68,6 +68,8 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
 
                         // read inputs configuration
 
+                        uint16_t index_num = 0;
+
                         if(plcOb.contains("Input Types") && plcOb["Input Types"].isArray()) {
                             QJsonArray inpTypesArray = plcOb["Input Types"].toArray();
                             int inpNum = 0;
@@ -122,6 +124,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                                             diInp.sysName = varOb["Name"].toString("");
                                                                             diInp.userName = varOb["Comment"].toString("");
                                                                             diInp.usedFlag = true;
+                                                                            diInp.num = varNum;
                                                                         }
                                                                         varNum++;
                                                                     }
@@ -153,6 +156,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                                         if(varNum==inpNum) {
                                                                             anInp.sysName = varOb["Name"].toString("");
                                                                             anInp.userName = varOb["Comment"].toString("");
+                                                                            anInp.num = varNum;
 
                                                                             if(inpNum<sensConnection.size()) {
                                                                                 int sensNum = sensConnection.at(inpNum);
@@ -207,6 +211,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                             QJsonObject varOb = var.toObject();
                                                             dOut.sysName = varOb["Name"].toString("");
                                                             dOut.userName = varOb["Comment"].toString("");
+                                                            dOut.num = outNum;
                                                             if(outNum<conf.dOut.size()) {
                                                                 conf.dOut[outNum] = dOut;
                                                             }
@@ -224,6 +229,9 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         conf.sysVar.clear();
 
                         // read cluster bits
+
+                        index_num = 0;
+
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
@@ -244,6 +252,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                      if(clBitOb.contains("Name") && clBitOb["Name"].isString()) {
                                                          v.sysName = clBitOb["Name"].toString();
                                                      }
+                                                     v.num = index_num++;
                                                      conf.sysVar.push_back(v);
                                                  }
                                             }
@@ -254,6 +263,9 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         }
 
                         // net bits
+
+                        index_num = 0;
+
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
@@ -274,6 +286,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                      if(netBitOb.contains("Name") && netBitOb["Name"].isString()) {
                                                          v.sysName = netBitOb["Name"].toString();
                                                      }
+                                                     v.num = index_num++;
                                                      conf.sysVar.push_back(v);
                                                  }
                                             }
@@ -284,6 +297,9 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         }
 
                         // net regs
+
+                        index_num = 0;
+
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
@@ -304,6 +320,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                      if(netRegOb.contains("Name") && netRegOb["Name"].isString()) {
                                                          v.sysName = netRegOb["Name"].toString();
                                                      }
+                                                     v.num = index_num++;
                                                      conf.sysVar.push_back(v);
                                                  }
                                             }
@@ -314,6 +331,9 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         }
 
                         // clust regs
+
+                        index_num = 0;
+
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
@@ -336,6 +356,7 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                                              if(clRegOb.contains("Name") && clRegOb["Name"].isString()) {
                                                                  v.sysName = clRegOb["Name"].toString();
                                                              }
+                                                             v.num = index_num++;
                                                              conf.sysVar.push_back(v);
                                                          }
                                                     }

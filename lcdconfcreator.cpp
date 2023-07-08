@@ -989,6 +989,95 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
     return res;
 }
 
+QByteArray LCDConfCreator::getEditVarConfig(uint32_t par)
+{
+    Q_UNUSED(par)
+    const int lengthOffset = 2;
+    const int maxVarCnt = 63;
+    Q_UNUSED(par)
+    QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfEditVar);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
+    res.append(1);
+
+    uint16_t varCnt = static_cast<uint16_t>(editableVar.size());
+    res.append(static_cast<char>(varCnt>>8));
+    res.append(static_cast<char>(varCnt&0xFF));
+
+    while(res.size()%64) res.append('\0');
+
+    if(editableVar.size()>maxVarCnt) editableVar.resize(maxVarCnt);
+
+    for(auto &var:editableVar) {
+
+        std::array<char,40> user_name;
+        for(char &v:user_name) v = 0;
+        QByteArray userNameUTF8;
+
+        SysVarType vType = var.varType;
+        std::vector<SysVar> varsByType = plcConf.getSysVarByType(vType);
+        auto it = std::find_if(varsByType.begin(),varsByType.end(),[&](const SysVar &sysVar){
+            return (sysVar.sysName==var.sysName);
+        });
+        if(it!=varsByType.end()) {
+            var.userName = it->userName;
+            var.num = it->num;
+        }
+
+        if(var.userName.isEmpty()) userNameUTF8 = var.sysName.toUtf8();
+        else userNameUTF8 = var.userName.toUtf8();
+
+        if(userNameUTF8.count()>=user_name.size()) {
+            userNameUTF8.resize(static_cast<int>(user_name.size()));
+        }
+        user_name[sizeof(user_name)-1] = 0;
+        user_name[sizeof(user_name)-2] = 0;
+
+        std::copy(userNameUTF8.begin(),userNameUTF8.end(),user_name.begin());
+        for(char v:user_name) {
+            res.append(v);
+        }
+
+        res.append(static_cast<char>(var.varType)); // var type
+        uint16_t index = static_cast<uint16_t>(var.num);
+        res.append(index>>8);
+        res.append(index&0xFF);
+
+        uint16_t min = 0;
+        uint16_t max = 65535;
+
+        if((vType==SysVarType::CLUSTER_BIT) || (vType==SysVarType::NET_BIT)) {
+            max = 1;
+        }
+
+        res.append(min>>8);
+        res.append(min&0xFF);
+        res.append(max>>8);
+        res.append(max&0xFF);
+
+        while(res.size()%64) res.append('\0');
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
+    return res;
+}
+
 void LCDConfCreator::addEmptyByte(QByteArray &conf)
 {
     conf.append('\0');
@@ -1766,10 +1855,30 @@ QByteArray LCDConfCreator::createLCDConf()
     res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
     dataArray.append(outDescrConf);
     dataOffset += outDescrConf.count();
+    while((dataOffset%64)!=0) {
+        addEmptyByte(dataArray);
+        dataOffset++;
+    }
+
+    QByteArray editVarConf = getEditVarConfig(0);
+    idNum = static_cast<uint16_t>(ConfID::ConfEditVar);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    res.append('\0'); // par
+    res.append('\0');
+    res.append('\0');
+    res.append('\0');
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>24)&0xFF)));
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>16)&0xFF)));
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>8)&0xFF)));
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
+    dataArray.append(editVarConf);
+    dataOffset += editVarConf.count();
     while((dataOffset%4096)!=0) {
         addEmptyByte(dataArray);
         dataOffset++;
     }
+
     QByteArray backgroundImageConf = getBackgroundImageConfig(0);
     uint32_t image_offset = headerAddr+dataOffset;
     idNum = static_cast<uint16_t>(ConfID::ConfBackgrImage);
@@ -1846,4 +1955,9 @@ void LCDConfCreator::setGraphicsItems(std::vector<RectItem *> items)
 void LCDConfCreator::setTextItems(std::vector<RectItem *> items)
 {
     textItems = items;
+}
+
+void LCDConfCreator::setEditableVars(const std::vector<SysVar> &vars)
+{
+    editableVar = vars;
 }

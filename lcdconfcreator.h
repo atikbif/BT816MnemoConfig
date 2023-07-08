@@ -7,7 +7,7 @@
 
 enum class ConfID {ConfAppl, ConfPassw, ConfAI, ConfDI, ConfDO, ConfNetReg, ConfClusterReg,
             ConfNetBit, ConfClusterBit, ConfCalculation, ConfCAN, ConfInpDescr, ConfOutputDescr,
-            ConfBackgrImage, ConfMnemo};
+            ConfBackgrImage, ConfMnemo, ConfEditVar};
 
 struct AnalogInputConfig {
     float k;
@@ -26,6 +26,7 @@ class LCDConfCreator
 
     std::vector<RectItem*> graphicsItems;
     std::vector<RectItem*> textItems;
+    std::vector<SysVar> editableVar;
 
     QByteArray getApplicationConfig(uint32_t par);
     QByteArray getPasswordConfig(uint32_t par);
@@ -42,6 +43,7 @@ class LCDConfCreator
     QByteArray getOutputDescriptionConfig(uint32_t par);
     QByteArray getBackgroundImageConfig(uint32_t par);
     QByteArray getMnemoConfig(uint32_t par, uint32_t backgroundAddr);
+    QByteArray getEditVarConfig(uint32_t par);
     void addEmptyByte(QByteArray &conf);
     AnalogInputConfig getAnalogInputConfig(AnalogueInp inp);
     std::vector<uint8_t> getItemMnemoData(RectItem *item);
@@ -55,6 +57,7 @@ public:
     void setBackgroundImage(const QString &value);
     void setGraphicsItems(std::vector<RectItem*> items);
     void setTextItems(std::vector<RectItem*> items);
+    void setEditableVars(const std::vector<SysVar> &vars);
 };
 
 #endif // LCDCONFCREATOR_H

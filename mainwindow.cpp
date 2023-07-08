@@ -257,6 +257,7 @@ void MainWindow::buildConfigFile()
 
     confCreator.setGraphicsItems(grItems);
     confCreator.setTextItems(textItems);
+    confCreator.setEditableVars(editVars.getVars());
 
     QByteArray confArray = confCreator.createLCDConf();
 
