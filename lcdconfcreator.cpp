@@ -926,6 +926,8 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
     itemCnt+=static_cast<uint16_t>(graphicsItems.size());
     itemCnt+=static_cast<uint16_t>(textItems.size());
     if(textItems.size()) itemCnt++;
+    itemCnt+=static_cast<uint16_t>(numberItems.size());
+    itemCnt+=static_cast<uint16_t>(lampItems.size());
 
     mnemoData.push_back(static_cast<uint8_t>(itemCnt>>8));
     mnemoData.push_back(static_cast<uint8_t>(itemCnt&0xFF));
@@ -968,12 +970,36 @@ QByteArray LCDConfCreator::getMnemoConfig(uint32_t par, uint32_t backgroundAddr)
         itemNum++;
     }
 
+    for(int i=0;i<lampItems.size();i++) {
+        mnemoData[headerOffset+itemNum*2] = dataOffset>>8;
+        mnemoData[headerOffset+itemNum*2+1] = dataOffset&0xFF;
+
+        // get item data
+        std::vector<uint8_t> itemData = getItemMnemoData(lampItems.at(i));
+
+        for(int j=0;j<itemData.size();j++) mnemoData.push_back(itemData.at(j));
+        dataOffset+=static_cast<uint16_t>(itemData.size());
+        itemNum++;
+    }
+
     if(textItems.size()) {  // load fonts item
         mnemoData[headerOffset+itemNum*2] = dataOffset>>8;
         mnemoData[headerOffset+itemNum*2+1] = dataOffset&0xFF;
 
         // get item data
         std::vector<uint8_t> itemData = getLoadFontsData();
+
+        for(int j=0;j<itemData.size();j++) mnemoData.push_back(itemData.at(j));
+        dataOffset+=static_cast<uint16_t>(itemData.size());
+        itemNum++;
+    }
+
+    for(int i=0;i<numberItems.size();i++) {
+        mnemoData[headerOffset+itemNum*2] = dataOffset>>8;
+        mnemoData[headerOffset+itemNum*2+1] = dataOffset&0xFF;
+
+        // get item data
+        std::vector<uint8_t> itemData = getItemMnemoData(numberItems.at(i));
 
         for(int j=0;j<itemData.size();j++) mnemoData.push_back(itemData.at(j));
         dataOffset+=static_cast<uint16_t>(itemData.size());
@@ -1975,6 +2001,16 @@ void LCDConfCreator::setGraphicsItems(std::vector<RectItem *> items)
 void LCDConfCreator::setTextItems(std::vector<RectItem *> items)
 {
     textItems = items;
+}
+
+void LCDConfCreator::setLampItems(std::vector<RectItem *> items)
+{
+    lampItems = items;
+}
+
+void LCDConfCreator::setNumberItems(std::vector<RectItem *> items)
+{
+    numberItems = items;
 }
 
 void LCDConfCreator::setEditableVars(const std::vector<SysVar> &vars)

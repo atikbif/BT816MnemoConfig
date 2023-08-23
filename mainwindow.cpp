@@ -21,6 +21,7 @@
 #include "QSettings"
 #include "QProcess"
 #include "lcdconfcreator.h"
+#include "messagevariables.h"
 
 void MainWindow::setProperties(const std::vector<ElProperty> &properties)
 {
@@ -58,6 +59,8 @@ void MainWindow::save()
     result["can address"] = canAddr;
 
     editVars.toJSON(result);
+
+    MessageVariables::toJSON(result,plc.getAlarmInfoVar());
 
     QString fileName = QFileDialog::getSaveFileName(this, "Сохранить проект", "",  "Проект пульта *.plt");
 
@@ -177,6 +180,9 @@ void MainWindow::open()
                 }
             }
             editVars.fromJSON(json);
+            std::vector<AlarmInfoVar> messageVars;
+            MessageVariables::fromJSON(json,messageVars);
+            plc.setAlarmInfoVar(messageVars);
             ui->statusbar->showMessage("Файл успешно открыт", 3000);
 
             if(!plcPrName.isEmpty()) {
@@ -185,6 +191,8 @@ void MainWindow::open()
                     auto res = reader.readFromFile(plcPrName);
                     if(res) {
                         plc = res.value();
+                        MessageVariables::updateUserName(messageVars, plc.getAllSysVar());
+                        plc.setAlarmInfoVar(messageVars);
                         if(prView) {
                             prView->setPLCConfig(plc);
                         }
@@ -254,9 +262,13 @@ void MainWindow::buildConfigFile()
 
     std::vector<RectItem*> grItems = getGraphicsItems();
     std::vector<RectItem*> textItems = getTextItems();
+    std::vector<RectItem*> numberItems = getNumberItems();
+    std::vector<RectItem*> lampItems = getLampItems();
 
     confCreator.setGraphicsItems(grItems);
     confCreator.setTextItems(textItems);
+    confCreator.setNumberItems(numberItems);
+    confCreator.setLampItems(lampItems);
     confCreator.setEditableVars(editVars.getVars());
 
     QByteArray confArray = confCreator.createLCDConf();
@@ -295,9 +307,85 @@ std::vector<RectItem *> MainWindow::getGraphicsItems()
             if((pr.getType()==ElProperty::Type::STRING_T)) {
                 if(pr.getName()=="type") {
                     QString val = ElProperty::getStringFromProperty(pr);
-                    if(!(val=="text" || val=="number")) {
+                    if((val=="filled_circle" || val=="filled_rect")) {
                         result.push_back(rect->clone());
                     }
+                    break;
+                }
+            }
+        }
+    }
+
+    for(RectItem* rect:allItems) {
+        delete rect;
+    }
+
+    return result;
+}
+
+std::vector<RectItem *> MainWindow::getNumberItems()
+{
+    std::vector<RectItem*> result;
+    QList<QGraphicsItem*> items = sc->items();
+
+    // сортировка по z координате
+
+    // ...
+
+    std::vector<RectItem*> allItems;
+
+    for(int i=0;i<items.count();i++) {
+        RectItem* item = dynamic_cast<RectItem*>(items[i]);
+        if(item!=nullptr) {
+            allItems.push_back(item->clone());
+        }
+    }
+    for(RectItem* rect:allItems) {
+        auto properties = rect->getProperties();
+        for(const auto &pr:properties) {
+            if((pr.getType()==ElProperty::Type::STRING_T)) {
+                if(pr.getName()=="type") {
+                    QString val = ElProperty::getStringFromProperty(pr);
+                    if(val=="number") {
+                        result.push_back(rect->clone());
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    for(RectItem* rect:allItems) {
+        delete rect;
+    }
+
+    return result;
+}
+
+std::vector<RectItem *> MainWindow::getLampItems()
+{
+    std::vector<RectItem*> result;
+    QList<QGraphicsItem*> items = sc->items();
+
+    // сортировка по z координате
+
+    // ...
+
+    std::vector<RectItem*> allItems;
+
+    for(int i=0;i<items.count();i++) {
+        RectItem* item = dynamic_cast<RectItem*>(items[i]);
+        if(item!=nullptr) {
+            allItems.push_back(item->clone());
+        }
+    }
+    for(RectItem* rect:allItems) {
+        auto properties = rect->getProperties();
+        for(const auto &pr:properties) {
+            if((pr.getType()==ElProperty::Type::STRING_T)) {
+                if(pr.getName()=="type") {
+                    QString val = ElProperty::getStringFromProperty(pr);
+                    if(val=="lamp") result.push_back(rect->clone());
                     break;
                 }
             }
@@ -334,7 +422,7 @@ std::vector<RectItem *> MainWindow::getTextItems()
             if((pr.getType()==ElProperty::Type::STRING_T)) {
                 if(pr.getName()=="type") {
                     QString val = ElProperty::getStringFromProperty(pr);
-                    if(val=="text" || val=="number") result.push_back(rect->clone());
+                    if(val=="text") result.push_back(rect->clone());
                     break;
                 }
             }
@@ -455,6 +543,7 @@ MainWindow::MainWindow(QWidget *parent)
         dialogPrConfig->setEVEPath(evePath);
         dialogPrConfig->updateGUI();
         if(dialogPrConfig->exec()==QDialog::Accepted) {
+            plc.setAlarmInfoVar(dialogPrConfig->getInfoVar());
             editVars.setVars(dialogPrConfig->getVars());
             canAddr = dialogPrConfig->getCanAddr();
             evePath = dialogPrConfig->getEVEPath();
@@ -470,7 +559,12 @@ MainWindow::MainWindow(QWidget *parent)
             JSONPLCConfigReader reader;
             auto res = reader.readFromFile(fileName);
             if(res) {
+
+                std::vector<AlarmInfoVar> messageVars = plc.getAlarmInfoVar();
                 plc = res.value();
+                editVars.updateUserName(plc.getAllSysVar());
+                MessageVariables::updateUserName(messageVars,plc.getAllSysVar());
+                plc.setAlarmInfoVar(messageVars);
                 if(prView) {
                     prView->setPLCConfig(plc);
 

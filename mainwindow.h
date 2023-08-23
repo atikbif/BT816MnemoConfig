@@ -37,6 +37,8 @@ class MainWindow : public QMainWindow
     void open();
     void buildConfigFile();
     std::vector<RectItem*> getGraphicsItems();
+    std::vector<RectItem*> getNumberItems();
+    std::vector<RectItem*> getLampItems();
     std::vector<RectItem*> getTextItems();
 
 public:

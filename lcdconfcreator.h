@@ -26,6 +26,8 @@ class LCDConfCreator
 
     std::vector<RectItem*> graphicsItems;
     std::vector<RectItem*> textItems;
+    std::vector<RectItem*> numberItems;
+    std::vector<RectItem*> lampItems;
     std::vector<SysVar> editableVar;
 
     QByteArray getApplicationConfig(uint32_t par);
@@ -57,6 +59,8 @@ public:
     void setBackgroundImage(const QString &value);
     void setGraphicsItems(std::vector<RectItem*> items);
     void setTextItems(std::vector<RectItem*> items);
+    void setLampItems(std::vector<RectItem*> items);
+    void setNumberItems(std::vector<RectItem*> items);
     void setEditableVars(const std::vector<SysVar> &vars);
 };
 

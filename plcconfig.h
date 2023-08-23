@@ -4,12 +4,14 @@
 #include <QString>
 #include <vector>
 #include <memory>
+#include <QJsonObject>
 
 enum class InpType {VType, IType};
 enum class SensType {NC,U0_4__2V,I0__20mA,I4__20mA,I2__10mA,U0__2_5V};
 enum class SysVarType {CLUSTER_BIT,CLUSTER_REG,NET_BIT,NET_REG};
 enum class DiscreteVarType{DI,DO,CLUSTER_BIT,NET_BIT};
 enum class AnalogueVarType{RAW_AI,CALCULATED_AI,CLUSTER_REG,NET_REG};
+enum class MessageType{InfoData, WarningData, AlarmData};
 
 struct Sensor {
     SensType sensType;
@@ -84,6 +86,26 @@ struct SysVar :public Var {
     }
 };
 
+struct AlarmInfoVar {
+    SysVar var;
+    MessageType messageType;
+    static QString getMessageTypeString(MessageType mType) {
+        QString res;
+        switch(mType) {
+            case MessageType::InfoData:
+            res = "Информация";
+            break;
+        case MessageType::WarningData:
+            res = "Предупреждение";
+            break;
+        case MessageType::AlarmData:
+            res = "Авария";
+            break;
+        }
+        return res;
+    }
+};
+
 struct Input: public Var {
     int num;
     bool usedFlag;
@@ -116,6 +138,7 @@ class PLCConfig
     std::vector<AnalogueInp> anInput;
     std::vector<DiscreteOutput> dOut;
     std::vector<SysVar> sysVar;
+    std::vector<AlarmInfoVar> infoVar;
 public:
     int getAppCN() const {return appCN;}
     int getAppCheckSum() const {return appCheckSum;}
@@ -124,11 +147,14 @@ public:
     QString getAppVersion() const {return appVersion;}
     QString getPLCName() const {return plcName;}
     std::vector<SysVar> getSysVarByType(SysVarType vType) const;
+    std::vector<SysVar> getAllSysVar() const;
     std::vector<Var> getDiscreteVarByType(DiscreteVarType vType) const;
     std::vector<Var> getAnalogueVarByType(AnalogueVarType vType) const;
     std::vector<DiscreteInp> getDiscreteInputs() const;
     std::vector<AnalogueInp> getAnalogueInputs() const;
     std::vector<DiscreteOutput> getDiscreteOutputs() const;
+    std::vector<AlarmInfoVar> getAlarmInfoVar() const;
+    void setAlarmInfoVar(const std::vector<AlarmInfoVar> &vars);
     explicit PLCConfig(const QString plcName = "PC21");
 };
 

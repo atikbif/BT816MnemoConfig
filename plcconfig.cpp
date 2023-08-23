@@ -24,6 +24,11 @@ std::vector<SysVar> PLCConfig::getSysVarByType(SysVarType vType) const
     return result;
 }
 
+std::vector<SysVar> PLCConfig::getAllSysVar() const
+{
+    return sysVar;
+}
+
 std::vector<Var> PLCConfig::getDiscreteVarByType(DiscreteVarType vType) const
 {
 
@@ -90,6 +95,16 @@ std::vector<AnalogueInp> PLCConfig::getAnalogueInputs() const
 std::vector<DiscreteOutput> PLCConfig::getDiscreteOutputs() const
 {
     return dOut;
+}
+
+std::vector<AlarmInfoVar> PLCConfig::getAlarmInfoVar() const
+{
+    return infoVar;
+}
+
+void PLCConfig::setAlarmInfoVar(const std::vector<AlarmInfoVar> &vars)
+{
+    infoVar = vars;
 }
 
 PLCConfig::PLCConfig(const QString plcName)

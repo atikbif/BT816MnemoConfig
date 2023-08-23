@@ -1,5 +1,7 @@
 #include "editablesysvariables.h"
 #include <QJsonArray>
+#include <vector>
+#include <array>
 
 void EditableSysVariables::setVars(const std::vector<SysVar> &v)
 {
@@ -26,6 +28,16 @@ void EditableSysVariables::toJSON(QJsonObject &ob)
         varArray.push_back(vOb);
     }
     ob.insert("editable variables",varArray);
+}
+
+void EditableSysVariables::updateUserName(const std::vector<SysVar> &sysVars)
+{
+    for(auto &v:vars) {
+        auto it = std::find_if(sysVars.cbegin(),sysVars.cend(),[v](const SysVar &var){return ((v.varType==var.varType)&&(v.sysName==var.sysName));});
+        if(it!=sysVars.cend()) {
+            v.userName = it->userName;
+        }
+    }
 }
 
 void EditableSysVariables::fromJSON(const QJsonObject &ob)

@@ -40,6 +40,7 @@ SOURCES += \
     Elements/Widgets/scalimages.cpp \
     Elements/Widgets/textitem.cpp \
     checksum.cpp \
+    dialogaddalarmvar.cpp \
     dialogaddeditablevar.cpp \
     dialogprojectconfig.cpp \
     displayscene.cpp \
@@ -48,6 +49,7 @@ SOURCES += \
     lcdconfcreator.cpp \
     main.cpp \
     mainwindow.cpp \
+    messagevariables.cpp \
     plcconfig.cpp \
     typical_fonts.cpp
 
@@ -69,6 +71,7 @@ HEADERS += \
     Elements/Widgets/selectionmode.h \
     Elements/Widgets/textitem.h \
     checksum.h \
+    dialogaddalarmvar.h \
     dialogaddeditablevar.h \
     dialogprojectconfig.h \
     displayscene.h \
@@ -76,11 +79,13 @@ HEADERS += \
     jsonplcconfigreader.h \
     lcdconfcreator.h \
     mainwindow.h \
+    messagevariables.h \
     plcconfig.h \
     plcconfigreader.h \
     typical_fonts.h
 
 FORMS += \
+    dialogaddalarmvar.ui \
     dialogaddeditablevar.ui \
     dialogprojectconfig.ui \
     mainwindow.ui

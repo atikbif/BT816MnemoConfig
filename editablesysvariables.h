@@ -12,6 +12,7 @@ public:
     void setVars(const std::vector<SysVar> &v);
     std::vector<SysVar> getVars() const;
     void toJSON(QJsonObject &ob);
+    void updateUserName(const std::vector<SysVar> &sysVars);
     void fromJSON(const QJsonObject &ob);
     void clear();
 };

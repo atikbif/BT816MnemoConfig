@@ -13,6 +13,7 @@ class DialogProjectConfig : public QDialog
     Q_OBJECT
     uint8_t can_addr;
     std::vector<SysVar> vars;
+    std::vector<AlarmInfoVar> alarmVars;
     PLCConfig plc;
     QString evePath;
 public:
@@ -24,6 +25,7 @@ public:
     void updateGUI();
     uint8_t getCanAddr() const;
     std::vector<SysVar> getVars() const;
+    std::vector<AlarmInfoVar> getInfoVar() const;
     void setPLC(const PLCConfig &plc);
     void setEVEPath(const QString &value);
     QString getEVEPath() {return evePath;}
@@ -38,6 +40,10 @@ private slots:
     void on_pushButtonDown_clicked();
 
     void on_pushButtonEvePath_clicked();
+
+    void on_pushButtonAddAlarm_clicked();
+
+    void on_pushButtonDelAlarm_clicked();
 
 private:
     Ui::DialogProjectConfig *ui;
