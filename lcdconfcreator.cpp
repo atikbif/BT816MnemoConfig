@@ -1040,9 +1040,8 @@ QByteArray LCDConfCreator::getEditVarConfig(uint32_t par)
     Q_UNUSED(par)
     const int lengthOffset = 2;
     const int maxVarCnt = 63;
-    Q_UNUSED(par)
     QByteArray res;
-    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfEditVar);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfMessageVar);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));
     // length
@@ -1107,6 +1106,85 @@ QByteArray LCDConfCreator::getEditVarConfig(uint32_t par)
         res.append(min&0xFF);
         res.append(max>>8);
         res.append(max&0xFF);
+
+        while(res.size()%64) res.append('\0');
+    }
+
+    int crc = CheckSum::getCRC16(res);
+
+    res.push_back(static_cast<char>(crc>>8));
+    res.push_back(static_cast<char>(crc&0xFF));
+
+    int length = res.count();
+
+    res[lengthOffset] = length>>8;
+    res[lengthOffset+1] = length &0xFF;
+
+    return res;
+}
+
+QByteArray LCDConfCreator::getMessageVarConfig(uint32_t par)
+{
+    Q_UNUSED(par)
+    const int lengthOffset = 2;
+    const int maxVarCnt = 63;
+    QByteArray res;
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfEditVar);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    // length
+    res.append('\0');
+    res.append('\0');
+
+    // version
+    res.append('\0');
+    res.append(1);
+
+    std::vector<AlarmInfoVar> infoVars = plcConf.getAlarmInfoVar();
+
+    uint16_t varCnt = static_cast<uint16_t>(infoVars.size());
+    res.append(static_cast<char>(varCnt>>8));
+    res.append(static_cast<char>(varCnt&0xFF));
+
+    while(res.size()%64) res.append('\0');
+
+    if(infoVars.size()>maxVarCnt) infoVars.resize(maxVarCnt);
+
+    for(auto &mVar:infoVars) {
+
+        std::array<char,40> user_name;
+        for(char &v:user_name) v = 0;
+        QByteArray userNameUTF8;
+
+        SysVarType vType = mVar.var.varType;
+        std::vector<SysVar> varsByType = plcConf.getSysVarByType(vType);
+        auto it = std::find_if(varsByType.begin(),varsByType.end(),[&](const SysVar &sysVar){
+            return (sysVar.sysName==mVar.var.sysName);
+        });
+        if(it!=varsByType.end()) {
+            mVar.var.userName = it->userName;
+            mVar.var.num = it->num;
+        }
+
+        if(mVar.var.userName.isEmpty()) userNameUTF8 = mVar.var.sysName.toUtf8();
+        else userNameUTF8 = mVar.var.userName.toUtf8();
+
+        if(userNameUTF8.count()>=user_name.size()) {
+            userNameUTF8.resize(static_cast<int>(user_name.size()));
+        }
+        user_name[sizeof(user_name)-1] = 0;
+        user_name[sizeof(user_name)-2] = 0;
+
+        std::copy(userNameUTF8.begin(),userNameUTF8.end(),user_name.begin());
+        for(char v:user_name) {
+            res.append(v);
+        }
+
+        res.append(static_cast<char>(mVar.var.varType)); // var type
+        uint16_t index = static_cast<uint16_t>(mVar.var.num);
+        res.append(index>>8);
+        res.append(index&0xFF);
+        res.append(static_cast<uint8_t>(mVar.messageType));
 
         while(res.size()%64) res.append('\0');
     }
@@ -1924,6 +2002,27 @@ QByteArray LCDConfCreator::createLCDConf()
         addEmptyByte(dataArray);
         dataOffset++;
     }
+
+    QByteArray messageVarConf = getMessageVarConfig(0);
+    idNum = static_cast<uint16_t>(ConfID::ConfMessageVar);
+    res.append(static_cast<char>(idNum>>8));
+    res.append(static_cast<char>(idNum&0xFF));
+    res.append('\0'); // par
+    res.append('\0');
+    res.append('\0');
+    res.append('\0');
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>24)&0xFF)));
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>16)&0xFF)));
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>8)&0xFF)));
+    res.append(static_cast<char>((((headerAddr+dataOffset)>>0)&0xFF)));
+    dataArray.append(messageVarConf);
+    dataOffset += messageVarConf.count();
+    while((dataOffset%4096)!=0) {
+        addEmptyByte(dataArray);
+        dataOffset++;
+    }
+
+
 
     QByteArray backgroundImageConf = getBackgroundImageConfig(0);
     uint32_t image_offset = headerAddr+dataOffset;
