@@ -168,7 +168,7 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
     std::vector<AnalogueInp> inputs = plcConf.getAnalogueInputs();
     res.append(static_cast<char>(inputs.size()));
 
-    while(res.size()%64) res.append('\0');
+    while(res.size()<64) res.append('\0');
 
     for(const auto &ai:inputs) {
 
@@ -184,6 +184,7 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
         for(char v:ai_sys_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
 
         std::array<char,40> ai_user_name;
         for(char &v:ai_user_name) v = 0;
@@ -197,6 +198,7 @@ QByteArray LCDConfCreator::getAIConfig(uint32_t par)
         for(char v:ai_user_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
 
         std::array<char,20> meas_unit;
         for(char &v:meas_unit) v = 0;
@@ -251,6 +253,8 @@ QByteArray LCDConfCreator::getDIConfig(uint32_t par)
     std::vector<DiscreteInp> inputs = plcConf.getDiscreteInputs();
     res.append(static_cast<char>(inputs.size()));
 
+    while(res.size()<64) res.append('\0');
+
     for(const auto &di:inputs) {
         res.append(static_cast<char>(di.usedFlag));
 
@@ -264,6 +268,7 @@ QByteArray LCDConfCreator::getDIConfig(uint32_t par)
         for(char v:di_sys_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
 
         std::array<char,40> di_user_name;
         for(char &v:di_user_name) v = 0;
@@ -275,6 +280,7 @@ QByteArray LCDConfCreator::getDIConfig(uint32_t par)
         for(char v:di_user_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
     }
 
     int crc = CheckSum::getCRC16(res);
@@ -311,6 +317,8 @@ QByteArray LCDConfCreator::getDOConfig(uint32_t par)
     std::vector<DiscreteOutput> outs = plcConf.getDiscreteOutputs();
     res.append(static_cast<char>(outs.size()));
 
+    while(res.size()<64) res.append('\0');
+
     for(const auto &dout:outs) {
 
         std::array<char,40> do_sys_name;
@@ -323,6 +331,7 @@ QByteArray LCDConfCreator::getDOConfig(uint32_t par)
         for(char v:do_sys_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
 
         std::array<char,40> do_user_name;
         for(char &v:do_user_name) v = 0;
@@ -334,6 +343,7 @@ QByteArray LCDConfCreator::getDOConfig(uint32_t par)
         for(char v:do_user_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
     }
 
     int crc = CheckSum::getCRC16(res);
@@ -436,6 +446,8 @@ QByteArray LCDConfCreator::getClusterRegConfig(uint32_t par)
     res.append(static_cast<char>(varCnt>>8));
     res.append(static_cast<char>(varCnt&0xFF));
 
+    while(res.size()<64) res.append('\0');
+
     for(const auto &var:vars) {
         std::array<char,40> sys_name;
         for(char &v:sys_name) v = 0;
@@ -447,6 +459,7 @@ QByteArray LCDConfCreator::getClusterRegConfig(uint32_t par)
         for(char v:sys_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
 
         std::array<char,40> user_name;
         for(char &v:user_name) v = 0;
@@ -458,6 +471,7 @@ QByteArray LCDConfCreator::getClusterRegConfig(uint32_t par)
         for(char v:user_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
     }
 
     int crc = CheckSum::getCRC16(res);
@@ -560,6 +574,8 @@ QByteArray LCDConfCreator::getClusterBitConfig(uint32_t par)
     res.append(static_cast<char>(varCnt>>8));
     res.append(static_cast<char>(varCnt&0xFF));
 
+    while(res.size()%64) res.append('\0');
+
     for(const auto &var:vars) {
         std::array<char,40> sys_name;
         for(char &v:sys_name) v = 0;
@@ -571,6 +587,7 @@ QByteArray LCDConfCreator::getClusterBitConfig(uint32_t par)
         for(char v:sys_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
 
         std::array<char,40> user_name;
         for(char &v:user_name) v = 0;
@@ -582,6 +599,7 @@ QByteArray LCDConfCreator::getClusterBitConfig(uint32_t par)
         for(char v:user_name) {
             res.append(v);
         }
+        while(res.size()%64) res.append('\0');
     }
 
     int crc = CheckSum::getCRC16(res);
@@ -1129,7 +1147,7 @@ QByteArray LCDConfCreator::getMessageVarConfig(uint32_t par)
     const int lengthOffset = 2;
     const int maxVarCnt = 63;
     QByteArray res;
-    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfEditVar);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfMessageVar);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));
     // length
