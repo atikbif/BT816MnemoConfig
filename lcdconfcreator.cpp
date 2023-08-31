@@ -1059,7 +1059,7 @@ QByteArray LCDConfCreator::getEditVarConfig(uint32_t par)
     const int lengthOffset = 2;
     const int maxVarCnt = 63;
     QByteArray res;
-    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfMessageVar);
+    uint16_t idNum = static_cast<uint16_t>(ConfID::ConfEditVar);
     res.append(static_cast<char>(idNum>>8));
     res.append(static_cast<char>(idNum&0xFF));
     // length
