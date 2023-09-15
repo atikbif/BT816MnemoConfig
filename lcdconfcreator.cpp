@@ -1184,8 +1184,19 @@ QByteArray LCDConfCreator::getMessageVarConfig(uint32_t par)
             mVar.var.num = it->num;
         }
 
-        if(mVar.var.userName.isEmpty()) userNameUTF8 = mVar.var.sysName.toUtf8();
-        else userNameUTF8 = mVar.var.userName.toUtf8();
+        uint16_t index = static_cast<uint16_t>(mVar.var.num);
+        QString name;
+        if(vType==SysVarType::CLUSTER_BIT) name = "C" + QString::number(17+index);
+        else if(vType==SysVarType::NET_BIT) name = "N" + QString::number(241+index);
+        if(name.size()>5) name.resize(5);
+        while(name.size()<5) name+=" ";
+
+        if(mVar.var.userName.isEmpty()) name += mVar.var.sysName;
+        else name += mVar.var.userName;
+
+        if(name.size()>20) name.resize(20);
+
+        userNameUTF8 = name.toUtf8();
 
         if(userNameUTF8.count()>=user_name.size()) {
             userNameUTF8.resize(static_cast<int>(user_name.size()));
@@ -1199,7 +1210,7 @@ QByteArray LCDConfCreator::getMessageVarConfig(uint32_t par)
         }
 
         res.append(static_cast<char>(mVar.var.varType)); // var type
-        uint16_t index = static_cast<uint16_t>(mVar.var.num);
+
         res.append(index>>8);
         res.append(index&0xFF);
         res.append(static_cast<uint8_t>(mVar.messageType));
@@ -2079,6 +2090,14 @@ QByteArray LCDConfCreator::createLCDConf()
         addEmptyByte(dataArray);
         dataOffset++;
     }
+
+    int dataLength = dataArray.size();
+
+    res.push_back((dataLength>>24)&0xFF);
+    res.push_back((dataLength>>16)&0xFF);
+    res.push_back((dataLength>>8)&0xFF);
+    res.push_back(dataLength&0xFF);
+
     quint16 crc = static_cast<quint16>(CheckSum::getCRC16(res));
     res.push_back((crc>>8)&0xFF);
     res.push_back(crc&0xFF);
