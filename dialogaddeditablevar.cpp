@@ -50,6 +50,13 @@ void DialogAddEditableVar::setVarType(SysVarType value)
     }
 }
 
+void DialogAddEditableVar::setVarIndex(int value)
+{
+    if(value<ui->comboBoxVarName->count()) {
+        ui->comboBoxVarName->setCurrentIndex(value);
+    }
+}
+
 SysVarType DialogAddEditableVar::getVarType() const
 {
     return vType;

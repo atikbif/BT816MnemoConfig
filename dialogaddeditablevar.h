@@ -21,6 +21,7 @@ public:
     explicit DialogAddEditableVar(QWidget *parent = nullptr);
     ~DialogAddEditableVar();
     void setVarType(SysVarType value);
+    void setVarIndex(int value);
     SysVarType getVarType() const;
     int getVarIndex() const;
     void setPLC(const PLCConfig &plc);

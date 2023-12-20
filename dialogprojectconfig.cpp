@@ -10,7 +10,36 @@ DialogProjectConfig::DialogProjectConfig(QWidget *parent) :
     ui(new Ui::DialogProjectConfig)
 {
     ui->setupUi(this);
-    connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,[](int row,int column){
+    connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,[this](int row,int column){
+        if(row<vars.size()) {
+            SysVar var = vars.at(row);
+
+            std::vector<SysVar> sysVars = plc.getSysVarByType(var.varType);
+            auto it = std::find_if(sysVars.begin(),sysVars.end(),[var](const SysVar &v){return v.sysName==var.sysName;});
+            if(it!=sysVars.end()) {
+                int index = std::distance(sysVars.begin(),it);
+                DialogAddEditableVar *dialogAddVar = new DialogAddEditableVar();
+                dialogAddVar->setPLC(plc);
+                dialogAddVar->setVarType(var.varType);
+                dialogAddVar->setVarIndex(index);
+                if(dialogAddVar->exec()==QDialog::Accepted) {
+                    SysVarType vType = dialogAddVar->getVarType();
+                    index = dialogAddVar->getVarIndex();
+                    sysVars = plc.getSysVarByType(vType);
+                    if(sysVars.size()>=index) {
+                        SysVar newVar = sysVars.at(index);
+                        auto it = std::find_if(vars.begin(),vars.end(),[newVar](const SysVar &v){return newVar.sysName==v.sysName;});
+                        if(it==vars.end() || (newVar.sysName==var.sysName)) {
+                            vars[row] = newVar;
+                            updateGUI();
+                            ui->tableWidget->setCurrentCell(row,0);
+                        }else {
+                            QMessageBox::warning(this,"проверка дубликатов","Переменная с таким именем уже была ранее добавлена");
+                        }
+                    }
+                }
+            }
+        }
 
     });
 
