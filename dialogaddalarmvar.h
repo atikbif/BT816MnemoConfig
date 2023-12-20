@@ -23,6 +23,9 @@ public:
     explicit DialogAddAlarmVar(QWidget *parent = nullptr);
     ~DialogAddAlarmVar();
     void setVarType(SysVarType value);
+    void setVarIndex(int value);
+    void setMessageType(MessageType value);
+    void setSysVarType(SysVarType value);
     SysVarType getVarType() const;
     int getVarIndex() const;
     MessageType getMessageType() const;

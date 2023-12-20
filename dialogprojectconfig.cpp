@@ -11,6 +11,7 @@ DialogProjectConfig::DialogProjectConfig(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,[this](int row,int column){
+        Q_UNUSED(column)
         if(row<vars.size()) {
             SysVar var = vars.at(row);
 
@@ -43,8 +44,45 @@ DialogProjectConfig::DialogProjectConfig(QWidget *parent) :
 
     });
 
-    connect(ui->tableWidgetAlarm,&QTableWidget::cellDoubleClicked,[](int row,int column){
+    connect(ui->tableWidgetAlarm,&QTableWidget::cellDoubleClicked,[this](int row,int column){
+        Q_UNUSED(column)
+        if(row<alarmVars.size()) {
+             SysVar var = alarmVars.at(row).var;
+             MessageType mType = alarmVars.at(row).messageType;
 
+             std::vector<SysVar> sysVars = plc.getSysVarByType(var.varType);
+             auto it = std::find_if(sysVars.begin(),sysVars.end(),[var](const SysVar &v){return v.sysName==var.sysName;});
+             if(it!=sysVars.end()) {
+                 int index = std::distance(sysVars.begin(),it);
+
+                 DialogAddAlarmVar *dialogAddAlarmVar = new DialogAddAlarmVar();
+
+                 dialogAddAlarmVar->setPLC(plc);
+                 dialogAddAlarmVar->setVarType(var.varType);
+                 dialogAddAlarmVar->setVarIndex(index);
+                 dialogAddAlarmVar->setMessageType(mType);
+                 if(dialogAddAlarmVar->exec()==QDialog::Accepted) {
+                     mType = dialogAddAlarmVar->getMessageType();
+                     SysVarType vType = dialogAddAlarmVar->getVarType();
+                     index = dialogAddAlarmVar->getVarIndex();
+                     sysVars = plc.getSysVarByType(vType);
+                    if(sysVars.size()>=index) {
+                         SysVar newVar = sysVars.at(index);
+                         auto it = std::find_if(alarmVars.begin(),alarmVars.end(),[newVar](const AlarmInfoVar &v){return newVar.sysName==v.var.sysName;});
+                         if(it==alarmVars.end() || (newVar.sysName==var.sysName)) {
+                            AlarmInfoVar alInfoVar;
+                            alInfoVar.messageType = mType;
+                            alInfoVar.var = newVar;
+                            alarmVars[row] = alInfoVar;
+                            updateGUI();
+                            ui->tableWidgetAlarm->setCurrentCell(row,0);
+                         }else {
+                             QMessageBox::warning(this,"проверка дубликатов","Переменная с таким именем уже была ранее добавлена");
+                         }
+                     }
+                 }
+             }
+        }
     });
 }
 
@@ -93,6 +131,10 @@ void DialogProjectConfig::updateGUI()
     ui->lineEditEvePath->setText(evePath);
 
     ui->tableWidgetAlarm->setSelectionBehavior(QAbstractItemView::SelectRows);
+
+    while(ui->tableWidgetAlarm->rowCount()) {
+        ui->tableWidgetAlarm->removeRow(0);
+    }
 
     for(const auto &v:alarmVars) {
         int i = ui->tableWidgetAlarm->rowCount();

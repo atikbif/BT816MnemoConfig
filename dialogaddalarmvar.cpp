@@ -50,6 +50,38 @@ void DialogAddAlarmVar::setVarType(SysVarType value)
     }
 }
 
+void DialogAddAlarmVar::setVarIndex(int value)
+{
+    if(value<ui->comboBoxVarName->count()) {
+        ui->comboBoxVarName->setCurrentIndex(value);
+    }
+}
+
+void DialogAddAlarmVar::setMessageType(MessageType value)
+{
+    messageType = value;
+
+    if(messageType==MessageType::InfoData) {
+        ui->comboBoxAlarmType->setCurrentText(AlarmInfoVar::getMessageTypeString(MessageType::InfoData));
+    }else if(messageType==MessageType::WarningData) {
+        ui->comboBoxAlarmType->setCurrentText(AlarmInfoVar::getMessageTypeString(MessageType::WarningData));
+    }else if(messageType==MessageType::AlarmData) {
+        ui->comboBoxAlarmType->setCurrentText(AlarmInfoVar::getMessageTypeString(MessageType::AlarmData));
+    }
+}
+
+void DialogAddAlarmVar::setSysVarType(SysVarType value)
+{
+    vType = value;
+    lastVarType = vType;
+
+    if(vType==SysVarType::CLUSTER_BIT) {
+        ui->comboBoxVarType->setCurrentText(SysVar::getDiscreteVarTypeString(DiscreteVarType::CLUSTER_BIT));
+    }else if(vType==SysVarType::NET_BIT) {
+        ui->comboBoxVarType->setCurrentText(SysVar::getDiscreteVarTypeString(DiscreteVarType::NET_BIT));
+    }
+}
+
 SysVarType DialogAddAlarmVar::getVarType() const
 {
     return vType;
