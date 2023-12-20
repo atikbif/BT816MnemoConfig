@@ -3,12 +3,20 @@
 #include "dialogaddeditablevar.h"
 #include "dialogaddalarmvar.h"
 #include <QFileDialog>
+#include <QMessageBox>
 
 DialogProjectConfig::DialogProjectConfig(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogProjectConfig)
 {
     ui->setupUi(this);
+    connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,[](int row,int column){
+
+    });
+
+    connect(ui->tableWidgetAlarm,&QTableWidget::cellDoubleClicked,[](int row,int column){
+
+    });
 }
 
 DialogProjectConfig::~DialogProjectConfig()
@@ -116,12 +124,18 @@ void DialogProjectConfig::on_pushButtonAdd_clicked()
         int index = dialogAddVar->getVarIndex();
         std::vector<SysVar> sysVars = plc.getSysVarByType(vType);
         if(sysVars.size()>=index) {
-            int i = ui->tableWidget->rowCount();
-            ui->tableWidget->insertRow(i);
-            ui->tableWidget->setItem(i,0,new QTableWidgetItem(sysVars.at(index).sysName));
-            ui->tableWidget->setItem(i,1,new QTableWidgetItem(sysVars.at(index).userName));
-            vars.push_back(sysVars.at(index));
-            ui->tableWidget->selectRow(ui->tableWidget->rowCount()-1);
+            SysVar var = sysVars.at(index);
+            auto it = std::find_if(vars.begin(),vars.end(),[var](const SysVar &v){return var.sysName==v.sysName;});
+            if(it==vars.end()) {
+                int i = ui->tableWidget->rowCount();
+                ui->tableWidget->insertRow(i);
+                ui->tableWidget->setItem(i,0,new QTableWidgetItem(var.sysName));
+                ui->tableWidget->setItem(i,1,new QTableWidgetItem(var.userName));
+                vars.push_back(var);
+                ui->tableWidget->selectRow(ui->tableWidget->rowCount()-1);
+            }else {
+                QMessageBox::warning(this,"проверка дубликатов","Переменная с таким именем уже была ранее добавлена");
+            }
         }
     }
     delete dialogAddVar;
@@ -208,29 +222,35 @@ void DialogProjectConfig::on_pushButtonAddAlarm_clicked()
         MessageType mType = dialogAddVar->getMessageType();
         std::vector<SysVar> sysVars = plc.getSysVarByType(vType);
         if(sysVars.size()>=index) {
-            int i = ui->tableWidgetAlarm->rowCount();
-            ui->tableWidgetAlarm->insertRow(i);
-            ui->tableWidgetAlarm->setItem(i,0,new QTableWidgetItem(sysVars.at(index).sysName));
-            ui->tableWidgetAlarm->setItem(i,1,new QTableWidgetItem(AlarmInfoVar::getMessageTypeString(mType)));
-            ui->tableWidgetAlarm->setItem(i,2,new QTableWidgetItem(sysVars.at(index).userName));
-            if(mType==MessageType::InfoData){
-                ui->tableWidgetAlarm->item(i, 0) ->setData(Qt::BackgroundRole, QColor (0,255,0));
-                ui->tableWidgetAlarm->item(i, 1) ->setData(Qt::BackgroundRole, QColor (0,255,0));
-                ui->tableWidgetAlarm->item(i, 2) ->setData(Qt::BackgroundRole, QColor (0,255,0));
-            }else if(mType==MessageType::WarningData){
-                ui->tableWidgetAlarm->item(i, 0) ->setData(Qt::BackgroundRole, QColor (255,255,0));
-                ui->tableWidgetAlarm->item(i, 1) ->setData(Qt::BackgroundRole, QColor (255,255,0));
-                ui->tableWidgetAlarm->item(i, 2) ->setData(Qt::BackgroundRole, QColor (255,255,0));
-            }else if(mType==MessageType::AlarmData){
-                ui->tableWidgetAlarm->item(i, 0) ->setData(Qt::BackgroundRole, QColor (255,0,0));
-                ui->tableWidgetAlarm->item(i, 1) ->setData(Qt::BackgroundRole, QColor (255,0,0));
-                ui->tableWidgetAlarm->item(i, 2) ->setData(Qt::BackgroundRole, QColor (255,0,0));
+            SysVar var = sysVars.at(index);
+            auto it = std::find_if(alarmVars.begin(),alarmVars.end(),[var](const AlarmInfoVar &v){return var.sysName==v.var.sysName;});
+            if(it==alarmVars.end()) {
+                int i = ui->tableWidgetAlarm->rowCount();
+                ui->tableWidgetAlarm->insertRow(i);
+                ui->tableWidgetAlarm->setItem(i,0,new QTableWidgetItem(var.sysName));
+                ui->tableWidgetAlarm->setItem(i,1,new QTableWidgetItem(AlarmInfoVar::getMessageTypeString(mType)));
+                ui->tableWidgetAlarm->setItem(i,2,new QTableWidgetItem(var.userName));
+                if(mType==MessageType::InfoData){
+                    ui->tableWidgetAlarm->item(i, 0) ->setData(Qt::BackgroundRole, QColor (0,255,0));
+                    ui->tableWidgetAlarm->item(i, 1) ->setData(Qt::BackgroundRole, QColor (0,255,0));
+                    ui->tableWidgetAlarm->item(i, 2) ->setData(Qt::BackgroundRole, QColor (0,255,0));
+                }else if(mType==MessageType::WarningData){
+                    ui->tableWidgetAlarm->item(i, 0) ->setData(Qt::BackgroundRole, QColor (255,255,0));
+                    ui->tableWidgetAlarm->item(i, 1) ->setData(Qt::BackgroundRole, QColor (255,255,0));
+                    ui->tableWidgetAlarm->item(i, 2) ->setData(Qt::BackgroundRole, QColor (255,255,0));
+                }else if(mType==MessageType::AlarmData){
+                    ui->tableWidgetAlarm->item(i, 0) ->setData(Qt::BackgroundRole, QColor (255,0,0));
+                    ui->tableWidgetAlarm->item(i, 1) ->setData(Qt::BackgroundRole, QColor (255,0,0));
+                    ui->tableWidgetAlarm->item(i, 2) ->setData(Qt::BackgroundRole, QColor (255,0,0));
+                }
+                AlarmInfoVar v;
+                v.messageType = mType;
+                v.var = var;
+                alarmVars.push_back(v);
+                ui->tableWidgetAlarm->selectRow(ui->tableWidget->rowCount()-1);
+            }else {
+                QMessageBox::warning(this,"проверка дубликатов","Переменная с таким именем уже была ранее добавлена");
             }
-            AlarmInfoVar v;
-            v.messageType = mType;
-            v.var = sysVars.at(index);
-            alarmVars.push_back(v);
-            ui->tableWidgetAlarm->selectRow(ui->tableWidget->rowCount()-1);
         }
     }
     delete dialogAddVar;
