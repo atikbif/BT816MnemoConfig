@@ -1,5 +1,8 @@
 #include "dialogaddalarmvar.h"
 #include "ui_dialogaddalarmvar.h"
+#include <QGuiApplication>
+#include <QScreen>
+#include <QAbstractItemView>
 
 SysVarType DialogAddAlarmVar::lastVarType = SysVarType::CLUSTER_BIT;
 
@@ -15,6 +18,13 @@ DialogAddAlarmVar::DialogAddAlarmVar(QWidget *parent) :
     ui->comboBoxAlarmType->addItem(AlarmInfoVar::getMessageTypeString(MessageType::InfoData));
     ui->comboBoxAlarmType->addItem(AlarmInfoVar::getMessageTypeString(MessageType::WarningData));
     ui->comboBoxAlarmType->addItem(AlarmInfoVar::getMessageTypeString(MessageType::AlarmData));
+
+    auto screens = QGuiApplication::screens();
+    uint16_t maxHeight = 800;
+    if(screens.size()) {
+        maxHeight = screens.at(0)->availableGeometry().height()*0.5;
+    }
+    ui->comboBoxVarName->view()->window()->setMaximumHeight(maxHeight);
 
     vType = lastVarType;
     setVarType(vType);

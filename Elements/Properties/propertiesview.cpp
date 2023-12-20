@@ -16,6 +16,9 @@
 #include "typical_fonts.h"
 #include <QRegExp>
 #include "../Widgets/numberitem.h"
+#include <QGuiApplication>
+#include <QScreen>
+#include <QAbstractItemView>
 
 void PropertiesView::clearLayout(QLayout *l)
 {
@@ -289,6 +292,12 @@ void PropertiesView::drawLinkBoolIndexProperties(QFormLayout *fLayout, const std
                 DiscreteVarType varType = SysVar::getDiscreteVarTypeFromString(comboBoxVarType->currentText());
                 std::vector<Var> vars = plc.getDiscreteVarByType(varType);
                 QComboBox *varNameBox = new QComboBox();
+                auto screens = QGuiApplication::screens();
+                uint16_t maxHeight = 800;
+                if(screens.size()) {
+                    maxHeight = screens.at(0)->availableGeometry().height()*0.5;
+                }
+                varNameBox->view()->window()->setMaximumHeight(maxHeight);
                 for(const auto &v:vars) {
                     QString varName = v.sysName;
                     if(!v.userName.isEmpty()) {
@@ -531,6 +540,14 @@ void PropertiesView::drawLinkAnalogueIndexProperties(QFormLayout *fLayout, const
                 AnalogueVarType varType = SysVar::getAnalogueVarTypeFromString(comboBoxVarType->currentText());
                 std::vector<Var> vars = plc.getAnalogueVarByType(varType);
                 QComboBox *varNameBox = new QComboBox();
+
+                auto screens = QGuiApplication::screens();
+                uint16_t maxHeight = 800;
+                if(screens.size()) {
+                    maxHeight = screens.at(0)->availableGeometry().height()*0.5;
+                }
+                varNameBox->view()->window()->setMaximumHeight(maxHeight);
+
                 for(const auto &v:vars) {
                     QString varName = v.sysName;
                     if(!v.userName.isEmpty()) {

@@ -527,7 +527,9 @@ QByteArray LCDConfCreator::getNetBitConfig(uint32_t par)
 
         std::array<char,40> user_name;
         for(char &v:user_name) v = 0;
-        QByteArray userNameUTF8 = var.userName.toUtf8();
+        QString distance = "";
+        if(!var.userName.isEmpty()) distance = " ";
+        QByteArray userNameUTF8 = (var.userName + distance + var.sysName).toUtf8();
         if(userNameUTF8.count()>=user_name.size()) {
             userNameUTF8.resize(static_cast<int>(user_name.size()));
         }
@@ -591,7 +593,9 @@ QByteArray LCDConfCreator::getClusterBitConfig(uint32_t par)
 
         std::array<char,40> user_name;
         for(char &v:user_name) v = 0;
-        QByteArray userNameUTF8 = var.userName.toUtf8();
+        QString distance = "";
+        if(!var.userName.isEmpty()) distance = " ";
+        QByteArray userNameUTF8 = (var.userName + distance + var.sysName).toUtf8();
         if(userNameUTF8.count()>=user_name.size()) {
             userNameUTF8.resize(static_cast<int>(user_name.size()-2));
         }
@@ -1187,7 +1191,7 @@ QByteArray LCDConfCreator::getMessageVarConfig(uint32_t par)
         uint16_t index = static_cast<uint16_t>(mVar.var.num);
         QString name;
         if(vType==SysVarType::CLUSTER_BIT) name = "C" + QString::number(17+index);
-        else if(vType==SysVarType::NET_BIT) name = "N" + QString::number(241+index);
+        else if(vType==SysVarType::NET_BIT) name = "N" + QString::number(257+index);
         if(name.size()>5) name.resize(5);
         while(name.size()<5) name+=" ";
 

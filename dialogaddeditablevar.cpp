@@ -1,5 +1,8 @@
 #include "dialogaddeditablevar.h"
 #include "ui_dialogaddeditablevar.h"
+#include <QGuiApplication>
+#include <QScreen>
+#include <QAbstractItemView>
 
 SysVarType DialogAddEditableVar::lastVarType = SysVarType::CLUSTER_BIT;
 
@@ -17,6 +20,13 @@ DialogAddEditableVar::DialogAddEditableVar(QWidget *parent) :
     vType = lastVarType;
 
     setVarType(vType);
+
+    auto screens = QGuiApplication::screens();
+    uint16_t maxHeight = 800;
+    if(screens.size()) {
+        maxHeight = screens.at(0)->availableGeometry().height()*0.5;
+    }
+    ui->comboBoxVarName->view()->window()->setMaximumHeight(maxHeight);
 }
 
 DialogAddEditableVar::~DialogAddEditableVar()

@@ -240,7 +240,8 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                                         QJsonArray nodeVarsArray = elOb["Groups"].toArray();
                                         for(auto gr:nodeVarsArray) {
                                             QJsonObject grOb = gr.toObject();
-                                            if(grOb.contains("Name") && (grOb["Name"].toString()=="NODE0") && grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                            //if(grOb.contains("Name") && (grOb["Name"].toString()=="NODE0") && grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                            if(grOb.contains("Name") && (grOb["Name"].toString().contains("NODE")) && grOb.contains("Variables") && grOb["Variables"].isArray()) {
                                                  QJsonArray clBitArray = grOb["Variables"].toArray();
                                                  for(auto clBit:clBitArray) {
                                                      QJsonObject clBitOb = clBit.toObject();
@@ -269,26 +270,30 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                if(QString::compare(elOb["Name"].toString(),"Сетевые биты")==0) {
-                                    if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
-                                        QJsonArray nodeVarsArray = elOb["Groups"].toArray();
-                                        for(auto gr:nodeVarsArray) {
+                                if(elOb["Name"].toString().isEmpty()) {
+                                    if(elOb.contains("Groups")&&elOb["Groups"].isArray()) {
+                                        QJsonArray scanGroups = elOb["Groups"].toArray();
+                                        for(auto gr:scanGroups) {
                                             QJsonObject grOb = gr.toObject();
-                                            if(grOb.contains("Name") && (grOb["Name"].toString()=="TX") && grOb.contains("Variables") && grOb["Variables"].isArray()) {
-                                                 QJsonArray netBitArray = grOb["Variables"].toArray();
-                                                 for(auto netBit:netBitArray) {
-                                                     QJsonObject netBitOb = netBit.toObject();
-                                                     SysVar v;
-                                                     v.varType = SysVarType::NET_BIT;
-                                                     if(netBitOb.contains("Comment") && netBitOb["Comment"].isString()) {
-                                                         v.userName = netBitOb["Comment"].toString();
-                                                     }
-                                                     if(netBitOb.contains("Name") && netBitOb["Name"].isString()) {
-                                                         v.sysName = netBitOb["Name"].toString();
-                                                     }
-                                                     v.num = index_num++;
-                                                     conf.sysVar.push_back(v);
-                                                 }
+                                            if(grOb.contains("Name")&&grOb["Name"].isString()) {
+                                                if(QString::compare(grOb["Name"].toString(),"Сетевые биты")==0) {
+                                                    if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                                         QJsonArray netBitArray = grOb["Variables"].toArray();
+                                                         for(auto netBit:netBitArray) {
+                                                             QJsonObject netBitOb = netBit.toObject();
+                                                             SysVar v;
+                                                             v.varType = SysVarType::NET_BIT;
+                                                             if(netBitOb.contains("Comment") && netBitOb["Comment"].isString()) {
+                                                                 v.userName = netBitOb["Comment"].toString();
+                                                             }
+                                                             if(netBitOb.contains("Name") && netBitOb["Name"].isString()) {
+                                                                 v.sysName = netBitOb["Name"].toString();
+                                                             }
+                                                             v.num = index_num++;
+                                                             conf.sysVar.push_back(v);
+                                                         }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -303,26 +308,30 @@ std::optional<PLCConfig> JSONPLCConfigReader::readFromFile(const QString &fName)
                         for(auto el:sysVarParGroupsArray) {
                             QJsonObject elOb = el.toObject();
                             if(elOb.contains("Name") && elOb["Name"].isString()) {
-                                if(QString::compare(elOb["Name"].toString(),"Сетевые регистры")==0) {
-                                    if(elOb.contains("Groups") && elOb["Groups"].isArray()) {
-                                        QJsonArray nodeVarsArray = elOb["Groups"].toArray();
-                                        for(auto gr:nodeVarsArray) {
+                                if(elOb["Name"].toString().isEmpty()) {
+                                    if(elOb.contains("Groups")&&elOb["Groups"].isArray()) {
+                                        QJsonArray scanGroups = elOb["Groups"].toArray();
+                                        for(auto gr:scanGroups) {
                                             QJsonObject grOb = gr.toObject();
-                                            if(grOb.contains("Name") && (grOb["Name"].toString()=="TX") && grOb.contains("Variables") && grOb["Variables"].isArray()) {
-                                                 QJsonArray netRegArray = grOb["Variables"].toArray();
-                                                 for(auto netReg:netRegArray) {
-                                                     QJsonObject netRegOb = netReg.toObject();
-                                                     SysVar v;
-                                                     v.varType = SysVarType::NET_REG;
-                                                     if(netRegOb.contains("Comment") && netRegOb["Comment"].isString()) {
-                                                         v.userName = netRegOb["Comment"].toString();
-                                                     }
-                                                     if(netRegOb.contains("Name") && netRegOb["Name"].isString()) {
-                                                         v.sysName = netRegOb["Name"].toString();
-                                                     }
-                                                     v.num = index_num++;
-                                                     conf.sysVar.push_back(v);
-                                                 }
+                                            if(grOb.contains("Name")&&grOb["Name"].isString()) {
+                                                if(QString::compare(grOb["Name"].toString(),"Сетевые регистры")==0) {
+                                                    if(grOb.contains("Variables") && grOb["Variables"].isArray()) {
+                                                         QJsonArray netRegArray = grOb["Variables"].toArray();
+                                                         for(auto netReg:netRegArray) {
+                                                             QJsonObject netRegOb = netReg.toObject();
+                                                             SysVar v;
+                                                             v.varType = SysVarType::NET_REG;
+                                                             if(netRegOb.contains("Comment") && netRegOb["Comment"].isString()) {
+                                                                 v.userName = netRegOb["Comment"].toString();
+                                                             }
+                                                             if(netRegOb.contains("Name") && netRegOb["Name"].isString()) {
+                                                                 v.sysName = netRegOb["Name"].toString();
+                                                             }
+                                                             v.num = index_num++;
+                                                             conf.sysVar.push_back(v);
+                                                         }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
