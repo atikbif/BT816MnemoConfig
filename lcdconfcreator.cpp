@@ -1098,8 +1098,21 @@ QByteArray LCDConfCreator::getEditVarConfig(uint32_t par)
             var.num = it->num;
         }
 
-        if(var.userName.isEmpty()) userNameUTF8 = var.sysName.toUtf8();
-        else userNameUTF8 = var.userName.toUtf8();
+        uint16_t index = static_cast<uint16_t>(var.num);
+        QString name;
+        if(vType==SysVarType::CLUSTER_BIT) name = "CB" + QString::number(17+index);
+        else if(vType==SysVarType::NET_BIT) name = "NB" + QString::number(257+index);
+        else if(vType==SysVarType::CLUSTER_REG) name = "CR" + QString::number(17+index);
+        else if(vType==SysVarType::NET_REG) name = "NR" + QString::number(97+index);
+        if(name.size()>5) name.resize(5);
+        while(name.size()<5) name+=" ";
+
+        if(var.userName.isEmpty()) name += var.sysName;
+        else name += var.userName;
+
+        if(name.size()>20) name.resize(20);
+
+        userNameUTF8 = name.toUtf8();
 
         if(userNameUTF8.count()>=user_name.size()) {
             userNameUTF8.resize(static_cast<int>(user_name.size()));
@@ -1113,7 +1126,6 @@ QByteArray LCDConfCreator::getEditVarConfig(uint32_t par)
         }
 
         res.append(static_cast<char>(var.varType)); // var type
-        uint16_t index = static_cast<uint16_t>(var.num);
         res.append(index>>8);
         res.append(index&0xFF);
 
