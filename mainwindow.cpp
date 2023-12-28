@@ -67,7 +67,25 @@ void MainWindow::save()
     QFile saveFile(fileName);
     if(saveFile.open(QIODevice::WriteOnly)) {
         saveFile.write(QJsonDocument(result).toJson());
-        lcdConfPrName = QFileInfo(saveFile).baseName() + "_lcdconf.bin";
+
+        // copy PRDATA files
+        QString prDataDir = prDir;
+        if(!prDataDir.isEmpty()) prDataDir += "/";
+        prDataDir += lcdPrName + "_PRDATA";
+        if(QDir().exists(prDataDir)) {
+            QString savePrDataDir = QFileInfo(saveFile).dir().absolutePath();
+            savePrDataDir += "/"+QFileInfo(saveFile).baseName() + "_PRDATA";
+            if(savePrDataDir!=prDataDir) {
+                QDir outDir(savePrDataDir);
+                outDir.removeRecursively();
+                if(!outDir.exists()) outDir.mkpath(outDir.absolutePath());
+                copyFiles(prDataDir,savePrDataDir);
+            }
+        }
+
+
+        lcdPrName = QFileInfo(saveFile).baseName();
+        prDir = QFileInfo(saveFile).dir().absolutePath();
         ui->statusbar->showMessage("Файл успешно сохранён", 3000);
     }else ui->statusbar->showMessage("Ошибка записи файла", 3000);
 }
@@ -102,7 +120,8 @@ void MainWindow::open()
             return;
         }
 
-        lcdConfPrName = QFileInfo(loadFile).baseName() + "_lcdconf.bin";
+        lcdPrName = QFileInfo(loadFile).baseName();
+        prDir = QFileInfo(loadFile).dir().absolutePath();
 
         if(json.contains("can address")) {
             canAddr = json["can address"].toInt();
@@ -186,9 +205,12 @@ void MainWindow::open()
             ui->statusbar->showMessage("Файл успешно открыт", 3000);
 
             if(!plcPrName.isEmpty()) {
-                if(QFile::exists(plcPrName)) {
+                QString dir = prDir;
+                if(!prDir.isEmpty()) dir += "/";
+                dir += lcdPrName + "_PRDATA";
+                if(QFile::exists(dir + "/" + plcPrName)) {
                     JSONPLCConfigReader reader;
-                    auto res = reader.readFromFile(plcPrName);
+                    auto res = reader.readFromFile(dir + "/" + plcPrName);
                     if(res) {
                         plc = res.value();
                         MessageVariables::updateUserName(messageVars, plc.getAllSysVar());
@@ -208,8 +230,11 @@ void MainWindow::open()
                 }
 
                 if(backgroundItem==nullptr) {
-                    if(QFile::exists(backgroundImage)) {
-                        QPixmap pix(backgroundImage);
+                    QString dir = prDir;
+                    if(!prDir.isEmpty()) dir += "/";
+                    dir += lcdPrName+"_PRDATA/";
+                    if(QFile::exists(dir + backgroundImage)) {
+                        QPixmap pix(dir + backgroundImage);
                         pix = pix.scaled(800,480);
                         backgroundItem = sc->addPixmap(pix);
                         backgroundItem->setZValue(-1000);
@@ -225,8 +250,17 @@ void MainWindow::open()
 
 void MainWindow::buildConfigFile()
 {
+    QString fileName = prDir;
+    if(!fileName.isEmpty()) fileName+="/";
+    fileName+=lcdPrName + "_PRDATA";
 
-    QFile confFile = QFile(lcdConfPrName);
+    if(!QDir().exists(fileName)) {
+        QDir().mkpath(fileName);
+    }
+
+    fileName += "/" + lcdPrName + "_lcdconf.bin";
+
+    QFile confFile = QFile(fileName);
     if (!confFile.open(QIODevice::WriteOnly)) {
         QMessageBox::warning(this,"ошибка конвертации","Не удалось создать файл "+QFileInfo(confFile).absoluteFilePath());
         return;
@@ -237,7 +271,11 @@ void MainWindow::buildConfigFile()
         if(converterFile.exists()) {
             QString program = "\"" + QFileInfo(converterFile).absoluteFilePath() + "\"";
 
-            QFile backgroundFile = QFile(backgroundImage);
+            QString dir = prDir;
+            if(!prDir.isEmpty()) dir += "/";
+            dir += lcdPrName+"_PRDATA/";
+
+            QFile backgroundFile = QFile(dir + backgroundImage);
 
             QString attr = QString(" img_cvt -i ") +  "\"" + QFileInfo(backgroundFile).absoluteFilePath() + "\"" + " -o " + "\"" + QFileInfo(backgroundFile).absolutePath() + "/conversion\"" +  " -f 24 -e thorough";
             QProcess builder;
@@ -258,7 +296,12 @@ void MainWindow::buildConfigFile()
     LCDConfCreator confCreator;
     confCreator.setPLCConfig(plc);
     confCreator.setCanAddr(canAddr);
-    confCreator.setBackgroundImage(backgroundImage);
+
+    QString dir = prDir;
+    if(!prDir.isEmpty()) dir += "/";
+    dir += lcdPrName+"_PRDATA/";
+
+    confCreator.setBackgroundImage(dir + backgroundImage);
 
     std::vector<RectItem*> grItems = getGraphicsItems();
     std::vector<RectItem*> textItems = getTextItems();
@@ -282,6 +325,33 @@ void MainWindow::buildConfigFile()
     for(RectItem* item:textItems) delete item;
 
     QMessageBox::information(this,"сборка проекта","файл конфигурации дисплея успешно сгенерирован");
+}
+
+void MainWindow::copyFiles(const QString &src, const QString &dst)
+{
+    QDir srcDir(src);
+    srcDir.setFilter(QDir::Files);
+    srcDir.setNameFilters({"*.*"});
+    QDir destDir(dst);
+    if(!destDir.exists()) QDir().mkpath(destDir.absolutePath());
+    foreach(QString file, srcDir.entryList()) {
+        QFileInfo fInfo(src + "/" + file);
+        QFile::copy(fInfo.absoluteFilePath(), destDir.absolutePath() + "/" + fInfo.fileName());
+    }
+
+
+    srcDir.setFilter(QDir::Dirs|QDir::NoDotAndDotDot);
+    srcDir.setNameFilters({"*"});
+
+    foreach(QString dir, srcDir.entryList()) {
+        QDir inpDir(src + "/" + dir);
+        QDir outDir (dst + "/" + inpDir.dirName());
+        if(!QDir(outDir).exists()) {
+            outDir.mkpath(outDir.absolutePath());
+        }
+
+        copyFiles(inpDir.absolutePath(),outDir.absolutePath());
+    }
 }
 
 std::vector<RectItem *> MainWindow::getGraphicsItems()
@@ -476,15 +546,19 @@ MainWindow::MainWindow(QWidget *parent)
             QPixmap pix(fileName);
             pix = pix.scaled(800,480);
 
-            QDir dir("PRDATA");
-            if (!dir.exists()) dir.mkpath(".");
+            QString dirName = prDir;
+            if(!prDir.isEmpty()) dirName += "/";
+            dirName += lcdPrName + "_PRDATA";
+            QDir dir(dirName);
+
+            if (!dir.exists()) dir.mkpath(dir.absolutePath());
 
             QFileInfo fInfo(fileName);
             fInfo.baseName();
 
-            QString copyFileName = "PRDATA/" + fInfo.baseName() + ".png";
+            QString copyFileName = dir.absolutePath() + "/" + fInfo.baseName() + ".png";
             QFile file(copyFileName);
-            backgroundImage = copyFileName;
+            backgroundImage = fInfo.baseName() + ".png";
             file.open(QIODevice::WriteOnly);
             pix.save(&file, "PNG");
             file.close();
@@ -559,7 +633,7 @@ MainWindow::MainWindow(QWidget *parent)
             JSONPLCConfigReader reader;
             auto res = reader.readFromFile(fileName);
             if(res) {
-
+                QFileInfo fInfo(fileName);
                 std::vector<AlarmInfoVar> messageVars = plc.getAlarmInfoVar();
                 plc = res.value();
                 editVars.updateUserName(plc.getAllSysVar());
@@ -567,14 +641,13 @@ MainWindow::MainWindow(QWidget *parent)
                 plc.setAlarmInfoVar(messageVars);
                 if(prView) {
                     prView->setPLCConfig(plc);
-
-                    QDir dir("PRDATA");
-                    if (!dir.exists()) dir.mkpath(".");
-
-                    QFileInfo fInfo(fileName);
-                    fInfo.baseName();
-                    QFile::copy(fileName,"PRDATA/"+fInfo.baseName()+".ldp");
-                    plcPrName = "PRDATA/"+fInfo.baseName()+".ldp";
+                    QString dirName = prDir;
+                    if(!prDir.isEmpty()) dirName += "/";
+                    dirName += lcdPrName + "_PRDATA";
+                    QDir dir(dirName);
+                    if (!dir.exists()) dir.mkpath(dir.absolutePath());
+                    QFile::copy(fileName,dir.absolutePath()+"/"+fInfo.baseName()+".ldp");
+                    plcPrName = fInfo.baseName()+".ldp";
                 }
             }
         }
@@ -617,15 +690,19 @@ MainWindow::MainWindow(QWidget *parent)
             QPixmap pix(fileName);
             pix = pix.scaled(800,480);
 
-            QDir dir("PRDATA");
-            if (!dir.exists()) dir.mkpath(".");
+            QString dirName = prDir;
+            if(!prDir.isEmpty()) dirName += "/";
+            dirName += lcdPrName + "_PRDATA";
+
+            QDir dir(dirName);
+            if (!dir.exists()) dir.mkpath(dir.absolutePath());
 
             QFileInfo fInfo(fileName);
             fInfo.baseName();
 
-            QString copyFileName = "PRDATA/" + fInfo.baseName() + ".png";
+            QString copyFileName = dir.absolutePath() + "/" + fInfo.baseName() + ".png";
             QFile file(copyFileName);
-            backgroundImage = copyFileName;
+            backgroundImage = fInfo.baseName() + ".png";
             file.open(QIODevice::WriteOnly);
             pix.save(&file, "PNG");
             file.close();

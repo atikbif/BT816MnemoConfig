@@ -25,10 +25,11 @@ class MainWindow : public QMainWindow
     PLCConfig plc;
     QString backgroundImage;
     QString plcPrName;
+    QString prDir = "";
     uint8_t canAddr = 1;
     QString evePath;
 
-    QString lcdConfPrName = "PC21LCDConfig.bin";
+    QString lcdPrName = "new_project";
 
     void setProperties(const std::vector<ElProperty> &properties);
     void updateRect(int x, int y, int w, int h, int lw);
@@ -36,6 +37,7 @@ class MainWindow : public QMainWindow
     void save();
     void open();
     void buildConfigFile();
+    void copyFiles(const QString &src,const QString &dst);
     std::vector<RectItem*> getGraphicsItems();
     std::vector<RectItem*> getNumberItems();
     std::vector<RectItem*> getLampItems();
